@@ -20,20 +20,6 @@ function initElevenst() {
 
   loadElevenst();
 
-  // 데이터가 비어있고 백업이 있다면 복구
-  if (elevenstState.cards.length === 0) {
-    const backupRaw = localStorage.getItem(ELEVENST_CONFIG.STORAGE_KEY + '_backup');
-    if (backupRaw) {
-      try {
-        const backup = JSON.parse(backupRaw);
-        if (Array.isArray(backup) && backup.length > 0) {
-          elevenstState.cards = backup;
-          reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
-        }
-      } catch (e) { /* ignore */ }
-    }
-  }
-
   if (elevenstState.cards.length === 0) {
     elevenstState.cards.push(newElevenstCard());
   }

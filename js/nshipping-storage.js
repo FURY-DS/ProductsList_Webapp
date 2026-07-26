@@ -8,7 +8,11 @@ function saveNshipping() {
   try {
     const data = JSON.stringify(nshippingState.cards);
     localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     return { ok: true };
   } catch (e) {
     if (!isNshippingStorageQuotaError(e) || !NSHIPPING_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
@@ -21,7 +25,11 @@ function saveNshipping() {
   try {
     const data = JSON.stringify(cleaned);
     localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     nshippingState.cards = cleaned;
     return { ok: true, imagesRemoved: true };

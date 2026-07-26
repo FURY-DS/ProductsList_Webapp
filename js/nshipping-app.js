@@ -20,20 +20,6 @@ function initNshipping() {
 
   loadNshipping();
 
-  // 데이터가 비어있고 백업이 있다면 복구
-  if (nshippingState.cards.length === 0) {
-    const backupRaw = localStorage.getItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup');
-    if (backupRaw) {
-      try {
-        const backup = JSON.parse(backupRaw);
-        if (Array.isArray(backup) && backup.length > 0) {
-          nshippingState.cards = backup;
-          reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
-        }
-      } catch (e) { /* ignore */ }
-    }
-  }
-
   if (nshippingState.cards.length === 0) {
     nshippingState.cards.push(newNshippingCard());
   }

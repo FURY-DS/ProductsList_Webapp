@@ -8,7 +8,11 @@ function saveEsm() {
   try {
     const data = JSON.stringify(esmState.cards);
     localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     return { ok: true };
   } catch (e) {
     if (!isStorageQuotaError(e) || !ESM_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
@@ -21,7 +25,11 @@ function saveEsm() {
   try {
     const data = JSON.stringify(cleaned);
     localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     esmState.cards = cleaned;
     return { ok: true, imagesRemoved: true };

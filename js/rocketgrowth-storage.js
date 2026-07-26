@@ -8,7 +8,11 @@ function saveRocketgrowth() {
   try {
     const data = JSON.stringify(rocketgrowthState.cards);
     localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     return { ok: true };
   } catch (e) {
     if (!isRocketgrowthStorageQuotaError(e) || !ROCKETGROWTH_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
@@ -21,7 +25,11 @@ function saveRocketgrowth() {
   try {
     const data = JSON.stringify(cleaned);
     localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     rocketgrowthState.cards = cleaned;
     return { ok: true, imagesRemoved: true };

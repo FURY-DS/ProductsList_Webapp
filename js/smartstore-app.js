@@ -20,20 +20,6 @@ function initSmartstore() {
 
   loadSmartstore();
 
-  // 데이터가 비어있고 백업이 있다면 복구
-  if (smartstoreState.cards.length === 0) {
-    const backupRaw = localStorage.getItem(SMARTSTORE_CONFIG.STORAGE_KEY + '_backup');
-    if (backupRaw) {
-      try {
-        const backup = JSON.parse(backupRaw);
-        if (Array.isArray(backup) && backup.length > 0) {
-          smartstoreState.cards = backup;
-          reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
-        }
-      } catch (e) { /* ignore */ }
-    }
-  }
-
   if (smartstoreState.cards.length === 0) {
     smartstoreState.cards.push(newSmartstoreCard());
   }

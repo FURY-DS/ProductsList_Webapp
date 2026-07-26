@@ -20,20 +20,6 @@ function initCoupang() {
 
   loadCoupang();
 
-  // 데이터가 비어있고 백업이 있다면 복구
-  if (coupangState.cards.length === 0) {
-    const backupRaw = localStorage.getItem(COUPANG_CONFIG.STORAGE_KEY + '_backup');
-    if (backupRaw) {
-      try {
-        const backup = JSON.parse(backupRaw);
-        if (Array.isArray(backup) && backup.length > 0) {
-          coupangState.cards = backup;
-          reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
-        }
-      } catch (e) { /* ignore */ }
-    }
-  }
-
   if (coupangState.cards.length === 0) {
     coupangState.cards.push(newCoupangCard());
   }

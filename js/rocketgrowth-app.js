@@ -20,20 +20,6 @@ function initRocketgrowth() {
 
   loadRocketgrowth();
 
-  // 데이터가 비어있고 백업이 있다면 복구
-  if (rocketgrowthState.cards.length === 0) {
-    const backupRaw = localStorage.getItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup');
-    if (backupRaw) {
-      try {
-        const backup = JSON.parse(backupRaw);
-        if (Array.isArray(backup) && backup.length > 0) {
-          rocketgrowthState.cards = backup;
-          reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
-        }
-      } catch (e) { /* ignore */ }
-    }
-  }
-
   if (rocketgrowthState.cards.length === 0) {
     rocketgrowthState.cards.push(newRocketgrowthCard());
   }

@@ -10,7 +10,11 @@ function save() {
   try {
     const data = JSON.stringify(state.cards);
     localStorage.setItem(CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     return { ok: true };
   } catch (e) {
     if (!isStorageQuotaError(e) || !CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
@@ -23,7 +27,11 @@ function save() {
   try {
     const data = JSON.stringify(cleaned);
     localStorage.setItem(CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(CONFIG.STORAGE_KEY + '_backup', data);
+    try {
+      localStorage.setItem(CONFIG.STORAGE_KEY + '_backup', data);
+    } catch (backupError) {
+      console.warn('Backup save failed', backupError);
+    }
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     state.cards = cleaned;
     return { ok: true, imagesRemoved: true };
