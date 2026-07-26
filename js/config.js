@@ -1,0 +1,121 @@
+/* =====================================================
+   config.js - 설정 및 상수 (하드코딩 제거)
+   모든 매직 넘버, 문자열, 필드 정의를 한 곳에서 관리
+   ===================================================== */
+
+const CONFIG = {
+  // 페이지 식별자 (내보내기/가져오기 검증용)
+  PAGE_ID: 'productlist',
+
+  // localStorage 키
+  STORAGE_KEY: 'productlist_v1',
+
+  // 레이아웃
+  COLUMNS: 4,
+
+  // 카드 헤더 (#01 옆)에 표시할 필드 키
+  CARD_HEADER_BADGE_FIELD: 'ny',
+
+  // 이미지 업로드 제한 (바이트)
+  IMAGE_MAX_SIZE: 5 * 1024 * 1024, // 5MB
+
+  // 토스트 표시 시간 (ms)
+  TOAST_DURATION: 1800,
+
+  // 통화 기호
+  CURRENCY: {
+    COST: '\u00A5',   // ¥ (위안화 - 원가)
+    RATE: '\u20A9',   // ₩ (원화 - 환율)
+    TOTAL: '\u20A9'   // ₩ (원화 - 총합)
+  },
+
+  // 페이지 제목
+  PAGE_TITLE: '상품리스트',
+  PAGE_HEADER: '상품리스트',
+
+  // 메뉴 항목 (드롭다운) - page 파일과 연결
+  MENU_ITEMS: [
+    { page: 'products',     label: '상품리스트',   url: 'index.html',        active: true,  ready: true  },
+    { page: 'nshipping',    label: 'N배송',        url: 'nshipping.html',    active: false, ready: true },
+    { page: 'rocketgrowth', label: '로켓그로스',   url: 'rocketgrowth.html', active: false, ready: true },
+    { page: 'smartstore',   label: '스마트스토어', url: 'smartstore.html',   active: false, ready: true },
+    { page: 'coupang',      label: '쿠팡',         url: 'coupang.html',      active: false, ready: true },
+    { page: 'esm11',        label: 'ESM/11번가',   url: 'esm11.html',        active: false, ready: true }
+  ],
+
+  // 필드 정의 - 카드에 표시되는 입력 필드
+  // name: 데이터 키, label: 표시 라벨, type: input type, placeholder, extra: 추가 속성
+  FIELDS: {
+    name:      { label: '상품명',          type: 'text',   placeholder: '예: 가방 / 신발' },
+    option:    { label: '옵션명',          type: 'text',   placeholder: '예: 블랙 / L' },
+    cost:      { label: '원가',            type: 'number', placeholder: '예: 15' },
+    rate:      { label: '환율',            type: 'number', placeholder: '예: 215' },
+    percent:   { label: '퍼센트',          type: 'number', placeholder: '예: 0.16', extra: 'step="any"' },
+    link:      { label: '링크 (URL)',      type: 'url',    placeholder: 'https://...' },
+    link2:     { label: '링크 (URL)',      type: 'url',    placeholder: 'https://...' },
+    rocket:    { label: '로켓배송코드',        type: 'text',   placeholder: '' },
+    nshipping: { label: 'N배송코드',       type: 'text',   placeholder: '' },
+    product:   { label: '엔와이창고 바코드',        type: 'text',   placeholder: '' },
+    ny:        { label: '판매자상품코드', type: 'text',   placeholder: '' }
+  },
+
+  // 카드 내 필드 배치 순서 (row 단위)
+  // type: 'photo+fields' | 'row'
+  //   photo+fields: 사진 + 필드 나란히
+  //   row: field-row (className으로 열 수 지정)
+  // total: true면 총합 필드를 row 끝에 추가
+  CARD_LAYOUT: [
+    { type: 'photo+fields', fields: ['name', 'option'] },
+    { type: 'row', className: 'three', fields: ['cost', 'rate', 'percent'], total: true },
+    { type: 'row', className: 'one',   fields: ['link'] },
+    { type: 'row', className: 'one',   fields: ['link2'] },
+    { type: 'row', className: 'four',  fields: ['rocket', 'nshipping', 'product', 'ny'] }
+  ],
+
+  // 총합 계산에 사용되는 필드
+  TOTAL_FIELDS: ['cost', 'rate', 'percent'],
+
+  // 메시지 (토스트 / 모달)
+  MESSAGES: {
+    SAVED:           '저장되었어요',
+    SAVE_FAIL:       '저장 실패: ',
+    LOAD_FAIL:       '불러오기 실패',
+    DELETED:         '삭제되었어요',
+    ALL_DELETED:     '모두 삭제되었어요',
+    NOTHING_DELETE:  '삭제할 데이터가 없어요',
+    EXPORT_DONE:     '내보내기 완료',
+    EXPORT_FAIL:     '내보내기 실패: ',
+    IMAGE_TOO_BIG:   '이미지는 5MB 이하만 가능해요',
+    IMAGE_ADDED:     '사진이 등록되었어요',
+    IMAGE_REMOVED:   '사진이 삭제되었어요',
+    IMPORT_DONE:     (n) => `${n}개 상품을 가져왔어요`,
+    IMPORT_ADDED:    (n) => `${n}개 상품을 추가했어요`,
+    IMPORT_FAIL:     '가져오기 실패: ',
+    IMPORT_WRONG_PAGE: (pageName) => `이 파일은 '${pageName}' 페이지의 데이터입니다.\n상품리스트 페이지에서는 가져올 수 없어요.`,
+    PAGE_COMING:     (name) => `${name} 페이지는 준비 중이에요`,
+    DELETE_TITLE:    '정말 삭제할까요?',
+    DELETE_TEXT:     (label) => `${label}을(를) 삭제하면 복구할 수 없어요. 계속할까요?`,
+    CLEAR_TITLE:     '전체 삭제',
+    CLEAR_TEXT:      (n) => `등록된 ${n}개 상품을 모두 삭제할까요?\n이 작업은 되돌릴 수 없어요.`,
+    IMPORT_TITLE:    '가져오기',
+    IMPORT_TEXT:     (n) => `기존 데이터 ${n}개를 교체할까요?\n(취소 시 기존 데이터에 추가돼요)`,
+    EMPTY_TITLE:     '아직 등록된 상품이 없어요',
+    EMPTY_DESC:      '아래 버튼을 눌러 첫 상품을 추가해 보세요.',
+    EMPTY_ADD_BTN:   '+ 상품 추가',
+    NO_RESULT_TITLE: '검색 결과가 없어요',
+    NO_RESULT_DESC:  (q) => `"${q}"와(과) 일치하는 상품이 없습니다.`,
+    SEARCH_PLACEHOLDER: '상품명, 옵션, 코드, 링크, 가격 등 전체 검색...',
+    BTN_ADD:         '＋ 상품 추가',
+    BTN_DELETE:      '－ 카드 삭제',
+    BTN_SAVE:        '저장',
+    BTN_EDIT:        '수정',
+    BTN_CANCEL:      '취소',
+    BTN_CONFIRM_DEL: '삭제',
+    BTN_COLLAPSE:    '숨기기',
+    BTN_EXPAND:      '펼치기',
+    BTN_COLLAPSE_ALL: '전체 숨기기',
+    BTN_EXPAND_ALL:   '전체 펼치기',
+    ALL_COLLAPSED:   '모든 상품을 숨겼어요',
+    ALL_EXPANDED:    '모든 상품을 펼쳤어요'
+  }
+};
