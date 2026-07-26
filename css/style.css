@@ -129,6 +129,15 @@ html, body {
 }
 .topbar button:hover { background: rgba(255,255,255,0.3); }
 
+/* 엑셀 버튼 구분 (약간 다른 배경) */
+.topbar button.btn-csv {
+  background: rgba(0, 184, 148, 0.25);
+  border-color: rgba(0, 184, 148, 0.4);
+}
+.topbar button.btn-csv:hover {
+  background: rgba(0, 184, 148, 0.4);
+}
+
 /* ===== Menu dropdown ===== */
 .menu-wrapper { position: relative; }
 .btn-menu {

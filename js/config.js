@@ -80,6 +80,22 @@ const CONFIG = {
   // 총합 계산에 사용되는 필드
   TOTAL_FIELDS: ['cost', 'rate', 'percent'],
 
+  // CSV 컬럼 순서 (엑셀 템플릿 및 가져오기용)
+  // 엑셀 헤더명 → 필드 키 매핑
+  CSV_COLUMNS: [
+    { header: '상품명',         key: 'name' },
+    { header: '옵션명',         key: 'option' },
+    { header: '원가',           key: 'cost' },
+    { header: '환율',           key: 'rate' },
+    { header: '퍼센트',         key: 'percent' },
+    { header: '링크1',          key: 'link' },
+    { header: '링크2',          key: 'link2' },
+    { header: '로켓배송코드',   key: 'rocket' },
+    { header: 'N배송코드',      key: 'nshipping' },
+    { header: '엔와이창고바코드', key: 'product' },
+    { header: '판매자상품코드', key: 'ny' }
+  ],
+
   // 메시지 (토스트 / 모달)
   MESSAGES: {
     SAVED:           '저장되었어요',
@@ -121,6 +137,14 @@ const CONFIG = {
     BTN_COLLAPSE_ALL: '전체 숨기기',
     BTN_EXPAND_ALL:   '전체 펼치기',
     ALL_COLLAPSED:   '모든 상품을 숨겼어요',
-    ALL_EXPANDED:    '모든 상품을 펼쳤어요'
+    ALL_EXPANDED:    '모든 상품을 펼쳤어요',
+    CSV_TEMPLATE_DONE: '엑셀 템플릿을 다운로드했어요',
+    CSV_IMPORT_DONE:   (n) => `${n}개 상품을 엑셀에서 가져왔어요`,
+    CSV_IMPORT_ADDED:  (n) => `${n}개 상품을 추가했어요`,
+    CSV_IMPORT_FAIL:   '엑셀 가져오기 실패: ',
+    CSV_EMPTY:         '엑셀 파일에 데이터가 없어요',
+    CSV_BAD_HEADER:    '엑셀 헤더(첫 행)가 올바르지 않아요.\n템플릿을 다운로드해서 사용해 주세요.',
+    CSV_IMPORT_TITLE:  '엑셀 가져오기',
+    CSV_IMPORT_TEXT:   (imp, existing) => `엑셀에서 ${imp}개 상품을 불러왔어요.\n기존 데이터 ${existing}개를 교체할까요?\n(취소 시 기존 데이터에 추가돼요)`
   }
 };
