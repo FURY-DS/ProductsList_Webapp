@@ -8,6 +8,30 @@ function initElevenstActions() {
   document.getElementById('btn-import').addEventListener('click', importElevenstData);
   document.getElementById('import-input').addEventListener('change', handleElevenstImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAllElevenst);
+  document.getElementById('btn-bulk-fee').addEventListener('click', applyBulkFeeElevenst);
+  document.getElementById('bulk-fee-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyBulkFeeElevenst(); }
+  });
+}
+
+/** 판매수수료 전체 적용 */
+function applyBulkFeeElevenst() {
+  const input = document.getElementById('bulk-fee-input');
+  const value = input.value.trim();
+  if (!value) { showToast('판매수수료 값을 입력해 주세요'); return; }
+  if (elevenstState.cards.length === 0) { showToast('등록된 상품이 없어요'); return; }
+  showModal({
+    title: '판매수수료 전체 적용',
+    text: `모든 상품(${elevenstState.cards.length}개)의 판매수수료를 '${value}'(으)로 변경할까요?`,
+    confirmText: '적용',
+    onConfirm: () => {
+      elevenstState.cards.forEach(c => { c.feeRate = value; recalcElevenstCard(c); });
+      saveElevenst();
+      renderElevenst();
+      input.value = '';
+      showToast(`전체 ${elevenstState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+    }
+  });
 }
 
 /** JSON 파일로 데이터 내보내기 */
@@ -101,6 +125,7 @@ function clearAllElevenst() {
   showModal({
     title: ELEVENST_CONFIG.MESSAGES.CLEAR_TITLE,
     text: ELEVENST_CONFIG.MESSAGES.CLEAR_TEXT(elevenstState.cards.length),
+    confirmText: '삭제',
     onConfirm: () => {
       elevenstState.cards = [];
       saveElevenst();
@@ -118,6 +143,7 @@ function confirmDeleteElevenst(cardId) {
   showModal({
     title: ELEVENST_CONFIG.MESSAGES.DELETE_TITLE,
     text: ELEVENST_CONFIG.MESSAGES.DELETE_TEXT(label),
+    confirmText: '삭제',
     onConfirm: () => {
       elevenstState.cards = elevenstState.cards.filter(c => c.id !== cardId);
       saveElevenst();

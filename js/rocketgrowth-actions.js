@@ -8,6 +8,30 @@ function initRocketgrowthActions() {
   document.getElementById('btn-import').addEventListener('click', importRocketgrowthData);
   document.getElementById('import-input').addEventListener('change', handleRocketgrowthImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAllRocketgrowth);
+  document.getElementById('btn-bulk-fee').addEventListener('click', applyBulkFeeRocketgrowth);
+  document.getElementById('bulk-fee-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyBulkFeeRocketgrowth(); }
+  });
+}
+
+/** 판매수수료 전체 적용 */
+function applyBulkFeeRocketgrowth() {
+  const input = document.getElementById('bulk-fee-input');
+  const value = input.value.trim();
+  if (!value) { showToast('판매수수료 값을 입력해 주세요'); return; }
+  if (rocketgrowthState.cards.length === 0) { showToast('등록된 상품이 없어요'); return; }
+  showModal({
+    title: '판매수수료 전체 적용',
+    text: `모든 상품(${rocketgrowthState.cards.length}개)의 판매수수료를 '${value}'(으)로 변경할까요?`,
+    confirmText: '적용',
+    onConfirm: () => {
+      rocketgrowthState.cards.forEach(c => { c.feeRate = value; recalcRocketgrowthCard(c); });
+      saveRocketgrowth();
+      renderRocketgrowth();
+      input.value = '';
+      showToast(`전체 ${rocketgrowthState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+    }
+  });
 }
 
 /** JSON 파일로 데이터보내기 */
@@ -101,6 +125,7 @@ function clearAllRocketgrowth() {
   showModal({
     title: ROCKETGROWTH_CONFIG.MESSAGES.CLEAR_TITLE,
     text: ROCKETGROWTH_CONFIG.MESSAGES.CLEAR_TEXT(rocketgrowthState.cards.length),
+    confirmText: '삭제',
     onConfirm: () => {
       rocketgrowthState.cards = [];
       saveRocketgrowth();
@@ -118,6 +143,7 @@ function confirmDeleteRocketgrowth(cardId) {
   showModal({
     title: ROCKETGROWTH_CONFIG.MESSAGES.DELETE_TITLE,
     text: ROCKETGROWTH_CONFIG.MESSAGES.DELETE_TEXT(label),
+    confirmText: '삭제',
     onConfirm: () => {
       rocketgrowthState.cards = rocketgrowthState.cards.filter(c => c.id !== cardId);
       saveRocketgrowth();

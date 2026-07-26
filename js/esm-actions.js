@@ -8,6 +8,30 @@ function initEsmActions() {
   document.getElementById('btn-import').addEventListener('click', importEsmData);
   document.getElementById('import-input').addEventListener('change', handleEsmImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAllEsm);
+  document.getElementById('btn-bulk-fee').addEventListener('click', applyBulkFeeEsm);
+  document.getElementById('bulk-fee-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyBulkFeeEsm(); }
+  });
+}
+
+/** 판매수수료 전체 적용 */
+function applyBulkFeeEsm() {
+  const input = document.getElementById('bulk-fee-input');
+  const value = input.value.trim();
+  if (!value) { showToast('판매수수료 값을 입력해 주세요'); return; }
+  if (esmState.cards.length === 0) { showToast('등록된 상품이 없어요'); return; }
+  showModal({
+    title: '판매수수료 전체 적용',
+    text: `모든 상품(${esmState.cards.length}개)의 판매수수료를 '${value}'(으)로 변경할까요?`,
+    confirmText: '적용',
+    onConfirm: () => {
+      esmState.cards.forEach(c => { c.feeRate = value; recalcEsmCard(c); });
+      saveEsm();
+      renderEsm();
+      input.value = '';
+      showToast(`전체 ${esmState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+    }
+  });
 }
 
 /** JSON 파일로 데이터 내보내기 */
@@ -101,6 +125,7 @@ function clearAllEsm() {
   showModal({
     title: ESM_CONFIG.MESSAGES.CLEAR_TITLE,
     text: ESM_CONFIG.MESSAGES.CLEAR_TEXT(esmState.cards.length),
+    confirmText: '삭제',
     onConfirm: () => {
       esmState.cards = [];
       saveEsm();
@@ -118,6 +143,7 @@ function confirmDeleteEsm(cardId) {
   showModal({
     title: ESM_CONFIG.MESSAGES.DELETE_TITLE,
     text: ESM_CONFIG.MESSAGES.DELETE_TEXT(label),
+    confirmText: '삭제',
     onConfirm: () => {
       esmState.cards = esmState.cards.filter(c => c.id !== cardId);
       saveEsm();

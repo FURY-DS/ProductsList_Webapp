@@ -35,9 +35,10 @@ function closeModal() {
  * 모달 표시
  * @param {Object} opts - { title, text, onConfirm }
  */
-function showModal({ title, text, onConfirm }) {
+function showModal({ title, text, onConfirm, confirmText }) {
   document.getElementById('modal-title').textContent = title || '확인';
   document.getElementById('modal-text').textContent = text || '';
+  document.getElementById('modal-confirm').textContent = confirmText || '확인';
   modalEl.classList.add('show');
   modalCallback = onConfirm || null;
 }

@@ -103,6 +103,7 @@ function clearAll() {
   showModal({
     title: CONFIG.MESSAGES.CLEAR_TITLE,
     text: CONFIG.MESSAGES.CLEAR_TEXT(state.cards.length),
+    confirmText: '삭제',
     onConfirm: () => {
       state.cards = [];
       save();
@@ -120,6 +121,7 @@ function confirmDelete(cardId) {
   showModal({
     title: CONFIG.MESSAGES.DELETE_TITLE,
     text: CONFIG.MESSAGES.DELETE_TEXT(label),
+    confirmText: '삭제',
     onConfirm: () => {
       state.cards = state.cards.filter(c => c.id !== cardId);
       save();

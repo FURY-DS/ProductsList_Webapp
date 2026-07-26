@@ -8,6 +8,30 @@ function initCoupangActions() {
   document.getElementById('btn-import').addEventListener('click', importCoupangData);
   document.getElementById('import-input').addEventListener('change', handleCoupangImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAllCoupang);
+  document.getElementById('btn-bulk-fee').addEventListener('click', applyBulkFeeCoupang);
+  document.getElementById('bulk-fee-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyBulkFeeCoupang(); }
+  });
+}
+
+/** 판매수수료 전체 적용 */
+function applyBulkFeeCoupang() {
+  const input = document.getElementById('bulk-fee-input');
+  const value = input.value.trim();
+  if (!value) { showToast('판매수수료 값을 입력해 주세요'); return; }
+  if (coupangState.cards.length === 0) { showToast('등록된 상품이 없어요'); return; }
+  showModal({
+    title: '판매수수료 전체 적용',
+    text: `모든 상품(${coupangState.cards.length}개)의 판매수수료를 '${value}'(으)로 변경할까요?`,
+    confirmText: '적용',
+    onConfirm: () => {
+      coupangState.cards.forEach(c => { c.feeRate = value; recalcCoupangCard(c); });
+      saveCoupang();
+      renderCoupang();
+      input.value = '';
+      showToast(`전체 ${coupangState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+    }
+  });
 }
 
 /** JSON 파일로 데이터 내보내기 */
@@ -101,6 +125,7 @@ function clearAllCoupang() {
   showModal({
     title: COUPANG_CONFIG.MESSAGES.CLEAR_TITLE,
     text: COUPANG_CONFIG.MESSAGES.CLEAR_TEXT(coupangState.cards.length),
+    confirmText: '삭제',
     onConfirm: () => {
       coupangState.cards = [];
       saveCoupang();
@@ -118,6 +143,7 @@ function confirmDeleteCoupang(cardId) {
   showModal({
     title: COUPANG_CONFIG.MESSAGES.DELETE_TITLE,
     text: COUPANG_CONFIG.MESSAGES.DELETE_TEXT(label),
+    confirmText: '삭제',
     onConfirm: () => {
       coupangState.cards = coupangState.cards.filter(c => c.id !== cardId);
       saveCoupang();

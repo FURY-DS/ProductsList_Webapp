@@ -199,6 +199,51 @@
   cursor: default;
 }
 
+/* ----- 판매수수료 전체입력 바 ----- */
+.bulk-fee-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+  flex-shrink: 0;
+}
+.bulk-fee-bar label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.bulk-fee-bar input {
+  width: 70px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  text-align: right;
+  font-family: inherit;
+}
+.bulk-fee-bar input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.bulk-fee-bar button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.bulk-fee-bar button:hover {
+  background: #5b4bc4;
+}
+
 /* ----- 반응형 ----- */
 @media (max-width: 520px) {
   .smartstore-card .bundle-item {
