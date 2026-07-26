@@ -40,7 +40,9 @@ const CONFIG = {
     { page: 'rocketgrowth', label: '로켓그로스',   url: 'rocketgrowth.html', active: false, ready: true },
     { page: 'smartstore',   label: '스마트스토어', url: 'smartstore.html',   active: false, ready: true },
     { page: 'coupang',      label: '쿠팡',         url: 'coupang.html',      active: false, ready: true },
-    { page: 'esm11',        label: 'ESM/11번가',   url: 'esm11.html',        active: false, ready: true }
+    { page: 'esm11',        label: 'ESM/11번가',   url: 'esm11.html',        active: false, ready: true },
+    { page: 'ownerclan',    label: '오너클랜',     url: '#',                 active: false, ready: false },
+    { page: 'domagguk',     label: '도매꾹',       url: '#',                 active: false, ready: false }
   ],
 
   // 필드 정의 - 카드에 표시되는 입력 필드
