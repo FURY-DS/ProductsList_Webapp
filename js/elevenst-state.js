@@ -1,13 +1,13 @@
 /* =====================================================
-   esm11-state.js - ESM/11번가 상태 및 카드 데이터 모델
+   elevenst-state.js - 11번가 상태 및 카드 데이터 모델
    ===================================================== */
 
-const esm11State = {
+const elevenstState = {
   cards: []
 };
 
-/** 새 ESM/11번가 카드 객체 생성 */
-function newEsm11Card() {
+/** 새 11번가 카드 객체 생성 */
+function newElevenstCard() {
   return {
     id: generateId(),
     isEditing: true,
@@ -48,19 +48,19 @@ function newBundleItem() {
   };
 }
 
-/** ID로 ESM/11번가 카드 찾기 */
-function findEsm11Card(id) {
-  return esm11State.cards.find(c => c.id === id);
+/** ID로 11번가 카드 찾기 */
+function findElevenstCard(id) {
+  return elevenstState.cards.find(c => c.id === id);
 }
 
-/** ID로 ESM/11번가 카드 인덱스 찾기 */
-function findEsm11CardIndex(id) {
-  return esm11State.cards.findIndex(c => c.id === id);
+/** ID로 11번가 카드 인덱스 찾기 */
+function findElevenstCardIndex(id) {
+  return elevenstState.cards.findIndex(c => c.id === id);
 }
 
 /** 카드 ID와 항목 ID로 복수품 항목 찾기 */
 function findBundleItem(cardId, itemId) {
-  const card = findEsm11Card(cardId);
+  const card = findElevenstCard(cardId);
   if (!card) return null;
   return card.bundleItems.find(i => i.id === itemId);
 }

@@ -46,7 +46,7 @@ function handleSmartstoreImportFile(e) {
       const parsed = JSON.parse(ev.target.result);
       let data;
 
-      // 새 형식: { _page: 'smartstore'|'coupang'|'esm11', data: [...] }
+      // 새 형식: { _page: 'smartstore'|'coupang'|'esm'|'elevenst', data: [...] }
       if (parsed && !Array.isArray(parsed) && parsed._page && parsed.data) {
         if (!SMARTSTORE_CONFIG.COMPATIBLE_PAGES.includes(parsed._page)) {
           showToast(SMARTSTORE_CONFIG.MESSAGES.IMPORT_WRONG_PAGE(parsed._page));

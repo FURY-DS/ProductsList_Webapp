@@ -1,38 +1,38 @@
 /* =====================================================
-   esm11-storage.js - ESM/11번가 데이터 저장 / 불러오기
+   esm-storage.js - ESM 데이터 저장 / 불러오기
    ===================================================== */
 
-/** ESM/11번가 카드 데이터를 localStorage에 저장 (동시에 백업도 갱신) */
-function saveEsm11() {
+/** ESM 카드 데이터를 localStorage에 저장 (동시에 백업도 갱신) */
+function saveEsm() {
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
-    const data = JSON.stringify(esm11State.cards);
-    localStorage.setItem(ESM11_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(ESM11_CONFIG.STORAGE_KEY + '_backup', data);
+    const data = JSON.stringify(esmState.cards);
+    localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
     return;
   } catch (e) {
-    if (!isStorageQuotaError(e) || !ESM11_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
-      showToast(ESM11_CONFIG.MESSAGES.SAVE_FAIL + (e.message || ''));
+    if (!isStorageQuotaError(e) || !ESM_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
+      showToast(ESM_CONFIG.MESSAGES.SAVE_FAIL + (e.message || ''));
       return;
     }
   }
 
   // 용량 초과 시 이미지 필드를 제거한 뒤 재시도
-  const cleaned = cleanEsm11CardsForSave(esm11State.cards);
+  const cleaned = cleanEsmCardsForSave(esmState.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(ESM11_CONFIG.STORAGE_KEY, data);
-    localStorage.setItem(ESM11_CONFIG.STORAGE_KEY + '_backup', data);
+    localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
-    esm11State.cards = cleaned;
-    showToast(ESM11_CONFIG.MESSAGES.SAVED_WITHOUT_IMAGES);
+    esmState.cards = cleaned;
+    showToast(ESM_CONFIG.MESSAGES.SAVED_WITHOUT_IMAGES);
   } catch (e2) {
-    showToast(ESM11_CONFIG.MESSAGES.SAVE_FAIL_QUOTA);
+    showToast(ESM_CONFIG.MESSAGES.SAVE_FAIL_QUOTA);
   }
 }
 
 /** 저장용 데이터에서 이미지 필드 제거 (localStorage 용량 절약) */
-function cleanEsm11CardsForSave(cards) {
+function cleanEsmCardsForSave(cards) {
   return cards.map(c => {
     const cleaned = { ...c, image: '' };
     if (Array.isArray(c.bundleItems)) {
@@ -51,10 +51,10 @@ function isStorageQuotaError(e) {
     (e.message && /quota|exceeded|storage/i.test(e.message));
 }
 
-/** ESM/11번가 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
-function loadEsm11() {
+/** ESM 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
+function loadEsm() {
   try {
-    let raw = localStorage.getItem(ESM11_CONFIG.STORAGE_KEY);
+    let raw = localStorage.getItem(ESM_CONFIG.STORAGE_KEY);
     let data = null;
 
     if (raw) {
@@ -62,7 +62,7 @@ function loadEsm11() {
     }
 
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(ESM11_CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(ESM_CONFIG.STORAGE_KEY + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }
@@ -70,8 +70,8 @@ function loadEsm11() {
 
     if (!Array.isArray(data)) return;
 
-    esm11State.cards = data.filter(c => c && typeof c === 'object').map(c => {
-      const defaults = newEsm11Card();
+    esmState.cards = data.filter(c => c && typeof c === 'object').map(c => {
+      const defaults = newEsmCard();
       const bundleItems = (Array.isArray(c.bundleItems) ? c.bundleItems : [])
         .filter(item => item && typeof item === 'object')
         .map(item => ({ ...newBundleItem(), ...item, id: item.id || generateId() }));
@@ -91,14 +91,14 @@ function loadEsm11() {
       return card;
     });
   } catch (e) {
-    console.warn(ESM11_CONFIG.MESSAGES.LOAD_FAIL, e);
+    console.warn(ESM_CONFIG.MESSAGES.LOAD_FAIL, e);
   }
 }
 
 /** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistData() {
   try {
-    const raw = localStorage.getItem(ESM11_CONFIG.PRODUCTLIST_STORAGE_KEY);
+    const raw = localStorage.getItem(ESM_CONFIG.PRODUCTLIST_STORAGE_KEY);
     if (!raw) return [];
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];

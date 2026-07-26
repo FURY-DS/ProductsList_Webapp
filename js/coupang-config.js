@@ -7,7 +7,7 @@ const COUPANG_CONFIG = {
   PAGE_ID: 'coupang',
 
   // 가져오기 호환 페이지 (수식/명칭이 동일한 페이지들)
-  COMPATIBLE_PAGES: ['smartstore', 'coupang', 'esm11'],
+  COMPATIBLE_PAGES: ['smartstore', 'coupang', 'esm', 'elevenst'],
 
   // localStorage 키
   STORAGE_KEY: 'coupang_v1',
