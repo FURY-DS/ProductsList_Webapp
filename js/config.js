@@ -43,7 +43,8 @@ const CONFIG = {
     { page: 'esm11',        label: 'ESM/11번가',   url: 'esm11.html',        active: false, ready: true },
     { page: 'ownerclan',    label: '오너클랜',     url: '#',                 active: false, ready: false },
     { page: 'domagguk',     label: '도매꾹',       url: '#',                 active: false, ready: false },
-    { page: 'always',       label: '올웨이즈',     url: '#',                 active: false, ready: false }
+    { page: 'always',       label: '올웨이즈',     url: '#',                 active: false, ready: false },
+    { page: 'tossshopping', label: '토스쇼핑',     url: '#',                 active: false, ready: false }
   ],
 
   // 필드 정의 - 카드에 표시되는 입력 필드
