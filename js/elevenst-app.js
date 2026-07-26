@@ -28,7 +28,7 @@ function initElevenst() {
         const backup = JSON.parse(backupRaw);
         if (Array.isArray(backup) && backup.length > 0) {
           elevenstState.cards = backup;
-          saveElevenst();
+          reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
         }
       } catch (e) { /* ignore */ }
     }
@@ -40,7 +40,7 @@ function initElevenst() {
 
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveElevenstCards();
-  saveElevenst();
+  reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
 
   renderElevenst();
 
@@ -48,7 +48,7 @@ function initElevenst() {
   window.addEventListener('storage', (e) => {
     if (e.key === ELEVENST_CONFIG.PRODUCTLIST_STORAGE_KEY) {
       resolveElevenstCards();
-      saveElevenst();
+      reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
       renderElevenst();
     }
   });
@@ -59,14 +59,14 @@ function bindElevenstPageLifecycle() {
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       resolveElevenstCards();
-      saveElevenst();
+      reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
       renderElevenst();
     }
   });
 
   // 페이지를 벗어나기 전에 혹시 모를 미저장 변경사항 저장
   window.addEventListener('beforeunload', () => {
-    saveElevenst();
+    reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
   });
 }
 
@@ -86,8 +86,7 @@ function bindElevenstKeyboardShortcuts() {
 
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      saveElevenst();
-      showToast(ELEVENST_CONFIG.MESSAGES.SAVED);
+      reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES, ELEVENST_CONFIG.MESSAGES.SAVED);
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

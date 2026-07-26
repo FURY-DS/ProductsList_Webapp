@@ -26,10 +26,10 @@ function applyBulkFeeCoupang() {
     confirmText: '적용',
     onConfirm: () => {
       coupangState.cards.forEach(c => { c.feeRate = value; recalcCoupangCard(c); });
-      saveCoupang();
+      const result = saveCoupang();
       renderCoupang();
       input.value = '';
-      showToast(`전체 ${coupangState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+      reportSaveResult(result, COUPANG_CONFIG.MESSAGES, `전체 ${coupangState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
     }
   });
 }
@@ -93,9 +93,9 @@ function handleCoupangImportFile(e) {
         text: COUPANG_CONFIG.MESSAGES.IMPORT_TEXT(coupangState.cards.length),
         onConfirm: () => {
           coupangState.cards = data;
-          saveCoupang();
+          const result = saveCoupang();
           renderCoupang();
-          showToast(COUPANG_CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, COUPANG_CONFIG.MESSAGES, COUPANG_CONFIG.MESSAGES.IMPORT_DONE(data.length));
         }
       });
 
@@ -103,9 +103,9 @@ function handleCoupangImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         coupangState.cards = coupangState.cards.concat(data);
-        saveCoupang();
+        const result = saveCoupang();
         renderCoupang();
-        showToast(COUPANG_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, COUPANG_CONFIG.MESSAGES, COUPANG_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -128,9 +128,9 @@ function clearAllCoupang() {
     confirmText: '삭제',
     onConfirm: () => {
       coupangState.cards = [];
-      saveCoupang();
+      const result = saveCoupang();
       renderCoupang();
-      showToast(COUPANG_CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, COUPANG_CONFIG.MESSAGES, COUPANG_CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -146,9 +146,9 @@ function confirmDeleteCoupang(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       coupangState.cards = coupangState.cards.filter(c => c.id !== cardId);
-      saveCoupang();
+      const result = saveCoupang();
       renderCoupang();
-      showToast(COUPANG_CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, COUPANG_CONFIG.MESSAGES, COUPANG_CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -157,7 +157,7 @@ function confirmDeleteCoupang(cardId) {
 function addCoupangCard() {
   const c = newCoupangCard();
   coupangState.cards.push(c);
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
   scrollToCoupangCard(c.id);
 }
@@ -171,7 +171,7 @@ function addCoupangCardAfter(cardId) {
   } else {
     coupangState.cards.splice(idx + 1, 0, c);
   }
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
   scrollToCoupangCard(c.id);
 }
@@ -191,7 +191,7 @@ function addBundleItem(cardId) {
   const item = newBundleItem();
   card.bundleItems.push(item);
   recalcCoupangCard(card);
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
@@ -209,6 +209,6 @@ function removeBundleItem(cardId, itemId) {
     card.isBundle = false;
   }
   recalcCoupangCard(card);
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
 }

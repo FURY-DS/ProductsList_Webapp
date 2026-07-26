@@ -67,15 +67,28 @@ function handleImportFile(e) {
 
       if (!Array.isArray(data)) throw new Error('형식이 올바르지 않아요');
 
+      // id 보정: 없는 필드는 기본값으로 채움 (다른 6개 페이지와 동일한 패턴)
+      const correctedData = data.filter(c => c && typeof c === 'object').map(c => {
+        const defaults = newCard();
+        return {
+          ...defaults,
+          ...c,
+          id: c.id || defaults.id,
+          isEditing: typeof c.isEditing === 'boolean' ? c.isEditing : false,
+          isCollapsed: typeof c.isCollapsed === 'boolean' ? c.isCollapsed : false,
+          image: c.image || ''
+        };
+      });
+
       // 교체 확인 모달
       showModal({
         title: CONFIG.MESSAGES.IMPORT_TITLE,
         text: CONFIG.MESSAGES.IMPORT_TEXT(state.cards.length),
         onConfirm: () => {
-          state.cards = data;
-          save();
+          state.cards = correctedData;
+          const result = save();
           render();
-          showToast(CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.IMPORT_DONE(correctedData.length));
         }
       });
 
@@ -83,10 +96,10 @@ function handleImportFile(e) {
       const cancelBtn = document.getElementById('modal-cancel');
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
-        state.cards = state.cards.concat(data);
-        save();
+        state.cards = state.cards.concat(correctedData);
+        const result = save();
         render();
-        showToast(CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.IMPORT_ADDED(correctedData.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -276,9 +289,9 @@ function handleCsvImportFile(e) {
         confirmText: '교체',
         onConfirm: () => {
           state.cards = cards;
-          save();
+          const result = save();
           render();
-          showToast(CONFIG.MESSAGES.CSV_IMPORT_DONE(cards.length));
+          reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.CSV_IMPORT_DONE(cards.length));
         }
       });
 
@@ -287,9 +300,9 @@ function handleCsvImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         state.cards = state.cards.concat(cards);
-        save();
+        const result = save();
         render();
-        showToast(CONFIG.MESSAGES.CSV_IMPORT_ADDED(cards.length));
+        reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.CSV_IMPORT_ADDED(cards.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
 
@@ -313,9 +326,9 @@ function clearAll() {
     confirmText: '삭제',
     onConfirm: () => {
       state.cards = [];
-      save();
+      const result = save();
       render();
-      showToast(CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -331,9 +344,9 @@ function confirmDelete(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       state.cards = state.cards.filter(c => c.id !== cardId);
-      save();
+      const result = save();
       render();
-      showToast(CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -342,7 +355,7 @@ function confirmDelete(cardId) {
 function addCard() {
   const c = newCard();
   state.cards.push(c);
-  save();
+  reportSaveResult(save(), CONFIG.MESSAGES);
   render();
   scrollToCard(c.id);
 }
@@ -356,7 +369,7 @@ function addCardAfter(cardId) {
   } else {
     state.cards.splice(idx + 1, 0, c);
   }
-  save();
+  reportSaveResult(save(), CONFIG.MESSAGES);
   render();
   scrollToCard(c.id);
 }

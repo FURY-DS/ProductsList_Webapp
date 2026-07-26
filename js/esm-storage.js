@@ -9,11 +9,10 @@ function saveEsm() {
     const data = JSON.stringify(esmState.cards);
     localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
     localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
-    return;
+    return { ok: true };
   } catch (e) {
     if (!isStorageQuotaError(e) || !ESM_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
-      showToast(ESM_CONFIG.MESSAGES.SAVE_FAIL + (e.message || ''));
-      return;
+      return { ok: false, msg: ESM_CONFIG.MESSAGES.SAVE_FAIL + (e.message || '') };
     }
   }
 
@@ -25,9 +24,9 @@ function saveEsm() {
     localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     esmState.cards = cleaned;
-    showToast(ESM_CONFIG.MESSAGES.SAVED_WITHOUT_IMAGES);
+    return { ok: true, imagesRemoved: true };
   } catch (e2) {
-    showToast(ESM_CONFIG.MESSAGES.SAVE_FAIL_QUOTA);
+    return { ok: false, msg: ESM_CONFIG.MESSAGES.SAVE_FAIL_QUOTA };
   }
 }
 

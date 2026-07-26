@@ -28,7 +28,7 @@ function initSmartstore() {
         const backup = JSON.parse(backupRaw);
         if (Array.isArray(backup) && backup.length > 0) {
           smartstoreState.cards = backup;
-          saveSmartstore();
+          reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
         }
       } catch (e) { /* ignore */ }
     }
@@ -40,7 +40,7 @@ function initSmartstore() {
 
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveSmartstoreCards();
-  saveSmartstore();
+  reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
 
   renderSmartstore();
 
@@ -48,7 +48,7 @@ function initSmartstore() {
   window.addEventListener('storage', (e) => {
     if (e.key === SMARTSTORE_CONFIG.PRODUCTLIST_STORAGE_KEY) {
       resolveSmartstoreCards();
-      saveSmartstore();
+      reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
       renderSmartstore();
     }
   });
@@ -59,14 +59,14 @@ function bindSmartstorePageLifecycle() {
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       resolveSmartstoreCards();
-      saveSmartstore();
+      reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
       renderSmartstore();
     }
   });
 
   // 페이지를 벗어나기 전에 혹시 모를 미저장 변경사항 저장
   window.addEventListener('beforeunload', () => {
-    saveSmartstore();
+    reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
   });
 }
 
@@ -86,8 +86,7 @@ function bindSmartstoreKeyboardShortcuts() {
 
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      saveSmartstore();
-      showToast(SMARTSTORE_CONFIG.MESSAGES.SAVED);
+      reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES, SMARTSTORE_CONFIG.MESSAGES.SAVED);
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

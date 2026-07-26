@@ -42,8 +42,7 @@ function bindKeyboardShortcuts() {
     // Ctrl/Cmd + S: 수동 저장
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      save();
-      showToast(CONFIG.MESSAGES.SAVED);
+      reportSaveResult(save(), CONFIG.MESSAGES, CONFIG.MESSAGES.SAVED);
     }
 
     // Ctrl/Cmd + F: 검색창 포커스

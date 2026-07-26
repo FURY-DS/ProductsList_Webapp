@@ -76,9 +76,9 @@ function recalcRocketgrowthCard(card) {
 function toggleAllRocketgrowthCards(collapse) {
   if (rocketgrowthState.cards.length === 0) return;
   rocketgrowthState.cards.forEach(c => c.isCollapsed = collapse);
-  saveRocketgrowth();
+  const result = saveRocketgrowth();
   renderRocketgrowth();
-  showToast(collapse ? ROCKETGROWTH_CONFIG.MESSAGES.ALL_COLLAPSED : ROCKETGROWTH_CONFIG.MESSAGES.ALL_EXPANDED);
+  reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, collapse ? ROCKETGROWTH_CONFIG.MESSAGES.ALL_COLLAPSED : ROCKETGROWTH_CONFIG.MESSAGES.ALL_EXPANDED);
 }
 
 /** 전체 렌더링 */
@@ -205,7 +205,7 @@ function renderRocketgrowthPhotoRow(card) {
   photoBox.dataset.upload = 'card';
   photoBox.title = '사진 클릭하여 변경';
   photoBox.innerHTML = imgSrc
-    ? `<img src="${imgSrc}" alt="상품 이미지" />`
+    ? `<img src="${escapeAttr(imgSrc)}" alt="상품 이미지" />`
     : `<span>사진</span>`;
 
   row.appendChild(photoBox);
@@ -319,7 +319,7 @@ function renderRocketgrowthBundleItem(card, item, idx) {
   thumb.dataset.upload = 'bundle';
   thumb.title = '사진 클릭하여 변경';
   thumb.innerHTML = thumbSrc
-    ? `<img src="${thumbSrc}" alt="" />`
+    ? `<img src="${escapeAttr(thumbSrc)}" alt="" />`
     : `<span>${idx + 1}</span>`;
   row.appendChild(thumb);
 
@@ -372,7 +372,7 @@ function bindRocketgrowthCardEvents(wrap, card) {
     if (c.isEditing) {
       c[t.name] = t.value;
       recalcRocketgrowthCard(c);
-      saveRocketgrowth();
+      reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
       updateRocketgrowthCalcDisplay(wrap, c);
     }
   });
@@ -387,7 +387,7 @@ function bindRocketgrowthCardEvents(wrap, card) {
     if (t.name === 'sellerCode') {
       c.sellerCode = t.value;
       updateRocketgrowthSingleProductFromCode(c, t.value);
-      saveRocketgrowth();
+      reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
       renderRocketgrowth();
       return;
     }
@@ -396,7 +396,7 @@ function bindRocketgrowthCardEvents(wrap, card) {
       const itemId = t.closest('.bundle-item')?.dataset.itemId;
       if (itemId) {
         updateRocketgrowthBundleItemFromCode(c, itemId, t.value);
-        saveRocketgrowth();
+        reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
         renderRocketgrowth();
       }
     }
@@ -415,7 +415,7 @@ function bindRocketgrowthCardEvents(wrap, card) {
       if (!c.isEditing) {
         c.isEditing = true;
         c.isCollapsed = false;
-        saveRocketgrowth();
+        reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
         renderRocketgrowth();
       }
 
@@ -536,9 +536,9 @@ function saveRocketgrowthCard(cardId) {
   if (!c) return;
   syncRocketgrowthCardFromDOM(cardId);
   c.isEditing = false;
-  saveRocketgrowth();
+  const result = saveRocketgrowth();
   renderRocketgrowth();
-  showToast(ROCKETGROWTH_CONFIG.MESSAGES.SAVED);
+  reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, ROCKETGROWTH_CONFIG.MESSAGES.SAVED);
 }
 
 /** 렌더링된 DOM의 현재 입력값을 상태 객체에 동기화 (저장 직전 안전 장치) */
@@ -580,7 +580,7 @@ function editRocketgrowthCard(cardId) {
   if (!c) return;
   c.isEditing = true;
   c.isCollapsed = false;
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] input[name="sellerCode"], .smartstore-card[data-id="${cardId}"] input[name="itemSellerCode"]`);
@@ -593,7 +593,7 @@ function toggleRocketgrowthCollapse(cardId) {
   const c = findRocketgrowthCard(cardId);
   if (!c) return;
   c.isCollapsed = !c.isCollapsed;
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
 }
 
@@ -605,7 +605,7 @@ function enableRocketgrowthBundleMode(cardId) {
   c.sellerCode = '';
   c.bundleItems = [newRocketgrowthBundleItem()];
   recalcRocketgrowthCard(c);
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
 }
 
@@ -636,9 +636,9 @@ function triggerRocketgrowthPhotoUpload(cardId, type, itemId) {
         if (item) item.image = dataUrl;
       }
 
-      saveRocketgrowth();
+      const result = saveRocketgrowth();
       renderRocketgrowth();
-      showToast('사진을 변경했어요');
+      reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, '사진을 변경했어요');
     } catch (err) {
       showToast('사진 처리 실패: ' + (err.message || ''));
     }

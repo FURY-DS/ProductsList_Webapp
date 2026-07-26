@@ -76,9 +76,9 @@ function recalcCoupangCard(card) {
 function toggleAllCoupangCards(collapse) {
   if (coupangState.cards.length === 0) return;
   coupangState.cards.forEach(c => c.isCollapsed = collapse);
-  saveCoupang();
+  const result = saveCoupang();
   renderCoupang();
-  showToast(collapse ? COUPANG_CONFIG.MESSAGES.ALL_COLLAPSED : COUPANG_CONFIG.MESSAGES.ALL_EXPANDED);
+  reportSaveResult(result, COUPANG_CONFIG.MESSAGES, collapse ? COUPANG_CONFIG.MESSAGES.ALL_COLLAPSED : COUPANG_CONFIG.MESSAGES.ALL_EXPANDED);
 }
 
 /** 전체 렌더링 */
@@ -205,7 +205,7 @@ function renderCoupangPhotoRow(card) {
   photoBox.dataset.upload = 'card';
   photoBox.title = '사진 클릭하여 변경';
   photoBox.innerHTML = imgSrc
-    ? `<img src="${imgSrc}" alt="상품 이미지" />`
+    ? `<img src="${escapeAttr(imgSrc)}" alt="상품 이미지" />`
     : `<span>사진</span>`;
 
   row.appendChild(photoBox);
@@ -319,7 +319,7 @@ function renderBundleItem(card, item, idx) {
   thumb.dataset.upload = 'bundle';
   thumb.title = '사진 클릭하여 변경';
   thumb.innerHTML = thumbSrc
-    ? `<img src="${thumbSrc}" alt="" />`
+    ? `<img src="${escapeAttr(thumbSrc)}" alt="" />`
     : `<span>${idx + 1}</span>`;
   row.appendChild(thumb);
 
@@ -372,7 +372,7 @@ function bindCoupangCardEvents(wrap, card) {
     if (c.isEditing) {
       c[t.name] = t.value;
       recalcCoupangCard(c);
-      saveCoupang();
+      reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
       updateCoupangCalcDisplay(wrap, c);
     }
   });
@@ -387,7 +387,7 @@ function bindCoupangCardEvents(wrap, card) {
     if (t.name === 'sellerCode') {
       c.sellerCode = t.value;
       updateSingleProductFromCode(c, t.value);
-      saveCoupang();
+      reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
       renderCoupang();
       return;
     }
@@ -396,7 +396,7 @@ function bindCoupangCardEvents(wrap, card) {
       const itemId = t.closest('.bundle-item')?.dataset.itemId;
       if (itemId) {
         updateBundleItemFromCode(c, itemId, t.value);
-        saveCoupang();
+        reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
         renderCoupang();
       }
     }
@@ -415,7 +415,7 @@ function bindCoupangCardEvents(wrap, card) {
       if (!c.isEditing) {
         c.isEditing = true;
         c.isCollapsed = false;
-        saveCoupang();
+        reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
         renderCoupang();
       }
 
@@ -536,9 +536,9 @@ function saveCoupangCard(cardId) {
   if (!c) return;
   syncCoupangCardFromDOM(cardId);
   c.isEditing = false;
-  saveCoupang();
+  const result = saveCoupang();
   renderCoupang();
-  showToast(COUPANG_CONFIG.MESSAGES.SAVED);
+  reportSaveResult(result, COUPANG_CONFIG.MESSAGES, COUPANG_CONFIG.MESSAGES.SAVED);
 }
 
 /** 렌더링된 DOM의 현재 입력값을 상태 객체에 동기화 (저장 직전 안전 장치) */
@@ -580,7 +580,7 @@ function editCoupangCard(cardId) {
   if (!c) return;
   c.isEditing = true;
   c.isCollapsed = false;
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] input[name="sellerCode"], .smartstore-card[data-id="${cardId}"] input[name="itemSellerCode"]`);
@@ -593,7 +593,7 @@ function toggleCoupangCollapse(cardId) {
   const c = findCoupangCard(cardId);
   if (!c) return;
   c.isCollapsed = !c.isCollapsed;
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
 }
 
@@ -605,7 +605,7 @@ function enableBundleMode(cardId) {
   c.sellerCode = '';
   c.bundleItems = [newBundleItem()];
   recalcCoupangCard(c);
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
 }
 
@@ -636,9 +636,9 @@ function triggerCoupangPhotoUpload(cardId, type, itemId) {
         if (item) item.image = dataUrl;
       }
 
-      saveCoupang();
+      const result = saveCoupang();
       renderCoupang();
-      showToast('사진을 변경했어요');
+      reportSaveResult(result, COUPANG_CONFIG.MESSAGES, '사진을 변경했어요');
     } catch (err) {
       showToast('사진 처리 실패: ' + (err.message || ''));
     }

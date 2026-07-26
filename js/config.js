@@ -19,6 +19,9 @@ const CONFIG = {
   // 이미지 업로드 제한 (바이트)
   IMAGE_MAX_SIZE: 5 * 1024 * 1024, // 5MB
 
+  // 용량 초과 시 이미지 자동 제거 후 저장 시도
+  IMAGE_REMOVE_ON_SAVE_FAIL: true,
+
   // 토스트 표시 시간 (ms)
   TOAST_DURATION: 1800,
 
@@ -99,7 +102,9 @@ const CONFIG = {
   // 메시지 (토스트 / 모달)
   MESSAGES: {
     SAVED:           '저장되었어요',
+    SAVED_WITHOUT_IMAGES: '사진 용량 때문에 이미지 없이 저장되었어요',
     SAVE_FAIL:       '저장 실패: ',
+    SAVE_FAIL_QUOTA: '저장 공간이 부족해요. 불필요한 데이터를 삭제해 주세요.',
     LOAD_FAIL:       '불러오기 실패',
     DELETED:         '삭제되었어요',
     ALL_DELETED:     '모두 삭제되었어요',

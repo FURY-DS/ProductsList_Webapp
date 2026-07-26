@@ -26,10 +26,10 @@ function applyBulkFeeRocketgrowth() {
     confirmText: '적용',
     onConfirm: () => {
       rocketgrowthState.cards.forEach(c => { c.feeRate = value; recalcRocketgrowthCard(c); });
-      saveRocketgrowth();
+      const result = saveRocketgrowth();
       renderRocketgrowth();
       input.value = '';
-      showToast(`전체 ${rocketgrowthState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+      reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, `전체 ${rocketgrowthState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
     }
   });
 }
@@ -93,9 +93,9 @@ function handleRocketgrowthImportFile(e) {
         text: ROCKETGROWTH_CONFIG.MESSAGES.IMPORT_TEXT(rocketgrowthState.cards.length),
         onConfirm: () => {
           rocketgrowthState.cards = data;
-          saveRocketgrowth();
+          const result = saveRocketgrowth();
           renderRocketgrowth();
-          showToast(ROCKETGROWTH_CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, ROCKETGROWTH_CONFIG.MESSAGES.IMPORT_DONE(data.length));
         }
       });
 
@@ -103,9 +103,9 @@ function handleRocketgrowthImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         rocketgrowthState.cards = rocketgrowthState.cards.concat(data);
-        saveRocketgrowth();
+        const result = saveRocketgrowth();
         renderRocketgrowth();
-        showToast(ROCKETGROWTH_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, ROCKETGROWTH_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -128,9 +128,9 @@ function clearAllRocketgrowth() {
     confirmText: '삭제',
     onConfirm: () => {
       rocketgrowthState.cards = [];
-      saveRocketgrowth();
+      const result = saveRocketgrowth();
       renderRocketgrowth();
-      showToast(ROCKETGROWTH_CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, ROCKETGROWTH_CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -146,9 +146,9 @@ function confirmDeleteRocketgrowth(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       rocketgrowthState.cards = rocketgrowthState.cards.filter(c => c.id !== cardId);
-      saveRocketgrowth();
+      const result = saveRocketgrowth();
       renderRocketgrowth();
-      showToast(ROCKETGROWTH_CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, ROCKETGROWTH_CONFIG.MESSAGES, ROCKETGROWTH_CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -157,7 +157,7 @@ function confirmDeleteRocketgrowth(cardId) {
 function addRocketgrowthCard() {
   const c = newRocketgrowthCard();
   rocketgrowthState.cards.push(c);
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
   scrollToRocketgrowthCard(c.id);
 }
@@ -171,7 +171,7 @@ function addRocketgrowthCardAfter(cardId) {
   } else {
     rocketgrowthState.cards.splice(idx + 1, 0, c);
   }
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
   scrollToRocketgrowthCard(c.id);
 }
@@ -191,7 +191,7 @@ function addRocketgrowthBundleItem(cardId) {
   const item = newRocketgrowthBundleItem();
   card.bundleItems.push(item);
   recalcRocketgrowthCard(card);
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
@@ -209,6 +209,6 @@ function removeRocketgrowthBundleItem(cardId, itemId) {
     card.isBundle = false;
   }
   recalcRocketgrowthCard(card);
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   renderRocketgrowth();
 }

@@ -79,9 +79,9 @@ function recalcNshippingCard(card) {
 function toggleAllNshippingCards(collapse) {
   if (nshippingState.cards.length === 0) return;
   nshippingState.cards.forEach(c => c.isCollapsed = collapse);
-  saveNshipping();
+  const result = saveNshipping();
   renderNshipping();
-  showToast(collapse ? NSHIPPING_CONFIG.MESSAGES.ALL_COLLAPSED : NSHIPPING_CONFIG.MESSAGES.ALL_EXPANDED);
+  reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, collapse ? NSHIPPING_CONFIG.MESSAGES.ALL_COLLAPSED : NSHIPPING_CONFIG.MESSAGES.ALL_EXPANDED);
 }
 
 /** 전체 렌더링 */
@@ -208,7 +208,7 @@ function renderNshippingPhotoRow(card) {
   photoBox.dataset.upload = 'card';
   photoBox.title = '사진 클릭하여 변경';
   photoBox.innerHTML = imgSrc
-    ? `<img src="${imgSrc}" alt="상품 이미지" />`
+    ? `<img src="${escapeAttr(imgSrc)}" alt="상품 이미지" />`
     : `<span>사진</span>`;
 
   row.appendChild(photoBox);
@@ -330,7 +330,7 @@ function renderNshippingBundleItem(card, item, idx) {
   thumb.dataset.upload = 'bundle';
   thumb.title = '사진 클릭하여 변경';
   thumb.innerHTML = thumbSrc
-    ? `<img src="${thumbSrc}" alt="" />`
+    ? `<img src="${escapeAttr(thumbSrc)}" alt="" />`
     : `<span>${idx + 1}</span>`;
   row.appendChild(thumb);
 
@@ -383,7 +383,7 @@ function bindNshippingCardEvents(wrap, card) {
     if (c.isEditing) {
       c[t.name] = t.value;
       recalcNshippingCard(c);
-      saveNshipping();
+      reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
       updateNshippingCalcDisplay(wrap, c);
     }
   });
@@ -398,7 +398,7 @@ function bindNshippingCardEvents(wrap, card) {
     if (t.name === 'sellerCode') {
       c.sellerCode = t.value;
       updateNshippingSingleProductFromCode(c, t.value);
-      saveNshipping();
+      reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
       renderNshipping();
       return;
     }
@@ -407,7 +407,7 @@ function bindNshippingCardEvents(wrap, card) {
       const itemId = t.closest('.bundle-item')?.dataset.itemId;
       if (itemId) {
         updateNshippingBundleItemFromCode(c, itemId, t.value);
-        saveNshipping();
+        reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
         renderNshipping();
       }
     }
@@ -426,7 +426,7 @@ function bindNshippingCardEvents(wrap, card) {
       if (!c.isEditing) {
         c.isEditing = true;
         c.isCollapsed = false;
-        saveNshipping();
+        reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
         renderNshipping();
       }
 
@@ -547,9 +547,9 @@ function saveNshippingCard(cardId) {
   if (!c) return;
   syncNshippingCardFromDOM(cardId);
   c.isEditing = false;
-  saveNshipping();
+  const result = saveNshipping();
   renderNshipping();
-  showToast(NSHIPPING_CONFIG.MESSAGES.SAVED);
+  reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, NSHIPPING_CONFIG.MESSAGES.SAVED);
 }
 
 /** 렌더링된 DOM의 현재 입력값을 상태 객체에 동기화 (저장 직전 안전 장치) */
@@ -591,7 +591,7 @@ function editNshippingCard(cardId) {
   if (!c) return;
   c.isEditing = true;
   c.isCollapsed = false;
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] input[name="sellerCode"], .smartstore-card[data-id="${cardId}"] input[name="itemSellerCode"]`);
@@ -604,7 +604,7 @@ function toggleNshippingCollapse(cardId) {
   const c = findNshippingCard(cardId);
   if (!c) return;
   c.isCollapsed = !c.isCollapsed;
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
 }
 
@@ -616,7 +616,7 @@ function enableNshippingBundleMode(cardId) {
   c.sellerCode = '';
   c.bundleItems = [newNshippingBundleItem()];
   recalcNshippingCard(c);
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
 }
 
@@ -647,9 +647,9 @@ function triggerNshippingPhotoUpload(cardId, type, itemId) {
         if (item) item.image = dataUrl;
       }
 
-      saveNshipping();
+      const result = saveNshipping();
       renderNshipping();
-      showToast('사진을 변경했어요');
+      reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, '사진을 변경했어요');
     } catch (err) {
       showToast('사진 처리 실패: ' + (err.message || ''));
     }

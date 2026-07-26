@@ -28,7 +28,7 @@ function initRocketgrowth() {
         const backup = JSON.parse(backupRaw);
         if (Array.isArray(backup) && backup.length > 0) {
           rocketgrowthState.cards = backup;
-          saveRocketgrowth();
+          reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
         }
       } catch (e) { /* ignore */ }
     }
@@ -40,7 +40,7 @@ function initRocketgrowth() {
 
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveRocketgrowthCards();
-  saveRocketgrowth();
+  reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
 
   renderRocketgrowth();
 
@@ -48,7 +48,7 @@ function initRocketgrowth() {
   window.addEventListener('storage', (e) => {
     if (e.key === ROCKETGROWTH_CONFIG.PRODUCTLIST_STORAGE_KEY) {
       resolveRocketgrowthCards();
-      saveRocketgrowth();
+      reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
       renderRocketgrowth();
     }
   });
@@ -59,14 +59,14 @@ function bindRocketgrowthPageLifecycle() {
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       resolveRocketgrowthCards();
-      saveRocketgrowth();
+      reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
       renderRocketgrowth();
     }
   });
 
   // 페이지를 벗어나기 전에 혹시 모를 미저장 변경사항 저장
   window.addEventListener('beforeunload', () => {
-    saveRocketgrowth();
+    reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES);
   });
 }
 
@@ -86,8 +86,7 @@ function bindRocketgrowthKeyboardShortcuts() {
 
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      saveRocketgrowth();
-      showToast(ROCKETGROWTH_CONFIG.MESSAGES.SAVED);
+      reportSaveResult(saveRocketgrowth(), ROCKETGROWTH_CONFIG.MESSAGES, ROCKETGROWTH_CONFIG.MESSAGES.SAVED);
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

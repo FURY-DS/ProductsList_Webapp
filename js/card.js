@@ -27,9 +27,10 @@ function computeTotal(card) {
 function toggleAllCards(collapse) {
   if (state.cards.length === 0) return;
   state.cards.forEach(c => c.isCollapsed = collapse);
-  save();
+  const result = save();
   render();
-  showToast(collapse ? CONFIG.MESSAGES.ALL_COLLAPSED : CONFIG.MESSAGES.ALL_EXPANDED);
+  reportSaveResult(result, CONFIG.MESSAGES,
+    collapse ? CONFIG.MESSAGES.ALL_COLLAPSED : CONFIG.MESSAGES.ALL_EXPANDED);
 }
 function render() {
   boardEl.innerHTML = '';
@@ -160,7 +161,7 @@ function renderPhotoRow(card, fieldNames) {
   const photoBox = document.createElement('div');
   photoBox.className = 'photo-box' + (card.image ? ' has-image' : '');
   photoBox.innerHTML = card.image
-    ? `<img src="${card.image}" alt="상품 이미지" />`
+    ? `<img src="${escapeAttr(card.image)}" alt="상품 이미지" />`
     : `<span>사진</span>`;
 
   // 편집 중일 때만 사진 액션 버튼 표시
@@ -276,7 +277,8 @@ function bindCardEvents(wrap, card) {
     const c = findCard(card.id);
     if (!c) return;
     c[t.name] = t.value;
-    save();
+    // 입력 중에는 성공 토스트를 띄우지 않되, 저장 실패는 즉시 알림
+    reportSaveResult(save(), CONFIG.MESSAGES);
 
     // 총합 자동 갱신
     if (CONFIG.TOTAL_FIELDS.includes(t.name)) {
@@ -333,9 +335,9 @@ function saveCard(cardId) {
   const c = findCard(cardId);
   if (!c) return;
   c.isEditing = false;
-  save();
+  const result = save();
   render();
-  showToast(CONFIG.MESSAGES.SAVED);
+  reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.SAVED);
 }
 
 /** 카드 수정 모드 진입 */
@@ -344,7 +346,7 @@ function editCard(cardId) {
   if (!c) return;
   c.isEditing = true;
   c.isCollapsed = false; // 수정 시 자동 펼침
-  save();
+  reportSaveResult(save(), CONFIG.MESSAGES);
   render();
   setTimeout(() => {
     const el = document.querySelector(`.card[data-id="${cardId}"] input`);
@@ -357,6 +359,6 @@ function toggleCollapse(cardId) {
   const c = findCard(cardId);
   if (!c) return;
   c.isCollapsed = !c.isCollapsed;
-  save();
+  reportSaveResult(save(), CONFIG.MESSAGES);
   render();
 }

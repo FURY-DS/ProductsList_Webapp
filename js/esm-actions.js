@@ -26,10 +26,10 @@ function applyBulkFeeEsm() {
     confirmText: '적용',
     onConfirm: () => {
       esmState.cards.forEach(c => { c.feeRate = value; recalcEsmCard(c); });
-      saveEsm();
+      const result = saveEsm();
       renderEsm();
       input.value = '';
-      showToast(`전체 ${esmState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+      reportSaveResult(result, ESM_CONFIG.MESSAGES, `전체 ${esmState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
     }
   });
 }
@@ -93,9 +93,9 @@ function handleEsmImportFile(e) {
         text: ESM_CONFIG.MESSAGES.IMPORT_TEXT(esmState.cards.length),
         onConfirm: () => {
           esmState.cards = data;
-          saveEsm();
+          const result = saveEsm();
           renderEsm();
-          showToast(ESM_CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, ESM_CONFIG.MESSAGES, ESM_CONFIG.MESSAGES.IMPORT_DONE(data.length));
         }
       });
 
@@ -103,9 +103,9 @@ function handleEsmImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         esmState.cards = esmState.cards.concat(data);
-        saveEsm();
+        const result = saveEsm();
         renderEsm();
-        showToast(ESM_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, ESM_CONFIG.MESSAGES, ESM_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -128,9 +128,9 @@ function clearAllEsm() {
     confirmText: '삭제',
     onConfirm: () => {
       esmState.cards = [];
-      saveEsm();
+      const result = saveEsm();
       renderEsm();
-      showToast(ESM_CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, ESM_CONFIG.MESSAGES, ESM_CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -146,9 +146,9 @@ function confirmDeleteEsm(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       esmState.cards = esmState.cards.filter(c => c.id !== cardId);
-      saveEsm();
+      const result = saveEsm();
       renderEsm();
-      showToast(ESM_CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, ESM_CONFIG.MESSAGES, ESM_CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -157,7 +157,7 @@ function confirmDeleteEsm(cardId) {
 function addEsmCard() {
   const c = newEsmCard();
   esmState.cards.push(c);
-  saveEsm();
+  reportSaveResult(saveEsm(), ESM_CONFIG.MESSAGES);
   renderEsm();
   scrollToEsmCard(c.id);
 }
@@ -171,7 +171,7 @@ function addEsmCardAfter(cardId) {
   } else {
     esmState.cards.splice(idx + 1, 0, c);
   }
-  saveEsm();
+  reportSaveResult(saveEsm(), ESM_CONFIG.MESSAGES);
   renderEsm();
   scrollToEsmCard(c.id);
 }
@@ -191,7 +191,7 @@ function addBundleItem(cardId) {
   const item = newBundleItem();
   card.bundleItems.push(item);
   recalcEsmCard(card);
-  saveEsm();
+  reportSaveResult(saveEsm(), ESM_CONFIG.MESSAGES);
   renderEsm();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
@@ -209,6 +209,6 @@ function removeBundleItem(cardId, itemId) {
     card.isBundle = false;
   }
   recalcEsmCard(card);
-  saveEsm();
+  reportSaveResult(saveEsm(), ESM_CONFIG.MESSAGES);
   renderEsm();
 }

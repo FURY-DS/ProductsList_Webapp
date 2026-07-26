@@ -9,11 +9,10 @@ function saveNshipping() {
     const data = JSON.stringify(nshippingState.cards);
     localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY, data);
     localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup', data);
-    return;
+    return { ok: true };
   } catch (e) {
     if (!isNshippingStorageQuotaError(e) || !NSHIPPING_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
-      showToast(NSHIPPING_CONFIG.MESSAGES.SAVE_FAIL + (e.message || ''));
-      return;
+      return { ok: false, msg: NSHIPPING_CONFIG.MESSAGES.SAVE_FAIL + (e.message || '') };
     }
   }
 
@@ -25,9 +24,9 @@ function saveNshipping() {
     localStorage.setItem(NSHIPPING_CONFIG.STORAGE_KEY + '_backup', data);
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     nshippingState.cards = cleaned;
-    showToast(NSHIPPING_CONFIG.MESSAGES.SAVED_WITHOUT_IMAGES);
+    return { ok: true, imagesRemoved: true };
   } catch (e2) {
-    showToast(NSHIPPING_CONFIG.MESSAGES.SAVE_FAIL_QUOTA);
+    return { ok: false, msg: NSHIPPING_CONFIG.MESSAGES.SAVE_FAIL_QUOTA };
   }
 }
 

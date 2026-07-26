@@ -26,10 +26,10 @@ function applyBulkFeeElevenst() {
     confirmText: '적용',
     onConfirm: () => {
       elevenstState.cards.forEach(c => { c.feeRate = value; recalcElevenstCard(c); });
-      saveElevenst();
+      const result = saveElevenst();
       renderElevenst();
       input.value = '';
-      showToast(`전체 ${elevenstState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+      reportSaveResult(result, ELEVENST_CONFIG.MESSAGES, `전체 ${elevenstState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
     }
   });
 }
@@ -93,9 +93,9 @@ function handleElevenstImportFile(e) {
         text: ELEVENST_CONFIG.MESSAGES.IMPORT_TEXT(elevenstState.cards.length),
         onConfirm: () => {
           elevenstState.cards = data;
-          saveElevenst();
+          const result = saveElevenst();
           renderElevenst();
-          showToast(ELEVENST_CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, ELEVENST_CONFIG.MESSAGES, ELEVENST_CONFIG.MESSAGES.IMPORT_DONE(data.length));
         }
       });
 
@@ -103,9 +103,9 @@ function handleElevenstImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         elevenstState.cards = elevenstState.cards.concat(data);
-        saveElevenst();
+        const result = saveElevenst();
         renderElevenst();
-        showToast(ELEVENST_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, ELEVENST_CONFIG.MESSAGES, ELEVENST_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -128,9 +128,9 @@ function clearAllElevenst() {
     confirmText: '삭제',
     onConfirm: () => {
       elevenstState.cards = [];
-      saveElevenst();
+      const result = saveElevenst();
       renderElevenst();
-      showToast(ELEVENST_CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, ELEVENST_CONFIG.MESSAGES, ELEVENST_CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -146,9 +146,9 @@ function confirmDeleteElevenst(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       elevenstState.cards = elevenstState.cards.filter(c => c.id !== cardId);
-      saveElevenst();
+      const result = saveElevenst();
       renderElevenst();
-      showToast(ELEVENST_CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, ELEVENST_CONFIG.MESSAGES, ELEVENST_CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -157,7 +157,7 @@ function confirmDeleteElevenst(cardId) {
 function addElevenstCard() {
   const c = newElevenstCard();
   elevenstState.cards.push(c);
-  saveElevenst();
+  reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
   renderElevenst();
   scrollToElevenstCard(c.id);
 }
@@ -171,7 +171,7 @@ function addElevenstCardAfter(cardId) {
   } else {
     elevenstState.cards.splice(idx + 1, 0, c);
   }
-  saveElevenst();
+  reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
   renderElevenst();
   scrollToElevenstCard(c.id);
 }
@@ -191,7 +191,7 @@ function addBundleItem(cardId) {
   const item = newBundleItem();
   card.bundleItems.push(item);
   recalcElevenstCard(card);
-  saveElevenst();
+  reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
   renderElevenst();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
@@ -209,6 +209,6 @@ function removeBundleItem(cardId, itemId) {
     card.isBundle = false;
   }
   recalcElevenstCard(card);
-  saveElevenst();
+  reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);
   renderElevenst();
 }

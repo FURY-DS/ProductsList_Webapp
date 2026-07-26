@@ -26,10 +26,10 @@ function applyBulkFeeSmartstore() {
     confirmText: '적용',
     onConfirm: () => {
       smartstoreState.cards.forEach(c => { c.feeRate = value; recalcSmartstoreCard(c); });
-      saveSmartstore();
+      const result = saveSmartstore();
       renderSmartstore();
       input.value = '';
-      showToast(`전체 ${smartstoreState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+      reportSaveResult(result, SMARTSTORE_CONFIG.MESSAGES, `전체 ${smartstoreState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
     }
   });
 }
@@ -93,9 +93,9 @@ function handleSmartstoreImportFile(e) {
         text: SMARTSTORE_CONFIG.MESSAGES.IMPORT_TEXT(smartstoreState.cards.length),
         onConfirm: () => {
           smartstoreState.cards = data;
-          saveSmartstore();
+          const result = saveSmartstore();
           renderSmartstore();
-          showToast(SMARTSTORE_CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, SMARTSTORE_CONFIG.MESSAGES, SMARTSTORE_CONFIG.MESSAGES.IMPORT_DONE(data.length));
         }
       });
 
@@ -103,9 +103,9 @@ function handleSmartstoreImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         smartstoreState.cards = smartstoreState.cards.concat(data);
-        saveSmartstore();
+        const result = saveSmartstore();
         renderSmartstore();
-        showToast(SMARTSTORE_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, SMARTSTORE_CONFIG.MESSAGES, SMARTSTORE_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -128,9 +128,9 @@ function clearAllSmartstore() {
     confirmText: '삭제',
     onConfirm: () => {
       smartstoreState.cards = [];
-      saveSmartstore();
+      const result = saveSmartstore();
       renderSmartstore();
-      showToast(SMARTSTORE_CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, SMARTSTORE_CONFIG.MESSAGES, SMARTSTORE_CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -146,9 +146,9 @@ function confirmDeleteSmartstore(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       smartstoreState.cards = smartstoreState.cards.filter(c => c.id !== cardId);
-      saveSmartstore();
+      const result = saveSmartstore();
       renderSmartstore();
-      showToast(SMARTSTORE_CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, SMARTSTORE_CONFIG.MESSAGES, SMARTSTORE_CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -157,7 +157,7 @@ function confirmDeleteSmartstore(cardId) {
 function addSmartstoreCard() {
   const c = newSmartstoreCard();
   smartstoreState.cards.push(c);
-  saveSmartstore();
+  reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
   renderSmartstore();
   scrollToSmartstoreCard(c.id);
 }
@@ -171,7 +171,7 @@ function addSmartstoreCardAfter(cardId) {
   } else {
     smartstoreState.cards.splice(idx + 1, 0, c);
   }
-  saveSmartstore();
+  reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
   renderSmartstore();
   scrollToSmartstoreCard(c.id);
 }
@@ -191,7 +191,7 @@ function addBundleItem(cardId) {
   const item = newBundleItem();
   card.bundleItems.push(item);
   recalcSmartstoreCard(card);
-  saveSmartstore();
+  reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
   renderSmartstore();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
@@ -209,6 +209,6 @@ function removeBundleItem(cardId, itemId) {
     card.isBundle = false;
   }
   recalcSmartstoreCard(card);
-  saveSmartstore();
+  reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);
   renderSmartstore();
 }

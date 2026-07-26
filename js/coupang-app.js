@@ -28,7 +28,7 @@ function initCoupang() {
         const backup = JSON.parse(backupRaw);
         if (Array.isArray(backup) && backup.length > 0) {
           coupangState.cards = backup;
-          saveCoupang();
+          reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
         }
       } catch (e) { /* ignore */ }
     }
@@ -40,7 +40,7 @@ function initCoupang() {
 
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveCoupangCards();
-  saveCoupang();
+  reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
 
   renderCoupang();
 
@@ -48,7 +48,7 @@ function initCoupang() {
   window.addEventListener('storage', (e) => {
     if (e.key === COUPANG_CONFIG.PRODUCTLIST_STORAGE_KEY) {
       resolveCoupangCards();
-      saveCoupang();
+      reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
       renderCoupang();
     }
   });
@@ -59,14 +59,14 @@ function bindCoupangPageLifecycle() {
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       resolveCoupangCards();
-      saveCoupang();
+      reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
       renderCoupang();
     }
   });
 
   // 페이지를 벗어나기 전에 혹시 모를 미저장 변경사항 저장
   window.addEventListener('beforeunload', () => {
-    saveCoupang();
+    reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   });
 }
 
@@ -86,8 +86,7 @@ function bindCoupangKeyboardShortcuts() {
 
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      saveCoupang();
-      showToast(COUPANG_CONFIG.MESSAGES.SAVED);
+      reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES, COUPANG_CONFIG.MESSAGES.SAVED);
     }
 
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

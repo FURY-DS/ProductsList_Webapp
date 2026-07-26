@@ -27,9 +27,9 @@ function triggerPhotoUpload(cardId) {
       const c = findCard(cardId);
       if (!c) return;
       c.image = ev.target.result;
-      save();
+      const result = save();
       render();
-      showToast(CONFIG.MESSAGES.IMAGE_ADDED);
+      reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.IMAGE_ADDED);
     };
     reader.readAsDataURL(file);
   });
@@ -45,7 +45,7 @@ function removePhoto(cardId) {
   const c = findCard(cardId);
   if (!c) return;
   c.image = '';
-  save();
+  const result = save();
   render();
-  showToast(CONFIG.MESSAGES.IMAGE_REMOVED);
+  reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.IMAGE_REMOVED);
 }

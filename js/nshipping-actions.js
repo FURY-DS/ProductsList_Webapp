@@ -26,10 +26,10 @@ function applyBulkFeeNshipping() {
     confirmText: '적용',
     onConfirm: () => {
       nshippingState.cards.forEach(c => { c.feeRate = value; recalcNshippingCard(c); });
-      saveNshipping();
+      const result = saveNshipping();
       renderNshipping();
       input.value = '';
-      showToast(`전체 ${nshippingState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
+      reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, `전체 ${nshippingState.cards.length}개 상품의 판매수수료가 '${value}'(으)로 변경되었어요`);
     }
   });
 }
@@ -93,9 +93,9 @@ function handleNshippingImportFile(e) {
         text: NSHIPPING_CONFIG.MESSAGES.IMPORT_TEXT(nshippingState.cards.length),
         onConfirm: () => {
           nshippingState.cards = data;
-          saveNshipping();
+          const result = saveNshipping();
           renderNshipping();
-          showToast(NSHIPPING_CONFIG.MESSAGES.IMPORT_DONE(data.length));
+          reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, NSHIPPING_CONFIG.MESSAGES.IMPORT_DONE(data.length));
         }
       });
 
@@ -103,9 +103,9 @@ function handleNshippingImportFile(e) {
       const onceHandler = () => {
         cancelBtn.removeEventListener('click', onceHandler);
         nshippingState.cards = nshippingState.cards.concat(data);
-        saveNshipping();
+        const result = saveNshipping();
         renderNshipping();
-        showToast(NSHIPPING_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
+        reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, NSHIPPING_CONFIG.MESSAGES.IMPORT_ADDED(data.length));
       };
       cancelBtn.addEventListener('click', onceHandler, { once: true });
     } catch (err) {
@@ -128,9 +128,9 @@ function clearAllNshipping() {
     confirmText: '삭제',
     onConfirm: () => {
       nshippingState.cards = [];
-      saveNshipping();
+      const result = saveNshipping();
       renderNshipping();
-      showToast(NSHIPPING_CONFIG.MESSAGES.ALL_DELETED);
+      reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, NSHIPPING_CONFIG.MESSAGES.ALL_DELETED);
     }
   });
 }
@@ -146,9 +146,9 @@ function confirmDeleteNshipping(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       nshippingState.cards = nshippingState.cards.filter(c => c.id !== cardId);
-      saveNshipping();
+      const result = saveNshipping();
       renderNshipping();
-      showToast(NSHIPPING_CONFIG.MESSAGES.DELETED);
+      reportSaveResult(result, NSHIPPING_CONFIG.MESSAGES, NSHIPPING_CONFIG.MESSAGES.DELETED);
     }
   });
 }
@@ -157,7 +157,7 @@ function confirmDeleteNshipping(cardId) {
 function addNshippingCard() {
   const c = newNshippingCard();
   nshippingState.cards.push(c);
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
   scrollToNshippingCard(c.id);
 }
@@ -171,7 +171,7 @@ function addNshippingCardAfter(cardId) {
   } else {
     nshippingState.cards.splice(idx + 1, 0, c);
   }
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
   scrollToNshippingCard(c.id);
 }
@@ -191,7 +191,7 @@ function addNshippingBundleItem(cardId) {
   const item = newNshippingBundleItem();
   card.bundleItems.push(item);
   recalcNshippingCard(card);
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
   setTimeout(() => {
     const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
@@ -209,6 +209,6 @@ function removeNshippingBundleItem(cardId, itemId) {
     card.isBundle = false;
   }
   recalcNshippingCard(card);
-  saveNshipping();
+  reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
 }

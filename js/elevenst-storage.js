@@ -9,11 +9,10 @@ function saveElevenst() {
     const data = JSON.stringify(elevenstState.cards);
     localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY, data);
     localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY + '_backup', data);
-    return;
+    return { ok: true };
   } catch (e) {
     if (!isStorageQuotaError(e) || !ELEVENST_CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
-      showToast(ELEVENST_CONFIG.MESSAGES.SAVE_FAIL + (e.message || ''));
-      return;
+      return { ok: false, msg: ELEVENST_CONFIG.MESSAGES.SAVE_FAIL + (e.message || '') };
     }
   }
 
@@ -25,9 +24,9 @@ function saveElevenst() {
     localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY + '_backup', data);
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     elevenstState.cards = cleaned;
-    showToast(ELEVENST_CONFIG.MESSAGES.SAVED_WITHOUT_IMAGES);
+    return { ok: true, imagesRemoved: true };
   } catch (e2) {
-    showToast(ELEVENST_CONFIG.MESSAGES.SAVE_FAIL_QUOTA);
+    return { ok: false, msg: ELEVENST_CONFIG.MESSAGES.SAVE_FAIL_QUOTA };
   }
 }
 
