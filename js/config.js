@@ -38,17 +38,24 @@ const CONFIG = {
 
   // 메뉴 항목 (드롭다운) - page 파일과 연결
   MENU_ITEMS: [
-    { page: 'products',     label: '상품리스트',   url: 'index.html',        active: true,  ready: true  },
-    { page: 'nshipping',    label: 'N배송',        url: 'nshipping.html',    active: false, ready: true },
-    { page: 'rocketgrowth', label: '로켓그로스',   url: 'rocketgrowth.html', active: false, ready: true },
-    { page: 'smartstore',   label: '스마트스토어', url: 'smartstore.html',   active: false, ready: true },
-    { page: 'coupang',      label: '쿠팡',         url: 'coupang.html',      active: false, ready: true },
-    { page: 'esm',           label: 'ESM',           url: 'esm.html',          active: false, ready: true },
-    { page: 'elevenst',      label: '11번가',        url: 'elevenst.html',     active: false, ready: true },
-    { page: 'ownerclan',    label: '오너클랜',     url: '#',                 active: false, ready: false },
-    { page: 'domagguk',     label: '도매꾹',       url: '#',                 active: false, ready: false },
-    { page: 'always',       label: '올웨이즈',     url: '#',                 active: false, ready: false },
-    { page: 'tossshopping', label: '토스쇼핑',     url: '#',                 active: false, ready: false }
+    { page: 'products',     label: '상품리스트',   url: 'index.html',        active: true,  ready: true },
+    {
+      page: 'marketplace',
+      label: '마켓플레이스',
+      children: [
+        { page: 'nshipping',    label: 'N배송',        url: 'nshipping.html',    ready: true },
+        { page: 'rocketgrowth', label: '로켓그로스',   url: 'rocketgrowth.html', ready: true },
+        { page: 'smartstore',   label: '스마트스토어', url: 'smartstore.html',   ready: true },
+        { page: 'coupang',      label: '쿠팡',         url: 'coupang.html',      ready: true },
+        { page: 'esm',          label: 'ESM',          url: 'esm.html',          ready: true },
+        { page: 'elevenst',     label: '11번가',       url: 'elevenst.html',     ready: true },
+        { page: 'ownerclan',    label: '오너클론',     url: '#',                 ready: false },
+        { page: 'domagguk',     label: '도매꾹',       url: '#',                 ready: false },
+        { page: 'always',       label: '올웨이즈',     url: '#',                 ready: false },
+        { page: 'tossshopping', label: '토스쇼핑',     url: '#',                 ready: false }
+      ]
+    },
+    { page: 'settlement',   label: '오픈마켓정산', url: 'settlement.html',   active: false, ready: true }
   ],
 
   // 필드 정의 - 카드에 표시되는 입력 필드

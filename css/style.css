@@ -202,6 +202,63 @@ html, body {
   font-weight: 500;
 }
 
+/* ===== Nested menu group ===== */
+.dropdown .menu-group {
+  border-bottom: 1px solid var(--border);
+}
+.dropdown .menu-group:last-child {
+  border-bottom: none;
+}
+.dropdown .menu-group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: #fff;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.dropdown .menu-group-toggle:hover {
+  background: #f5f6fa;
+}
+.dropdown .menu-group-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.dropdown .menu-group.open .menu-group-arrow {
+  transform: rotate(180deg);
+}
+.dropdown .menu-sub {
+  display: none;
+  background: #f9f9fb;
+  border-top: 1px dashed var(--border);
+}
+.dropdown .menu-sub.show {
+  display: block;
+}
+.dropdown .menu-sub button {
+  padding-left: 28px;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: none;
+  background: transparent;
+}
+.dropdown .menu-sub button:hover {
+  background: #f0eff5;
+}
+.dropdown .menu-sub button.active {
+  background: #e8e4ff;
+  color: var(--primary);
+}
+.dropdown .menu-group.active-group > .menu-group-toggle {
+  color: var(--primary);
+}
+
 /* ===== Search bar (main area) ===== */
 .search-bar {
   background: var(--card);

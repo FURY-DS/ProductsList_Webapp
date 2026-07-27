@@ -1,0 +1,338 @@
+/* =====================================================
+   settlement.css - 오픈마켓정산 페이지 스타일
+   ===================================================== */
+
+/* --- 정산 테이블 --- */
+.settlement-wrap {
+  padding: 6px 2px 40px;
+  overflow-x: hidden;
+}
+
+.settlement-scroll,
+.daily-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.settlement-scroll {
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+}
+
+.daily-table-wrap {
+  max-height: none;
+}
+
+.settlement-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 1200px;
+  font-size: 13px;
+  table-layout: fixed;
+}
+
+.settlement-table th,
+.settlement-table td {
+  border: 1px solid #d0d0d0;
+  padding: 5px 6px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+
+.settlement-table th {
+  background: #2c3e50;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.settlement-table .row-label {
+  text-align: left;
+  background: #f5f6f8;
+  font-weight: 500;
+  color: #333;
+  width: 220px;
+  min-width: 220px;
+  white-space: pre-line;
+  line-height: 1.4;
+  padding: 4px 8px;
+}
+
+.settlement-table th.row-label,
+.settlement-table td.row-label {
+  width: 220px;
+  min-width: 220px;
+}
+
+.settlement-table th.month-col,
+.settlement-table td.month-col {
+  width: calc((100% - 220px) / 12);
+  min-width: 70px;
+}
+
+.settlement-table .row-label.section-header {
+  background: #34495e;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.settlement-table .row-label.result-label {
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 700;
+}
+
+.settlement-table .row-label.loss-label {
+  background: #ffebee;
+  color: #c62828;
+  font-weight: 700;
+}
+
+.settlement-table .cell-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: right;
+  font-size: 13px;
+  padding: 2px 4px;
+  color: #1565c0;
+  font-weight: 600;
+  outline: none;
+}
+
+.settlement-table .cell-input:focus {
+  background: #e3f2fd;
+  outline: 2px solid #42a5f5;
+  outline-offset: -2px;
+}
+
+.settlement-table .cell-input::placeholder {
+  color: #bbb;
+  font-weight: 400;
+}
+
+.settlement-table .cell-input.yn-input {
+  text-align: center;
+  width: 40px;
+}
+
+.settlement-table .cell-input.text-input {
+  text-align: left;
+  color: #333;
+  font-weight: 400;
+}
+
+.settlement-table .cell-calc {
+  background: #e8eaf6;
+  color: #283593;
+  font-weight: 700;
+  text-align: right;
+}
+
+.settlement-table .cell-plain-calc {
+  background: transparent;
+  text-align: right;
+}
+
+.settlement-table .plain-calc-value {
+  display: inline-block;
+  width: 100%;
+  padding: 2px 4px;
+  color: #1565c0;
+  font-weight: 600;
+  font-size: 13px;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.settlement-table .cell-calc.result-positive {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.settlement-table .cell-calc.result-negative {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.settlement-table .cell-calc.zero-val {
+  color: #999;
+}
+
+.settlement-table .cell-calc.negative,
+.settlement-table .cell-plain-calc.negative,
+.settlement-table .plain-calc-value.negative,
+.settlement-table .cell-input.negative {
+  color: #c62828 !important;
+}
+
+.settlement-table td.note-month-cell {
+  text-align: left;
+  vertical-align: top;
+  padding: 4px;
+  overflow: visible;
+  white-space: normal;
+  cursor: text;
+}
+
+.settlement-table .cell-input.note-textarea {
+  text-align: left;
+  width: 100%;
+  min-height: 130px;
+  height: 130px;
+  resize: none;
+  border: 1px dashed #bbb;
+  border-radius: 3px;
+  background: #fafafa;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  color: #333;
+  font-weight: 400;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: min-height 0.2s ease, height 0.2s ease, background 0.15s, border-color 0.15s;
+}
+
+.settlement-table .cell-input.note-textarea::placeholder {
+  color: #aaa;
+  font-size: 11px;
+}
+
+.settlement-table .cell-input.note-textarea.expanded,
+.settlement-table .cell-input.note-textarea:focus {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 2px;
+  z-index: 10;
+  min-height: 300px;
+  height: auto;
+  background: #fffde7;
+  border: 1px solid #fdd835;
+  resize: vertical;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.settlement-table .cell-input.note-input {
+  text-align: left;
+  min-height: 20px;
+}
+
+/* --- 일별 이익 섹션 --- */
+.daily-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.daily-section-toggle .toggle-arrow {
+  font-size: 14px;
+  transition: transform 0.2s;
+}
+
+.daily-section-toggle.open .toggle-arrow {
+  transform: rotate(90deg);
+}
+
+.daily-section-toggle .toggle-label {
+  font-weight: 700;
+  color: #333;
+  font-size: 14px;
+}
+
+.daily-table-wrap {
+  transition: max-height 0.3s ease;
+}
+
+.daily-table-wrap.collapsed {
+  max-height: 0;
+}
+
+/* --- 행 하이라이트 --- */
+.settlement-table tr:hover td:not(.row-label) {
+  background: #fff3e0;
+}
+
+.settlement-table tr:hover td.row-label {
+  background: #e8eaed;
+}
+
+/* --- 연도 선택 --- */
+.year-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 8px;
+}
+
+.year-selector label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.year-selector select {
+  font-size: 14px;
+  padding: 4px 8px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* --- 버튼 바 --- */
+.settlement-btn-bar {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  flex-wrap: wrap;
+}
+
+.settlement-btn-bar button {
+  font-size: 12px;
+  padding: 5px 12px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  color: #333;
+  transition: background 0.15s;
+}
+
+.settlement-btn-bar button:hover {
+  background: #e3f2fd;
+}
+
+.settlement-btn-bar .btn-export {
+  background: #e8f5e9;
+  border-color: #81c784;
+}
+
+.settlement-btn-bar .btn-export:hover {
+  background: #c8e6c9;
+}
+
+.settlement-btn-bar .btn-import {
+  background: #e3f2fd;
+  border-color: #64b5f6;
+}
+
+.settlement-btn-bar .btn-import:hover {
+  background: #bbdefb;
+}
+
+/* --- 스크롤 테이블 헤더 고정 (상단 정의와 통합) --- */
