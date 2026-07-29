@@ -35,6 +35,13 @@ const SMARTSTORE_CONFIG = {
   },
 
   // 필드 정의
+  // 주의: warehouseFee/marketFee 필드키는 페이지별로 의미가 다릅니다.
+  //   스마트스토어/쿠팡/ESM/11번가/도매꾹/올웨이즈/토스쇼핑: warehouseFee=창고택배비, marketFee=마켓택배비
+  //   N배송: warehouseFee=창고택배비, marketFee=마켓택배비 (+ barcodeFee/pickingFee/tagFee)
+  //   로켓그로스: warehouseFee=피킹라벨출고비, marketFee=쿠팡입출고비용 (★ 부호 반대: 최종이익에서 marketFee를 빼기(-))
+  //   오너클랜: warehouseFee=창고택배비, marketFee=마켓택배비 (★ 수식이 다름: 공급가입력 기반)
+  // 수식 공식:
+  //   이 페이지(스마트스토어): 판매가 - 최종원가 - 판매수수료 - 창고택배비 + 마켓택배비 = 최종이익
   FIELDS: {
     sellerCode:    { label: '판매자상품코드 입력', type: 'text',   placeholder: '예: NYP0012' },
     itemTotal:     { label: '총합',                type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },

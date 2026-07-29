@@ -32,6 +32,12 @@ const ROCKETGROWTH_CONFIG = {
   },
 
   // 필드 정의
+  // ★ 로켓그로스는 다른 판매 페이지와 수식이 다릅니다.
+  //   - warehouseFee = 피킹라벨출고비 (다른 페이지에서는 창고택배비)
+  //   - marketFee = 쿠팡입출고비용 (다른 페이지에서는 마켓택배비)
+  //   - ★ 최종이익에서 marketFee를 빼기(-): 판매가 - 최종원가 - 판매수수료 - 피킹라벨출고비 - 쿠팡입출고비용
+  //   - (다른 페이지에서는 marketFee를 더하기(+): + 마켓택배비)
+  //   - 2개이상구매/복수품 전용 필드 없음
   FIELDS: {
     sellerCode:    { label: '판매자상품코드 입력', type: 'text',   placeholder: '예: NYP0012' },
     itemTotal:     { label: '총합',                type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },

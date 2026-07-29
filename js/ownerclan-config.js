@@ -1,5 +1,5 @@
 /* =====================================================
-   smartstore-config.js - 오너클랜 전용 설정
+   ownerclan-config.js - 오너클랜 전용 설정
    ===================================================== */
 
 const OWNERCLAN_CONFIG = {
@@ -35,6 +35,12 @@ const OWNERCLAN_CONFIG = {
   },
 
   // 필드 정의
+  // ★ 오너클랜은 스마트스토어와 구조가 같지만 수식이 다릅니다.
+  //   - 판매가 = 공급가입력 × 1.1 (자동계산, readonly)
+  //   - 판매수수료 금액 = feeRate × (공급가입력 + 마켓택배비)
+  //   - 최종이익 = 공급가입력 - 최종원가 - 판매수수료금액 - 창고택배비 + 마켓택배비
+  //   - 2개이상구매 = 공급가입력 - 최종원가 - 판매수수료금액
+  // warehouseFee=창고택배비, marketFee=마켓택배비 (다른 페이지와 동일 키지만 수식에서 공급가입력 기반)
   FIELDS: {
     sellerCode:    { label: '판매자상품코드 입력', type: 'text',   placeholder: '예: NYP0012' },
     itemTotal:     { label: '총합',                type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },

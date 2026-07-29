@@ -1,5 +1,7 @@
 /* =====================================================
    nshipping-card.js - N배송 카드 렌더링 및 보드 관리
+
+   명명 패턴: ForNshipping 접미사 (lookupProductlistByCodeForNshipping 등)
    ===================================================== */
 
 let nshippingBoardEl = null;

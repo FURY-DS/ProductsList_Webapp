@@ -1,5 +1,9 @@
 /* =====================================================
    coupang-card.js - 쿠팡 카드 렌더링 및 보드 관리
+
+   명명 패턴: lookup/compute 함수에 페이지 접두사 없이 범용 이름 사용
+   (lookupProductlistByCode, getProductlistImage, computeProductlistTotal, getBundleItemImage)
+   다른 페이지는 ForNshipping/ForRocketgrowth/OWNERCLAN 등 페이지별 접두사 사용
    ===================================================== */
 
 let coupangBoardEl = null;
@@ -143,7 +147,7 @@ function renderCoupangEmptyState(title, desc, showAddBtn) {
 /** 개별 카드 렌더링 */
 function renderCoupangCard(card, idx) {
   const wrap = document.createElement('div');
-  wrap.className = 'card coupang-card smartstore-card'
+  wrap.className = 'card smartstore-card'
     + (card.isEditing ? '' : ' saved')
     + (card.isCollapsed ? ' collapsed' : '');
   wrap.dataset.id = card.id;

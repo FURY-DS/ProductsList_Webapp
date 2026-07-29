@@ -32,6 +32,10 @@ const NSHIPPING_CONFIG = {
   },
 
   // 필드 정의
+  // N배송 전용 필드: barcodeFee(NY바코드비용), pickingFee(피킹비용), tagFee(태그비용)
+  // warehouseFee=창고택배비, marketFee=마켓택배비 (+ 부호, 다른 판매 페이지와 동일)
+  // 최종이익 = 판매가 - 최종원가 - 판매수수료 - 창고택배비 + 마켓택배비 - NY바코드 - 피킹 - 태그
+  // 2개이상구매 필드 없음
   FIELDS: {
     sellerCode:    { label: '판매자상품코드 입력', type: 'text',   placeholder: '예: NYP0012' },
     itemTotal:     { label: '총합',                type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },

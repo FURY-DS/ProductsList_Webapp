@@ -35,6 +35,8 @@ const ELEVENST_CONFIG = {
   },
 
   // 필드 정의
+  // 11번가는 스마트스토어와 100% 동일한 수식/필드 구조를 사용합니다.
+  // warehouseFee=창고택배비, marketFee=마켓택배비 (+ 부호)
   FIELDS: {
     sellerCode:    { label: '판매자상품코드 입력', type: 'text',   placeholder: '예: NYP0012' },
     itemTotal:     { label: '총합',                type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },
