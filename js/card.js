@@ -20,7 +20,7 @@ function computeTotal(card) {
   const cost = parseNum(card.cost);
   const rate = parseNum(card.rate);
   const pct  = parseNum(card.percent);
-  return cost * rate * pct;
+  return round2(cost * rate * pct);
 }
 
 /** 모든 카드 한 번에 접기/펼치기 */
@@ -249,9 +249,16 @@ function makeField(name, value, readonly) {
     ? def.label
     : (needsCurrency(name) ? `${def.label} (${getCurrencySymbol(name)})` : def.label);
 
+  // 읽기 전용 숫자 필드는 콤마 + 소수점 2자리 포맷 적용
+  const isReadonlyNumber = readonly && def.type === 'number';
+  const inputType = isReadonlyNumber ? 'text' : def.type;
+  const displayVal = isReadonlyNumber
+    ? formatNumber(parseNum(safeVal))
+    : escapeAttr(String(safeVal));
+
   f.innerHTML = `
     <label>${label}</label>
-    <input type="${def.type}" name="${name}" value="${escapeAttr(String(safeVal))}" placeholder="${escapeAttr(def.placeholder)}" ${extra} ${roAttr} />
+    <input type="${inputType}" name="${name}" value="${displayVal}" placeholder="${escapeAttr(def.placeholder)}" ${extra} ${roAttr} />
   `;
   return f;
 }

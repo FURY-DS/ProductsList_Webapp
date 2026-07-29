@@ -61,12 +61,14 @@ function handleSettlementBlur(e) {
   updateNegativeClass(input, input.value);
 }
 
-/** 입력 필드 focus 시 raw 값으로 복원 */
+/** 입력 필드 focus 시 raw 값으로 복원 (소수점 2자리 이내) */
 function handleSettlementFocus(e) {
   const input = e.target;
   if (!input.classList.contains('money-input')) return;
   const raw = parseMoneyInput(input.value);
-  input.value = raw === 0 ? '' : String(raw);
+  // 소수점 2자리 이내로 표시 (10+ 자리 방지)
+  const rounded = Math.round(raw * 100) / 100;
+  input.value = rounded === 0 ? '' : String(rounded);
   input.classList.remove('negative');
 }
 
@@ -97,11 +99,12 @@ function handleDailyBlur(e) {
   updateNegativeClass(input, input.value);
 }
 
-/** 일별 입력 필드 focus 시 raw 값으로 복원 */
+/** 일별 입력 필드 focus 시 raw 값으로 복원 (소수점 2자리 이내) */
 function handleDailyFocus(e) {
   const input = e.target;
   const raw = parseMoneyInput(input.value);
-  input.value = raw === 0 ? '' : String(raw);
+  const rounded = Math.round(raw * 100) / 100;
+  input.value = rounded === 0 ? '' : String(rounded);
   input.classList.remove('negative');
 }
 
@@ -205,6 +208,8 @@ function importSettlement() {
         });
         recalcAll();
         renderSettlement();
+        const yearSelect = document.getElementById('year-select');
+        if (yearSelect) yearSelect.value = settlementState.year;
         reportSaveResult(saveSettlement(), SETTLEMENT_CONFIG.MESSAGES, SETTLEMENT_CONFIG.MESSAGES.IMPORT_DONE);
       } catch (err) {
         showToast(SETTLEMENT_CONFIG.MESSAGES.IMPORT_FAIL + err.message);
@@ -215,50 +220,38 @@ function importSettlement() {
   input.click();
 }
 
-/** 전체 초기화 */
+/** 현재 연도 초기화 */
 function clearSettlement() {
   showModal({
-    title: SETTLEMENT_CONFIG.MESSAGES.CLEAR_TITLE,
-    text: SETTLEMENT_CONFIG.MESSAGES.CLEAR_TEXT,
+    title: `${settlementState.year}년 초기화`,
+    text: `${settlementState.year}년 정산 데이터를 초기화할까요?\n이 작업은 되돌릴 수 없어요.`,
     confirmText: '초기화',
     onConfirm: () => {
-      initEmptySettlement();
+      initEmptyMonths();
       renderSettlement();
       reportSaveResult(saveSettlement(), SETTLEMENT_CONFIG.MESSAGES, SETTLEMENT_CONFIG.MESSAGES.SAVED);
     }
   });
 }
 
-/** 연도 변경 */
+/** 연도 변경 (다년도 데이터 안전 전환) */
 function changeSettlementYear(newYear) {
-  // 현재 연도 데이터 저장 후 새 연도 데이터 로드
-  const yearKey = SETTLEMENT_CONFIG.STORAGE_KEY + '_' + settlementState.year;
-  try {
-    localStorage.setItem(yearKey, JSON.stringify({ year: settlementState.year, months: settlementState.months }));
-  } catch (e) { /* ignore */ }
-
+  // 1. 현재 연도 데이터 저장
+  saveSettlement();
+  // 2. 연도 전환
   settlementState.year = newYear;
-  // 새 연도 데이터 로드
-  const newYearKey = SETTLEMENT_CONFIG.STORAGE_KEY + '_' + newYear;
-  try {
-    const raw = localStorage.getItem(newYearKey);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      settlementState.months = parsed.months.map(m => {
-        const defaultMonth = SETTLEMENT_CONFIG.DEFAULT_MONTH();
-        Object.keys(defaultMonth).forEach(k => {
-          if (m[k] === undefined) m[k] = defaultMonth[k];
-        });
-        return m;
-      });
-      recalcAll();
-    } else {
-      initEmptySettlement();
-    }
-  } catch (e) {
-    initEmptySettlement();
+  // 3. 새 연도 데이터 로드 (없으면 빈 months 생성)
+  const months = loadYearData(newYear);
+  if (months) {
+    settlementState.months = months;
+  } else {
+    initEmptyMonths();
   }
+  recalcAll();
+  // 4. UI 갱신
   renderSettlement();
-  // 메인 키도 업데이트
-  reportSaveResult(saveSettlement(), SETTLEMENT_CONFIG.MESSAGES);
+  const yearSelect = document.getElementById('year-select');
+  if (yearSelect) yearSelect.value = newYear;
+  // 5. currentYear 갱신 저장
+  saveSettlement();
 }

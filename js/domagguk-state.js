@@ -1,13 +1,13 @@
 /* =====================================================
-   smartstore-state.js - 스마트스토어 상태 및 카드 데이터 모델
+   smartstore-state.js - 도매꾹 상태 및 카드 데이터 모델
    ===================================================== */
 
-const smartstoreState = {
+const domaggukState = {
   cards: []
 };
 
-/** 새 스마트스토어 카드 객체 생성 */
-function newSmartstoreCard() {
+/** 새 도매꾹 카드 객체 생성 */
+function newDOMAGGUKCard() {
   return {
     id: generateId(),
     isEditing: true,
@@ -49,19 +49,19 @@ function newBundleItem() {
   };
 }
 
-/** ID로 스마트스토어 카드 찾기 */
-function findSmartstoreCard(id) {
-  return smartstoreState.cards.find(c => c.id === id);
+/** ID로 도매꾹 카드 찾기 */
+function findDOMAGGUKCard(id) {
+  return domaggukState.cards.find(c => c.id === id);
 }
 
-/** ID로 스마트스토어 카드 인덱스 찾기 */
-function findSmartstoreCardIndex(id) {
-  return smartstoreState.cards.findIndex(c => c.id === id);
+/** ID로 도매꾹 카드 인덱스 찾기 */
+function findDOMAGGUKCardIndex(id) {
+  return domaggukState.cards.findIndex(c => c.id === id);
 }
 
 /** 카드 ID와 항목 ID로 복수품 항목 찾기 */
 function findBundleItem(cardId, itemId) {
-  const card = findSmartstoreCard(cardId);
+  const card = findDOMAGGUKCard(cardId);
   if (!card) return null;
   return card.bundleItems.find(i => i.id === itemId);
 }

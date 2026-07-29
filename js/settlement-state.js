@@ -29,7 +29,7 @@ function recalcMonth(monthData) {
   calcNyDailySum(monthData);
   SETTLEMENT_CONFIG.ROWS.forEach(row => {
     if (row.type === 'calc') {
-      monthData[row.id] = row.formula(monthData);
+      monthData[row.id] = round2(row.formula(monthData));
     }
   });
 }

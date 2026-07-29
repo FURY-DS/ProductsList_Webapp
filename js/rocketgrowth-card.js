@@ -38,29 +38,31 @@ function computeProductlistTotalForRocketgrowth(product) {
   const cost = parseNum(product.cost);
   const rate = parseNum(product.rate);
   const pct  = parseNum(product.percent);
-  return cost * rate * pct;
+  return round2(cost * rate * pct);
 }
 
 /** 최종원가 계산 */
 function computeRocketgrowthFinalCost(card) {
   if (card.isBundle) {
-    return card.bundleItems.reduce((sum, item) => sum + parseNum(item.total), 0);
+    return round2(card.bundleItems.reduce((sum, item) => sum + parseNum(item.total), 0));
   }
   return parseNum(card.finalCost);
 }
 
 /** 판매수수료 최종결과값 계산 */
 function computeRocketgrowthFeeAmount(card) {
-  return parseNum(card.sellingPrice) * parseNum(card.feeRate);
+  return round2(parseNum(card.sellingPrice) * parseNum(card.feeRate));
 }
 
 /** 최종이익 계산: 판매가 - 최종원가 - 판매수수료 - 피킹라벨출고비 - 쿠팡입출고비용 */
 function computeRocketgrowthFinalProfit(card) {
-  return parseNum(card.sellingPrice)
+  return round2(
+    parseNum(card.sellingPrice)
     - parseNum(card.finalCost)
     - parseNum(card.feeAmount)
     - parseNum(card.warehouseFee)
-    - parseNum(card.marketFee);
+    - parseNum(card.marketFee)
+  );
 }
 
 /** 카드의 계산 필드를 최신값으로 갱신 */
@@ -271,9 +273,14 @@ function makeRocketgrowthField(name, value, readonly) {
   const extra = def.extra || '';
   const highlightClass = def.highlight ? 'highlight' : '';
 
+  // 읽기 전용 숫자/계산 필드는 콤마 + 소수점 2자리 포맷 적용
+  const isReadonlyNumber = (readonly || def.readonly) && def.type === 'number';
+  const inputType = isReadonlyNumber ? 'text' : def.type;
+  const displayVal = isReadonlyNumber ? formatNumber(parseNum(safeVal)) : escapeAttr(String(safeVal));
+
   f.innerHTML = `
     <label>${def.label}</label>
-    <input type="${def.type}" name="${name}" value="${escapeAttr(String(safeVal))}" placeholder="${escapeAttr(def.placeholder)}" ${extra} class="${highlightClass}" ${roAttr} />
+    <input type="${inputType}" name="${name}" value="${displayVal}" placeholder="${escapeAttr(def.placeholder)}" ${extra} class="${highlightClass}" ${roAttr} />
   `;
   return f;
 }

@@ -1,13 +1,13 @@
 /* =====================================================
-   smartstore-state.js - 스마트스토어 상태 및 카드 데이터 모델
+   smartstore-state.js - 오너클랜 상태 및 카드 데이터 모델
    ===================================================== */
 
-const smartstoreState = {
+const ownerclanState = {
   cards: []
 };
 
-/** 새 스마트스토어 카드 객체 생성 */
-function newSmartstoreCard() {
+/** 새 오너클랜 카드 객체 생성 */
+function newOWNERCLANCard() {
   return {
     id: generateId(),
     isEditing: true,
@@ -25,6 +25,7 @@ function newSmartstoreCard() {
     // 비용/계산 필드
     finalCost: '',     // 최종원가 (상품리스트 총합 또는 복수품 합계)
     sellingPrice: '',  // 판매가
+    supplyPrice: '',   // 공급가입력
     feeRate: '',       // 판매수수료 비율 (예: 0.1)
     feeAmount: '',     // 판매수수료 최종결과값
     warehouseFee: '',  // 창고택배비
@@ -49,19 +50,19 @@ function newBundleItem() {
   };
 }
 
-/** ID로 스마트스토어 카드 찾기 */
-function findSmartstoreCard(id) {
-  return smartstoreState.cards.find(c => c.id === id);
+/** ID로 오너클랜 카드 찾기 */
+function findOWNERCLANCard(id) {
+  return ownerclanState.cards.find(c => c.id === id);
 }
 
-/** ID로 스마트스토어 카드 인덱스 찾기 */
-function findSmartstoreCardIndex(id) {
-  return smartstoreState.cards.findIndex(c => c.id === id);
+/** ID로 오너클랜 카드 인덱스 찾기 */
+function findOWNERCLANCardIndex(id) {
+  return ownerclanState.cards.findIndex(c => c.id === id);
 }
 
 /** 카드 ID와 항목 ID로 복수품 항목 찾기 */
 function findBundleItem(cardId, itemId) {
-  const card = findSmartstoreCard(cardId);
+  const card = findOWNERCLANCard(cardId);
   if (!card) return null;
   return card.bundleItems.find(i => i.id === itemId);
 }

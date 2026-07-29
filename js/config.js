@@ -49,10 +49,10 @@ const CONFIG = {
         { page: 'coupang',      label: '쿠팡',         url: 'coupang.html',      ready: true },
         { page: 'esm',          label: 'ESM',          url: 'esm.html',          ready: true },
         { page: 'elevenst',     label: '11번가',       url: 'elevenst.html',     ready: true },
-        { page: 'ownerclan',    label: '오너클론',     url: '#',                 ready: false },
-        { page: 'domagguk',     label: '도매꾹',       url: '#',                 ready: false },
-        { page: 'always',       label: '올웨이즈',     url: '#',                 ready: false },
-        { page: 'tossshopping', label: '토스쇼핑',     url: '#',                 ready: false }
+        { page: 'ownerclan',    label: '오너클랜',     url: 'ownerclan.html',    ready: true },
+        { page: 'domagguk',     label: '도매꾹',       url: 'domagguk.html',     ready: true },
+        { page: 'always',       label: '올웨이즈',     url: 'always.html',       ready: true },
+        { page: 'tossshopping', label: '토스쇼핑',     url: 'tossshopping.html', ready: true }
       ]
     },
     { page: 'settlement',   label: '오픈마켓정산', url: 'settlement.html',   active: false, ready: true }
@@ -117,6 +117,14 @@ const CONFIG = {
     ALL_DELETED:     '모두 삭제되었어요',
     NOTHING_DELETE:  '삭제할 데이터가 없어요',
     EXPORT_DONE:     '내보내기 완료',
+    EXPORT_ALL_DONE: '전체 데이터를 내보내기 완료',
+    EXPORT_ALL_FAIL: '전체 내보내기 실패: ',
+    IMPORT_ALL_TITLE: '전체 가져오기',
+    IMPORT_ALL_TEXT: (n) => `총 ${n}개 페이지 데이터를 교체할까요?
+기존 데이터는 덮어써져요.`,
+    IMPORT_ALL_DONE: (n) => `${n}개 페이지 데이터를 가져왔어요`,
+    IMPORT_ALL_FAIL: '전체 가져오기 실패: ',
+    IMPORT_ALL_WRONG_FILE: '전체 데이터 파일이 아니에요',
     EXPORT_FAIL:     '내보내기 실패: ',
     IMAGE_TOO_BIG:   '이미지는 5MB 이하만 가능해요',
     IMAGE_ADDED:     '사진이 등록되었어요',

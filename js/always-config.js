@@ -1,16 +1,16 @@
 /* =====================================================
-   coupang-config.js - 쿠팡 전용 설정
+   smartstore-config.js - 올웨이즈 전용 설정
    ===================================================== */
 
-const COUPANG_CONFIG = {
+const ALWAYS_CONFIG = {
   // 페이지 식별자 (내보내기/가져오기 검증용)
-  PAGE_ID: 'coupang',
+  PAGE_ID: 'always',
 
   // 가져오기 호환 페이지 (수식/명칭이 동일한 페이지들)
   COMPATIBLE_PAGES: ['smartstore', 'coupang', 'esm', 'elevenst', 'ownerclan', 'domagguk', 'always', 'tossshopping'],
 
   // localStorage 키
-  STORAGE_KEY: 'coupang_v1',
+  STORAGE_KEY: 'always_v1',
 
   // 상품리스트 데이터를 읽어올 키 (config.js의 CONFIG.STORAGE_KEY와 동일)
   PRODUCTLIST_STORAGE_KEY: 'productlist_v1',
@@ -19,8 +19,8 @@ const COUPANG_CONFIG = {
   COLUMNS: 4,
 
   // 페이지 제목
-  PAGE_TITLE: '쿠팡',
-  PAGE_HEADER: '쿠팡',
+  PAGE_TITLE: '올웨이즈',
+  PAGE_HEADER: '올웨이즈',
 
   // 이미지 (localStorage 용량 절약을 위해 자동 리사이즈)
   IMAGE_MAX_SIZE_BYTES: 2 * 1024 * 1024,   // 원본 파일 크기 2MB 까지만 허용
@@ -65,7 +65,7 @@ const COUPANG_CONFIG = {
     IMPORT_DONE:     (n) => `${n}개 상품을 가져왔어요`,
     IMPORT_ADDED:    (n) => `${n}개 상품을 추가했어요`,
     IMPORT_FAIL:     '가져오기 실패: ',
-    IMPORT_WRONG_PAGE: (pageName) => `이 파일은 '${pageName}' 페이지의 데이터입니다.\n쿠팡 페이지에서는 가져올 수 없어요.`,
+    IMPORT_WRONG_PAGE: (pageName) => `이 파일은 '${pageName}' 페이지의 데이터입니다.\n올웨이즈 페이지에서는 가져올 수 없어요.`,
     DELETE_TITLE:    '정말 삭제할까요?',
     DELETE_TEXT:     (label) => `${label}을(를) 삭제하면 복구할 수 없어요. 계속할까요?`,
     CLEAR_TITLE:     '전체 삭제',

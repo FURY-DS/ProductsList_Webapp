@@ -38,29 +38,40 @@ function computeProductlistTotal(product) {
   const cost = parseNum(product.cost);
   const rate = parseNum(product.rate);
   const pct  = parseNum(product.percent);
-  return cost * rate * pct;
+  return round2(cost * rate * pct);
 }
 
 /** 최종원가 계산 */
 function computeElevenstFinalCost(card) {
   if (card.isBundle) {
-    return card.bundleItems.reduce((sum, item) => sum + parseNum(item.total), 0);
+    return round2(card.bundleItems.reduce((sum, item) => sum + parseNum(item.total), 0));
   }
   return parseNum(card.finalCost);
 }
 
 /** 판매수수료 최종결과값 계산 */
 function computeElevenstFeeAmount(card) {
-  return parseNum(card.sellingPrice) * parseNum(card.feeRate);
+  return round2(parseNum(card.sellingPrice) * parseNum(card.feeRate));
 }
 
 /** 최종이익 계산: 판매가 - 최종원가 - 판매수수료 - 창고택배비 + 마켓택배비 */
 function computeElevenstFinalProfit(card) {
-  return parseNum(card.sellingPrice)
+  return round2(
+    parseNum(card.sellingPrice)
     - parseNum(card.finalCost)
     - parseNum(card.feeAmount)
     - parseNum(card.warehouseFee)
-    + parseNum(card.marketFee);
+    + parseNum(card.marketFee)
+  );
+}
+
+/** 2개이상구매 이익 계산: 판매가 - 최종원가 - 판매수수료 */
+function computeElevenstMultiBuyProfit(card) {
+  return round2(
+    parseNum(card.sellingPrice)
+    - parseNum(card.finalCost)
+    - parseNum(card.feeAmount)
+  );
 }
 
 /** 카드의 계산 필드를 최신값으로 갱신 */
@@ -70,6 +81,7 @@ function recalcElevenstCard(card) {
   }
   card.feeAmount = computeElevenstFeeAmount(card);
   card.finalProfit = computeElevenstFinalProfit(card);
+  card.multiBuyProfit = computeElevenstMultiBuyProfit(card);
 }
 
 /** 모든 카드 한 번에 접기/펼치기 */
@@ -232,12 +244,13 @@ function renderElevenstCalcRows(card) {
   row1.appendChild(makeElevenstFeeField(card));
   container.appendChild(row1);
 
-  // 2행: 창고택배비 | 마켓택배비 | 최종이익
+  // 2행: 창고택배비 | 마켓택배비 | 최종이익(반) | 2개이상구매(반)
   const row2 = document.createElement('div');
-  row2.className = 'field-row three';
+  row2.className = 'field-row split-profit';
   row2.appendChild(makeElevenstField('warehouseFee', card.warehouseFee, !card.isEditing));
   row2.appendChild(makeElevenstField('marketFee', card.marketFee, !card.isEditing));
   row2.appendChild(makeElevenstField('finalProfit', card.finalProfit, true));
+  row2.appendChild(makeElevenstField('multiBuyProfit', card.multiBuyProfit, true));
   container.appendChild(row2);
 
   return container;
@@ -265,15 +278,20 @@ function makeElevenstField(name, value, readonly) {
   if (!def) return document.createElement('div');
 
   const f = document.createElement('div');
-  f.className = 'field' + (name === 'feeAmount' || name === 'finalProfit' || name === 'finalCost' ? ' auto-field' : '');
+  f.className = 'field' + (name === 'feeAmount' || name === 'finalProfit' || name === 'finalCost' || name === 'multiBuyProfit' ? ' auto-field' : '');
   const safeVal = value == null ? '' : value;
   const roAttr = readonly || def.readonly ? 'readonly' : '';
   const extra = def.extra || '';
   const highlightClass = def.highlight ? 'highlight' : '';
 
+  // 읽기 전용 숫자/계산 필드는 콤마 + 소수점 2자리 포맷 적용
+  const isReadonlyNumber = (readonly || def.readonly) && def.type === 'number';
+  const inputType = isReadonlyNumber ? 'text' : def.type;
+  const displayVal = isReadonlyNumber ? formatNumber(parseNum(safeVal)) : escapeAttr(String(safeVal));
+
   f.innerHTML = `
     <label>${def.label}</label>
-    <input type="${def.type}" name="${name}" value="${escapeAttr(String(safeVal))}" placeholder="${escapeAttr(def.placeholder)}" ${extra} class="${highlightClass}" ${roAttr} />
+    <input type="${inputType}" name="${name}" value="${displayVal}" placeholder="${escapeAttr(def.placeholder)}" ${extra} class="${highlightClass}" ${roAttr} />
   `;
   return f;
 }
@@ -458,9 +476,11 @@ function updateElevenstCalcDisplay(wrap, card) {
   const finalCostEl = wrap.querySelector('input[name="finalCost"]');
   const feeAmountEl = wrap.querySelector('input[name="feeAmount"]');
   const finalProfitEl = wrap.querySelector('input[name="finalProfit"]');
+  const multiBuyProfitEl = wrap.querySelector('input[name="multiBuyProfit"]');
   if (finalCostEl) finalCostEl.value = formatNumber(parseNum(card.finalCost));
   if (feeAmountEl) feeAmountEl.value = formatNumber(parseNum(card.feeAmount));
   if (finalProfitEl) finalProfitEl.value = formatNumber(parseNum(card.finalProfit));
+  if (multiBuyProfitEl) multiBuyProfitEl.value = formatNumber(parseNum(card.multiBuyProfit));
 }
 
 /** 저장된 데이터에서 판매자상품코드 다시 조회 및 계산 */

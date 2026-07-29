@@ -7,7 +7,7 @@ const SMARTSTORE_CONFIG = {
   PAGE_ID: 'smartstore',
 
   // 가져오기 호환 페이지 (수식/명칭이 동일한 페이지들)
-  COMPATIBLE_PAGES: ['smartstore', 'coupang', 'esm', 'elevenst'],
+  COMPATIBLE_PAGES: ['smartstore', 'coupang', 'esm', 'elevenst', 'ownerclan', 'domagguk', 'always', 'tossshopping'],
 
   // localStorage 키
   STORAGE_KEY: 'smartstore_v1',
@@ -46,7 +46,8 @@ const SMARTSTORE_CONFIG = {
     feeAmount:     { label: '판매수수료 금액',    type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },
     warehouseFee:  { label: '창고택배비',          type: 'number', placeholder: '예: 3000' },
     marketFee:     { label: '마켓택배비',          type: 'number', placeholder: '예: 3000' },
-    finalProfit:   { label: '최종이익',            type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true }
+    finalProfit:   { label: '최종이익',            type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },
+    multiBuyProfit:{ label: '2개이상구매',         type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true }
   },
 
   // 메시지

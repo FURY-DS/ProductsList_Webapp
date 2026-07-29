@@ -244,8 +244,24 @@
   background: #5b4bc4;
 }
 
+/* ----- 2개이상구매 행: 최종이익 반절 + 2개이상구매 반절 ----- */
+.smartstore-card .field-row.split-profit {
+  grid-template-columns: 1fr 1fr 0.5fr 0.5fr;
+}
+
+/* ----- 판매가+공급가입력 행: 판매가 반절 + 공급가입력 반절 ----- */
+.smartstore-card .field-row.split-price {
+  grid-template-columns: 1fr 0.5fr 0.5fr 1fr;
+}
+
 /* ----- 반응형 ----- */
 @media (max-width: 520px) {
+  .smartstore-card .field-row.split-profit {
+    grid-template-columns: 1fr;
+  }
+  .smartstore-card .field-row.split-price {
+    grid-template-columns: 1fr;
+  }
   .smartstore-card .bundle-item {
     flex-wrap: wrap;
   }

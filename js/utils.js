@@ -11,9 +11,9 @@ function escapeAttr(s) {
     .replace(/>/g, '&gt;');
 }
 
-/** 숫자를 한국어 천 단위 콤마 형식으로 변환 */
+/** 숫자를 한국어 천 단위 콤마 형식으로 변환 (소수점 최대 2자리) */
 function formatNumber(n) {
-  if (!isFinite(n) || n === 0) return '';
+  if (!isFinite(n)) return '';
   return n.toLocaleString('ko-KR', { maximumFractionDigits: 2 });
 }
 
@@ -22,10 +22,16 @@ function generateId() {
   return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 }
 
-/** 숫자를 안전하게 파싱 (실패 시 0) */
+/** 숫자를 안전하게 파싱 (콤마 제거, 실패 시 0) */
 function parseNum(v) {
+  if (typeof v === 'string') v = v.replace(/,/g, '');
   const n = parseFloat(v);
   return isFinite(n) ? n : 0;
+}
+
+/** 소수점 2자리 반올림 */
+function round2(n) {
+  return Math.round(n * 100) / 100;
 }
 
 /**

@@ -30,6 +30,7 @@ function newElevenstCard() {
     warehouseFee: '',  // 창고택배비
     marketFee: '',     // 마켓택배비
     finalProfit: '',   // 최종이익
+    multiBuyProfit: '',// 2개이상구매 이익 (판매가 - 최종원가 - 판매수수료)
 
     // 복수품 모드용 항목 목록
     bundleItems: []

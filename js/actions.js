@@ -2,15 +2,144 @@
    actions.js - 상단 액션 버튼 (내보내기 / 가져오기 / 전체삭제)
    ===================================================== */
 
+const ALL_PAGES = [
+  { id: 'productlist',  key: 'productlist_v1',  name: '상품리스트' },
+  { id: 'nshipping',    key: 'nshipping_v1',    name: 'N배송' },
+  { id: 'rocketgrowth', key: 'rocketgrowth_v1', name: '로켓그로스' },
+  { id: 'smartstore',   key: 'smartstore_v1',   name: '스마트스토어' },
+  { id: 'coupang',      key: 'coupang_v1',      name: '쿠팡' },
+  { id: 'esm',          key: 'esm_v1',          name: 'ESM' },
+  { id: 'elevenst',     key: 'elevenst_v1',     name: '11번가' },
+  { id: 'ownerclan',    key: 'ownerclan_v1',    name: '오너클랜' },
+  { id: 'domagguk',     key: 'domagguk_v1',     name: '도매꾹' },
+  { id: 'always',       key: 'always_v1',       name: '올웨이즈' },
+  { id: 'tossshopping', key: 'tossshopping_v1', name: '토스쇼핑' },
+  { id: 'settlement',   key: 'settlement_v1',   name: '오픈마켓정산' }
+];
+
 /** 액션 버튼 초기화 (DOM 로드 후 호출) */
 function initActions() {
   document.getElementById('btn-export').addEventListener('click', exportData);
   document.getElementById('btn-import').addEventListener('click', importData);
   document.getElementById('import-input').addEventListener('change', handleImportFile);
+  document.getElementById('btn-export-all').addEventListener('click', exportAllData);
+  document.getElementById('btn-import-all').addEventListener('click', importAllData);
+  document.getElementById('import-all-input').addEventListener('change', handleImportAllFile);
   document.getElementById('btn-csv-template').addEventListener('click', downloadCsvTemplate);
   document.getElementById('btn-csv-import').addEventListener('click', importCsvData);
   document.getElementById('csv-import-input').addEventListener('change', handleCsvImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAll);
+}
+
+/** 전체 데이터 내보내기 (상품리스트 + 마켓플레이스 + 오픈마켓정산) */
+function exportAllData() {
+  try {
+    const pages = {};
+    let exportedCount = 0;
+    ALL_PAGES.forEach(p => {
+      const raw = localStorage.getItem(p.key);
+      if (raw === null) return;
+      let data;
+      try { data = JSON.parse(raw); } catch (e) { data = raw; }
+      pages[p.id] = { key: p.key, name: p.name, data };
+      exportedCount++;
+    });
+
+    const payload = {
+      _exportType: 'all',
+      _exportVersion: 1,
+      exportDate: new Date().toISOString(),
+      pages
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `전체데이터_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(CONFIG.MESSAGES.EXPORT_ALL_DONE || `${exportedCount}개 페이지 데이터를 내보내기 완료`);
+  } catch (err) {
+    showToast((CONFIG.MESSAGES.EXPORT_ALL_FAIL || '전체 내보내기 실패: ') + err.message);
+  }
+}
+
+/** 전체 데이터 가져오기 파일 선택 */
+function importAllData() {
+  document.getElementById('import-all-input').click();
+}
+
+/** 전체 데이터 가져오기 처리 */
+function handleImportAllFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+
+  const r = new FileReader();
+  r.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed || parsed._exportType !== 'all' || typeof parsed.pages !== 'object') {
+        throw new Error(CONFIG.MESSAGES.IMPORT_ALL_WRONG_FILE || '올바른 전체 데이터 파일이 아니에요');
+      }
+
+      const pageEntries = Object.entries(parsed.pages).filter(([id, p]) => {
+        return p && typeof p === 'object' && ALL_PAGES.some(ap => ap.id === id);
+      });
+      if (pageEntries.length === 0) {
+        throw new Error('가져올 페이지 데이터가 없어요');
+      }
+
+      showModal({
+        title: CONFIG.MESSAGES.IMPORT_ALL_TITLE || '전체 가져오기',
+        text: CONFIG.MESSAGES.IMPORT_ALL_TEXT
+          ? CONFIG.MESSAGES.IMPORT_ALL_TEXT(pageEntries.length)
+          : `총 ${pageEntries.length}개 페이지 데이터를 교체할까요?\n기존 데이터는 덮어써져요.`,
+        confirmText: '교체',
+        onConfirm: () => {
+          let applied = 0;
+          pageEntries.forEach(([id, p]) => {
+            const cfg = ALL_PAGES.find(ap => ap.id === id);
+            if (!cfg) return;
+            const value = typeof p.data === 'string' ? p.data : JSON.stringify(p.data);
+            try {
+              localStorage.setItem(cfg.key, value);
+              try { localStorage.setItem(cfg.key + '_backup', value); } catch (e) { /* ignore */ }
+              applied++;
+
+              // 현재 상품리스트 페이지라면 상태도 바로 갱신
+              if (id === 'productlist') {
+                let arr;
+                try { arr = JSON.parse(value); } catch (e) { arr = []; }
+                if (!Array.isArray(arr)) arr = [];
+                state.cards = arr.filter(c => c && typeof c === 'object').map(c => {
+                  const defaults = newCard();
+                  return {
+                    ...defaults,
+                    ...c,
+                    id: c.id || defaults.id,
+                    isEditing: typeof c.isEditing === 'boolean' ? c.isEditing : false,
+                    isCollapsed: typeof c.isCollapsed === 'boolean' ? c.isCollapsed : false,
+                    image: c.image || ''
+                  };
+                });
+              }
+            } catch (err) {
+              console.warn(`Failed to write ${cfg.key}`, err);
+            }
+          });
+          render();
+          showToast(CONFIG.MESSAGES.IMPORT_ALL_DONE
+            ? CONFIG.MESSAGES.IMPORT_ALL_DONE(applied)
+            : `${applied}개 페이지 데이터를 가져왔어요`);
+        }
+      });
+    } catch (err) {
+      showToast((CONFIG.MESSAGES.IMPORT_ALL_FAIL || '전체 가져오기 실패: ') + err.message);
+    }
+  };
+  r.readAsText(f);
+  e.target.value = '';
 }
 
 /** JSON 파일로 데이터 내보내기 */

@@ -187,9 +187,9 @@ function renderDailyTable() {
   }
 }
 
-/** 숫자 포맷 (₩) */
+/** 숫자 포맷 (₩) - 소수점 최대 2자리 */
 function formatNum(val) {
   if (val === 0 || val === null || val === undefined) return '0';
   if (typeof val !== 'number') return val;
-  return val.toLocaleString('ko-KR');
+  return val.toLocaleString('ko-KR', { maximumFractionDigits: 2 });
 }

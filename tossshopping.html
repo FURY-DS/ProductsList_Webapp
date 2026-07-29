@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>상품리스트</title>
+<title>토스쇼핑</title>
 <link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/smartstore.css" />
 </head>
 <body>
 
@@ -15,26 +16,25 @@
       <!-- 메뉴 항목은 js/menu.js에서 동적 생성 -->
     </nav>
   </div>
-  <div class="title">상품리스트</div>
+  <div class="title">토스쇼핑</div>
   <div class="search-bar" id="search-bar">
     <button class="btn btn-toggle-all" id="btn-toggle-all" data-action="collapse" title="모든 카드 상세 정보 숨기기">전체 숨기기</button>
     <span class="icon">🔍</span>
     <input type="text" id="search-input" autocomplete="off" />
     <button class="clear" id="search-clear" title="검색어 지우기">×</button>
     <span class="count" id="search-count"></span>
-    <button class="btn btn-global" id="btn-export-all" title="전체 데이터 내보내기">전체내보내기</button>
-    <button class="btn btn-global" id="btn-import-all" title="전체 데이터 가져오기">전체가져오기</button>
+  </div>
+  <div class="bulk-fee-bar">
+    <label>판매수수료 전체입력</label>
+    <input type="number" id="bulk-fee-input" step="any" placeholder="0.1" />
+    <button id="btn-bulk-fee">적용</button>
   </div>
   <div class="actions">
     <button id="btn-export" title="데이터 내보내기">내보내기</button>
     <button id="btn-import" title="데이터 가져오기">가져오기</button>
-    <button id="btn-csv-template" title="엑셀 템플릿 다운로드" class="btn-csv">엑셀 템플릿</button>
-    <button id="btn-csv-import" title="엑셀 파일 가져오기" class="btn-csv">엑셀 가져오기</button>
     <button id="btn-clear" title="전체 삭제">전체삭제</button>
   </div>
   <input type="file" id="import-input" accept="application/json" style="display:none" />
-  <input type="file" id="import-all-input" accept="application/json" style="display:none" />
-  <input type="file" id="csv-import-input" accept=".csv,text/csv" style="display:none" />
 </header>
 
 <main class="container">
@@ -58,17 +58,17 @@
 
 <!-- 스크립트 (의존성 순서대로 로드) -->
 <script src="js/config.js"></script>
+<script src="js/tossshopping-config.js"></script>
 <script src="js/utils.js"></script>
-<script src="js/state.js"></script>
+<script src="js/tossshopping-state.js"></script>
 <script src="js/toast.js"></script>
 <script src="js/modal.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/photo.js"></script>
-<script src="js/search.js"></script>
-<script src="js/card.js"></script>
+<script src="js/tossshopping-storage.js"></script>
+<script src="js/tossshopping-search.js"></script>
+<script src="js/tossshopping-card.js"></script>
 <script src="js/menu.js"></script>
-<script src="js/actions.js"></script>
-<script src="js/app.js"></script>
+<script src="js/tossshopping-actions.js"></script>
+<script src="js/tossshopping-app.js"></script>
 
 </body>
 </html>
