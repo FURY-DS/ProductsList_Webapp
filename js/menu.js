@@ -5,6 +5,16 @@
 let btnMenuEl = null;
 let menuDropdownEl = null;
 
+/** 현재 사용자 역할 (localStorage / sessionStorage에서 읽기) */
+function getCurrentRole() {
+  return localStorage.getItem('auth_role') || sessionStorage.getItem('auth_role') || null;
+}
+
+/** 관리자 여부 */
+function isCurrentUserAdmin() {
+  return getCurrentRole() === 'admin';
+}
+
 /** 메뉴 초기화 (DOM 로드 후 호출) */
 function initMenu() {
   btnMenuEl = document.getElementById('btn-menu');
@@ -47,6 +57,9 @@ function renderMenuItems() {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
   CONFIG.MENU_ITEMS.forEach(item => {
+    // adminOnly 항목은 관리자에게만 표시
+    if (item.adminOnly && !isCurrentUserAdmin()) return;
+
     if (item.children && item.children.length > 0) {
       // 중첩 메뉴 그룹
       const group = document.createElement('div');
@@ -70,6 +83,8 @@ function renderMenuItems() {
       if (hasActiveChild) sub.classList.add('show');
 
       item.children.forEach(child => {
+        // 하위 항목도 adminOnly 필터링
+        if (child.adminOnly && !isCurrentUserAdmin()) return;
         const btn = createMenuButton(child, currentPage);
         sub.appendChild(btn);
       });
