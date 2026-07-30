@@ -81,6 +81,38 @@ function showAuthOverlay() {
     submitBtn.disabled = false;
     submitBtn.textContent = '로그인';
   }
+
+  // 체크박스 상태 복원
+  const prefs = Auth.getCheckboxStates();
+  const savePwCb = document.getElementById('auth-save-pw');
+  const autoLoginCb = document.getElementById('auth-auto-login');
+  if (savePwCb) savePwCb.checked = prefs.savePw;
+  if (autoLoginCb) autoLoginCb.checked = prefs.autoLogin;
+
+  // 비밀번호 저장이 켜져 있으면 아이디/비밀번호 자동 채움
+  const usernameInput = document.getElementById('auth-username');
+  const passwordInput = document.getElementById('auth-password');
+  if (prefs.savePw) {
+    const saved = Auth.getSavedCredentials();
+    if (saved) {
+      if (usernameInput) usernameInput.value = saved.u || '';
+      if (passwordInput) passwordInput.value = saved.p || '';
+    }
+  } else {
+    if (usernameInput) usernameInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+  }
+  const passwordConfirmInput = document.getElementById('auth-password-confirm');
+  if (passwordConfirmInput) passwordConfirmInput.value = '';
+
+  // auth-options 표시 (로그인 탭일 때만)
+  const activeTab = document.querySelector('.auth-tab.active');
+  const mode = activeTab ? activeTab.dataset.mode : 'login';
+  const optionsEl = document.getElementById('auth-options');
+  if (optionsEl) {
+    if (mode === 'login') optionsEl.classList.remove('hidden');
+    else optionsEl.classList.add('hidden');
+  }
 }
 
 /** 인증 오버레이 숨기기 + 앱 표시 */
@@ -108,6 +140,13 @@ function initAuthUI() {
       } else {
         if (submitBtn) submitBtn.textContent = '로그인';
         if (confirmField) confirmField.classList.add('hidden');
+      }
+
+      // 체크박스 옵션은 로그인 탭에서만 표시
+      const optionsEl = document.getElementById('auth-options');
+      if (optionsEl) {
+        if (mode === 'login') optionsEl.classList.remove('hidden');
+        else optionsEl.classList.add('hidden');
       }
 
       // 에러 메시지 초기화
@@ -175,11 +214,31 @@ async function handleAuthSubmit() {
   }
 
   try {
+    // 체크박스 상태 읽기
+    const savePwCb = document.getElementById('auth-save-pw');
+    const autoLoginCb = document.getElementById('auth-auto-login');
+    const savePw = savePwCb ? savePwCb.checked : false;
+    const autoLogin = autoLoginCb ? autoLoginCb.checked : true;
+
+    // 체크박스 상태 저장 (다음에 폼 열 때 복원용)
+    Auth.saveCheckboxStates(savePw, autoLogin);
+
     let result;
     if (mode === 'register') {
-      result = await Auth.register(username, password);
+      result = await Auth.register(username, password, { autoLogin });
+      // 회원가입 시에도 비밀번호 저장 (로그인과 동일하게)
+      if (result.ok && savePw) {
+        Auth.saveCredentials(username, password);
+      } else if (result.ok && !savePw) {
+        Auth.clearSavedCredentials();
+      }
     } else {
-      result = await Auth.login(username, password);
+      result = await Auth.login(username, password, { autoLogin });
+      if (result.ok && savePw) {
+        Auth.saveCredentials(username, password);
+      } else if (result.ok && !savePw) {
+        Auth.clearSavedCredentials();
+      }
     }
 
     if (result.ok) {
@@ -212,12 +271,8 @@ async function handleLogout() {
 
   showAuthOverlay();
 
-  // 폼 초기화
-  const usernameInput = document.getElementById('auth-username');
-  const passwordInput = document.getElementById('auth-password');
+  // 폼 초기화는 showAuthOverlay에서 처리하므로 여기서는 체크박스만 정리
   const passwordConfirmInput = document.getElementById('auth-password-confirm');
-  if (usernameInput) usernameInput.value = '';
-  if (passwordInput) passwordInput.value = '';
   if (passwordConfirmInput) passwordConfirmInput.value = '';
 
   // 로그인 탭으로 초기화
@@ -228,6 +283,8 @@ async function handleLogout() {
   if (submitBtn) submitBtn.textContent = '로그인';
   const confirmField = document.getElementById('auth-confirm-field');
   if (confirmField) confirmField.classList.add('hidden');
+  const optionsEl = document.getElementById('auth-options');
+  if (optionsEl) optionsEl.classList.remove('hidden');
 }
 
 /** 헤더에 사용자 정보 + 동기화 상태 표시 */

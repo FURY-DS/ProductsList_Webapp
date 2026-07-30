@@ -2,17 +2,25 @@
    auth.js - 사용자 인증 모듈
    회원가입 / 로그인 / 로그아웃 / 세션 확인
 
-   토큰은 localStorage에 저장, 30일간 유효 (서버 TTL)
+   자동로그인 ON  → 토큰을 localStorage에 저장 (브라우저 재시작 후에도 유지, 30일)
+   자동로그인 OFF → 토큰을 sessionStorage에 저장 (탭 닫으면 삭제)
+   비밀번호 저장  → 아이디/비밀번호를 localStorage에 저장 (폼 자동 채움)
    ===================================================== */
 
 const Auth = {
   token: null,
   username: null,
 
-  /** 초기화 - localStorage에서 토큰 복원 */
+  /** 초기화 - localStorage 또는 sessionStorage에서 토큰 복원 */
   init() {
-    this.token = localStorage.getItem('auth_token') || null;
-    this.username = localStorage.getItem('auth_username') || null;
+    this.token =
+      localStorage.getItem('auth_token') ||
+      sessionStorage.getItem('auth_token') ||
+      null;
+    this.username =
+      localStorage.getItem('auth_username') ||
+      sessionStorage.getItem('auth_username') ||
+      null;
   },
 
   /** 인증 여부 */
@@ -21,7 +29,7 @@ const Auth = {
   },
 
   /** 회원가입 */
-  async register(username, password) {
+  async register(username, password, options = {}) {
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -32,7 +40,7 @@ const Auth = {
       if (!res.ok) {
         return { ok: false, msg: data.error || '회원가입 실패' };
       }
-      this._setSession(data.token, data.username);
+      this._setSession(data.token, data.username, options.autoLogin !== false);
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: '네트워크 오류: ' + e.message };
@@ -40,7 +48,7 @@ const Auth = {
   },
 
   /** 로그인 */
-  async login(username, password) {
+  async login(username, password, options = {}) {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -51,7 +59,7 @@ const Auth = {
       if (!res.ok) {
         return { ok: false, msg: data.error || '로그인 실패' };
       }
-      this._setSession(data.token, data.username);
+      this._setSession(data.token, data.username, options.autoLogin !== false);
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: '네트워크 오류: ' + e.message };
@@ -100,12 +108,21 @@ const Auth = {
   },
 
   /** 세션 저장 (내부) */
-  _setSession(token, username) {
+  _setSession(token, username, autoLogin) {
     this.token = token;
     this.username = username;
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_username', username);
-    // 기존 cloud_auth_key 제거 (마이그레이션)
+
+    // 양쪽 다 정리
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_username');
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_username');
+
+    // 자동로그인이면 localStorage (영구), 아니면 sessionStorage (탭 닫으면 삭제)
+    const storage = autoLogin ? localStorage : sessionStorage;
+    storage.setItem('auth_token', token);
+    storage.setItem('auth_username', username);
+
     localStorage.removeItem('cloud_auth_key');
   },
 
@@ -115,6 +132,56 @@ const Auth = {
     this.username = null;
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_username');
+    sessionStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_username');
     localStorage.removeItem('cloud_auth_key');
+  },
+
+  // =====================================================
+  //  비밀번호 저장 (폼 자동 채움용)
+  // =====================================================
+
+  /** 아이디/비밀번호를 localStorage에 저장 (base64 인코딩) */
+  saveCredentials(username, password) {
+    try {
+      const json = JSON.stringify({ u: username, p: password });
+      const encoded = btoa(unescape(encodeURIComponent(json)));
+      localStorage.setItem('saved_credentials', encoded);
+    } catch (e) { /* ignore */ }
+  },
+
+  /** 저장된 아이디/비밀번호 불러오기 */
+  getSavedCredentials() {
+    try {
+      const raw = localStorage.getItem('saved_credentials');
+      if (!raw) return null;
+      const decoded = decodeURIComponent(escape(atob(raw)));
+      return JSON.parse(decoded);
+    } catch (e) {
+      return null;
+    }
+  },
+
+  /** 저장된 아이디/비밀번호 삭제 */
+  clearSavedCredentials() {
+    localStorage.removeItem('saved_credentials');
+  },
+
+  // =====================================================
+  //  체크박스 상태 저장/복원
+  // =====================================================
+
+  /** 체크박스 상태 저장 */
+  saveCheckboxStates(savePw, autoLogin) {
+    localStorage.setItem('auth_pref_save_pw', savePw ? '1' : '0');
+    localStorage.setItem('auth_pref_auto_login', autoLogin ? '1' : '0');
+  },
+
+  /** 체크박스 상태 불러오기 */
+  getCheckboxStates() {
+    return {
+      savePw: localStorage.getItem('auth_pref_save_pw') === '1',
+      autoLogin: localStorage.getItem('auth_pref_auto_login') !== '0' // 기본값 true
+    };
   }
 };

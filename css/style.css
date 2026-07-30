@@ -972,6 +972,29 @@ html, body {
   min-height: 18px;
   margin: 8px 0;
 }
+.auth-options {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.auth-options.hidden {
+  display: none;
+}
+.auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-soft);
+  cursor: pointer;
+  user-select: none;
+}
+.auth-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
 .btn-auth-submit {
   width: 100%;
   padding: 12px;

@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>상품리스트</title>
-<link rel="stylesheet" href="css/style.css?v=7" />
+<link rel="stylesheet" href="css/style.css?v=8" />
 </head>
 <body class="app-hidden">
 
@@ -31,6 +31,16 @@
       <div class="auth-field hidden" id="auth-confirm-field">
         <label for="auth-password-confirm">비밀번호 확인</label>
         <input type="password" id="auth-password-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+      </div>
+      <div class="auth-options" id="auth-options">
+        <label class="auth-checkbox">
+          <input type="checkbox" id="auth-save-pw" />
+          <span>비밀번호 저장</span>
+        </label>
+        <label class="auth-checkbox">
+          <input type="checkbox" id="auth-auto-login" />
+          <span>자동로그인</span>
+        </label>
       </div>
       <p class="auth-error" id="auth-error"></p>
       <button type="submit" class="btn-auth-submit" id="auth-submit">로그인</button>
@@ -150,21 +160,21 @@
 <div class="toast" id="toast"></div>
 
 <!-- 스크립트 (의존성 순서대로 로드) -->
-<script src="js/config.js?v=7"></script>
-<script src="js/utils.js?v=7"></script>
-<script src="js/state.js?v=7"></script>
-<script src="js/toast.js?v=7"></script>
-<script src="js/modal.js?v=7"></script>
-<script src="js/storage.js?v=7"></script>
-<script src="js/photo.js?v=7"></script>
-<script src="js/search.js?v=7"></script>
-<script src="js/card.js?v=7"></script>
-<script src="js/menu.js?v=7"></script>
-<script src="js/actions.js?v=7"></script>
-<script src="js/rate-bulk.js?v=7"></script>
-<script src="js/auth.js?v=7"></script>
-<script src="js/cloud-sync.js?v=7"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/config.js?v=8"></script>
+<script src="js/utils.js?v=8"></script>
+<script src="js/state.js?v=8"></script>
+<script src="js/toast.js?v=8"></script>
+<script src="js/modal.js?v=8"></script>
+<script src="js/storage.js?v=8"></script>
+<script src="js/photo.js?v=8"></script>
+<script src="js/search.js?v=8"></script>
+<script src="js/card.js?v=8"></script>
+<script src="js/menu.js?v=8"></script>
+<script src="js/actions.js?v=8"></script>
+<script src="js/rate-bulk.js?v=8"></script>
+<script src="js/auth.js?v=8"></script>
+<script src="js/cloud-sync.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
 
 </body>
 </html>
