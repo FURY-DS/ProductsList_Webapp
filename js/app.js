@@ -10,6 +10,7 @@ function init() {
   initSearch();
   initMenu();
   initActions();
+  initRateBulk();
   bindKeyboardShortcuts();
 
   // 데이터 로드

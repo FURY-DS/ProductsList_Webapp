@@ -18,6 +18,7 @@
   <div class="title">상품리스트</div>
   <div class="search-bar" id="search-bar">
     <button class="btn btn-toggle-all" id="btn-toggle-all" data-action="collapse" title="모든 카드 상세 정보 숨기기">전체 숨기기</button>
+    <button class="btn btn-rate-bulk" id="btn-rate-bulk" title="모든 카드의 환율을 한 번에 수정">환율 일괄수정</button>
     <span class="icon">🔍</span>
     <input type="text" id="search-input" autocomplete="off" />
     <button class="clear" id="search-clear" title="검색어 지우기">×</button>
@@ -53,6 +54,57 @@
   </div>
 </div>
 
+<!-- 환율 일괄 수정 모달 -->
+<div class="modal-backdrop" id="rate-bulk-modal">
+  <div class="modal modal-rate-bulk">
+    <h3 id="rate-bulk-title">환율 일괄 수정</h3>
+    <p class="modal-desc">모든 카드의 환율을 한 번에 수정할 수 있어요.</p>
+
+    <div class="rate-bulk-section">
+      <div class="rate-bulk-mode">
+        <label class="rate-bulk-radio">
+          <input type="radio" name="rate-mode" value="absolute" checked />
+          <span>모든 환율을 같은 값으로 설정</span>
+        </label>
+        <label class="rate-bulk-radio">
+          <input type="radio" name="rate-mode" value="multiplier" />
+          <span>모든 환율에 같은 비율(배수) 적용</span>
+        </label>
+      </div>
+
+      <div class="rate-bulk-input-wrap" id="rate-input-absolute">
+        <label>새 환율 값 (₩)</label>
+        <input type="number" id="rate-bulk-absolute" placeholder="예: 215" step="any" />
+      </div>
+
+      <div class="rate-bulk-input-wrap hidden" id="rate-input-multiplier">
+        <label>곱할 비율 (1.0 = 그대로, 1.05 = 5% 인상)</label>
+        <input type="number" id="rate-bulk-multiplier" placeholder="예: 1.05" step="any" />
+      </div>
+
+      <div class="rate-bulk-scope">
+        <label>적용 범위</label>
+        <select id="rate-bulk-scope">
+          <option value="all">모든 카드</option>
+          <option value="filled">환율이 입력된 카드만</option>
+          <option value="empty">환율이 비어있는 카드만</option>
+        </select>
+      </div>
+
+      <div class="rate-bulk-preview" id="rate-bulk-preview">
+        <div class="preview-row"><span>변경 대상</span><strong id="preview-count">0개</strong></div>
+        <div class="preview-row"><span>변경 전 평균</span><strong id="preview-before">-</strong></div>
+        <div class="preview-row"><span>변경 후 평균</span><strong id="preview-after">-</strong></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="rate-bulk-cancel">취소</button>
+      <button class="btn btn-confirm" id="rate-bulk-apply">적용</button>
+    </div>
+  </div>
+</div>
+
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
@@ -68,6 +120,7 @@
 <script src="js/card.js"></script>
 <script src="js/menu.js"></script>
 <script src="js/actions.js"></script>
+<script src="js/rate-bulk.js"></script>
 <script src="js/app.js"></script>
 
 </body>

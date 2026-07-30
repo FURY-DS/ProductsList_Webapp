@@ -34,6 +34,11 @@ function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
+/** 소수점 4자리 반올림 (환율 배수 계산 등 정밀도 필요 시) */
+function round4(n) {
+  return Math.round(n * 10000) / 10000;
+}
+
 /**
  * 저장 결과를 토스트로 알림
  * save 계열 함수는 토스트를 직접 띄우지 않고 { ok, imagesRemoved?, msg? }를 반환하므로,
