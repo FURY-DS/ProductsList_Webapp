@@ -8,7 +8,8 @@
 import {
   createUser, createSession,
   validateUsername, validatePassword,
-  jsonResponse, handleOptions
+  jsonResponse, handleOptions,
+  getClientIp, isRateLimited, recordAttempt
 } from '../../_lib/auth.js';
 
 export async function onRequestPost(context) {
@@ -30,6 +31,13 @@ export async function onRequestPost(context) {
   if (!validatePassword(password)) {
     return jsonResponse({ error: '비밀번호는 6자 이상이어야 합니다' }, 400);
   }
+
+  const ip = getClientIp(request);
+
+  if (await isRateLimited(env.DATA_KV, 'register', ip)) {
+    return jsonResponse({ error: '가입 시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
+  }
+  await recordAttempt(env.DATA_KV, 'register', ip);
 
   const result = await createUser(env.DATA_KV, username, password);
   if (result.error) {
