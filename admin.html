@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 패널 - ProductsList</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* 로그인 화면 */
+    .admin-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .admin-login-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+      width: 400px;
+      max-width: 90vw;
+    }
+    .admin-login-box h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: #1a1a2e;
+    }
+    .admin-login-box p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    .admin-login-box input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .admin-login-box input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+    .admin-login-box button {
+      width: 100%;
+      padding: 12px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .admin-login-box button:hover { background: #5558e3; }
+    .admin-login-box button:disabled { background: #c8cad6; cursor: not-allowed; }
+    .login-error {
+      color: #e53e3e;
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
+    /* 관리자 패널 */
+    .admin-panel { display: none; }
+    .admin-header {
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-header h1 {
+      font-size: 18px;
+      color: #1a1a2e;
+    }
+    .admin-header .logout-btn {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .admin-header .logout-btn:hover { background: #fecaca; }
+
+    .admin-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* 통계 */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      flex: 1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .stat-card .label {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    /* 사용자 테이블 */
+    .user-table-wrapper {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-header h2 {
+      font-size: 16px;
+      color: #1a1a2e;
+    }
+    .refresh-btn {
+      background: #f0f2f5;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #555;
+    }
+    .refresh-btn:hover { background: #e0e0e0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      text-align: left;
+      padding: 12px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #f9fafb; }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-view { background: #e0e7ff; color: #4f46e5; }
+    .btn-reset { background: #fef3c7; color: #d97706; }
+    .btn-delete { background: #fee2e2; color: #dc2626; }
+
+    .empty-state {
+      padding: 48px 20px;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+    .loading {
+      padding: 48px 20px;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      width: 440px;
+      max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    .modal h3 {
+      font-size: 17px;
+      margin-bottom: 16px;
+      color: #1a1a2e;
+    }
+    .modal p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .modal input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .modal input:focus { outline: none; border-color: #6366f1; }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    .modal-btn {
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .modal-btn-cancel { background: #f0f2f5; color: #555; }
+    .modal-btn-confirm { background: #6366f1; color: #fff; }
+    .modal-btn-danger { background: #dc2626; color: #fff; }
+    .modal-btn:hover { opacity: 0.85; }
+
+    /* 데이터 뷰어 */
+    .data-viewer {
+      max-height: 400px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #333;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #dc2626; }
+    .toast.success { background: #059669; }
+  </style>
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<div class="admin-login" id="admin-login">
+  <div class="admin-login-box">
+    <h1>🔧 관리자 패널</h1>
+    <p>ProductsList 사용자 관리</p>
+    <input type="password" id="admin-key-input" placeholder="Admin Key 입력" autocomplete="off" />
+    <button id="admin-login-btn" onclick="adminLogin()">로그인</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- 관리자 패널 -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-header">
+    <h1>🔧 관리자 패널 — ProductsList</h1>
+    <button class="logout-btn" onclick="adminLogout()">로그아웃</button>
+  </div>
+  <div class="admin-content">
+    <!-- 통계 -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">전체 사용자</div>
+        <div class="value" id="stat-users">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">데이터 보유 사용자</div>
+        <div class="value" id="stat-data">—</div>
+      </div>
+    </div>
+
+    <!-- 사용자 테이블 -->
+    <div class="user-table-wrapper">
+      <div class="table-header">
+        <h2>사용자 목록</h2>
+        <button class="refresh-btn" onclick="loadUsers()">🔄 새로고침</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>아이디</th>
+            <th>가입일</th>
+            <th>작업</th>
+          </tr>
+        </thead>
+        <tbody id="user-tbody">
+          <tr><td colspan="3" class="loading">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 비밀번호 재설정 -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal">
+    <h3>비밀번호 재설정</h3>
+    <p>사용자: <strong id="reset-username"></strong></p>
+    <p>기존 세션은 모두 삭제되며, 해당 사용자는 다시 로그인해야 합니다.</p>
+    <input type="password" id="reset-password" placeholder="새 비밀번호 (6자 이상)" autocomplete="off" />
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-reset')">취소</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmReset()">재설정</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 계정 삭제 -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <h3>⚠️ 계정 삭제</h3>
+    <p>사용자 <strong id="delete-username"></strong>의 모든 데이터를 삭제합니다.</p>
+    <p style="color: #dc2626; font-weight: 600;">이 작업은 되돌릴 수 없습니다!</p>
+    <p>삭제 항목: 계정 정보, 상품 데이터, 활성 세션</p>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-delete')">취소</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 모달: 데이터 조회 -->
+<div class="modal-overlay" id="modal-data">
+  <div class="modal" style="width: 600px;">
+    <h3>📦 데이터 조회: <span id="data-username"></span></h3>
+    <div class="data-viewer" id="data-content">불러오는 중...</div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-danger" onclick="deleteData()">데이터 삭제</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-data')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+let adminKey = '';
+let currentUser = '';
+
+// 로컬 저장된 키 복원
+(function init() {
+  const saved = sessionStorage.getItem('admin_key');
+  if (saved) {
+    adminKey = saved;
+    showPanel();
+  }
+})();
+
+async function adminLogin() {
+  const input = document.getElementById('admin-key-input');
+  const btn = document.getElementById('admin-login-btn');
+  const err = document.getElementById('login-error');
+  adminKey = input.value.trim();
+  if (!adminKey) { err.textContent = 'Admin Key를 입력하세요'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '확인 중...';
+  err.textContent = '';
+
+  try {
+    const res = await fetch('/api/admin/users', { headers: { 'X-Admin-Key': adminKey } });
+    if (res.status === 401) {
+      err.textContent = 'Admin Key가 올바르지 않습니다';
+      btn.disabled = false;
+      btn.textContent = '로그인';
+      return;
+    }
+    if (!res.ok) throw new Error('Server error');
+    sessionStorage.setItem('admin_key', adminKey);
+    showPanel();
+  } catch (e) {
+    err.textContent = '네트워크 오류: ' + e.message;
+    btn.disabled = false;
+    btn.textContent = '로그인';
+  }
+}
+
+function adminLogout() {
+  adminKey = '';
+  sessionStorage.removeItem('admin_key');
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('admin-key-input').value = '';
+}
+
+function showPanel() {
+  document.getElementById('admin-login').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  loadUsers();
+}
+
+async function loadUsers() {
+  const tbody = document.getElementById('user-tbody');
+  tbody.innerHTML = '<tr><td colspan="3" class="loading">불러오는 중...</td></tr>';
+
+  try {
+    const res = await fetch('/api/admin/users', { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) throw new Error('Failed');
+    const { users } = await res.json();
+
+    document.getElementById('stat-users').textContent = users.length;
+
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">등록된 사용자가 없습니다</td></tr>';
+      document.getElementById('stat-data').textContent = '0';
+      return;
+    }
+
+    tbody.innerHTML = '';
+    let dataCount = 0;
+
+    for (const user of users) {
+      // 데이터 존재 여부 확인
+      const dataRes = await fetch(`/api/admin/data?username=${user.username}`, {
+        headers: { 'X-Admin-Key': adminKey }
+      });
+      const dataInfo = await dataRes.json();
+      const hasData = dataInfo.data !== null;
+      if (hasData) dataCount++;
+
+      const date = user.createdAt ? new Date(user.createdAt).toLocaleString('ko-KR') : '—';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${escapeHtml(user.username)}</strong></td>
+        <td>${date}</td>
+        <td>
+          <div class="user-actions">
+            <button class="btn btn-view" onclick="viewData('${user.username}')">데이터</button>
+            <button class="btn btn-reset" onclick="resetPassword('${user.username}')">비밀번호</button>
+            <button class="btn btn-delete" onclick="deleteAccount('${user.username}')">삭제</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    document.getElementById('stat-data').textContent = dataCount;
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="3" class="empty-state">오류: ${escapeHtml(e.message)}</td></tr>`;
+  }
+}
+
+function viewData(username) {
+  currentUser = username;
+  document.getElementById('data-username').textContent = username;
+  document.getElementById('data-content').textContent = '불러오는 중...';
+  document.getElementById('modal-data').classList.add('active');
+
+  fetch(`/api/admin/data?username=${username}`, { headers: { 'X-Admin-Key': adminKey } })
+    .then(r => r.json())
+    .then(data => {
+      const content = document.getElementById('data-content');
+      if (!data.data) {
+        content.textContent = '(데이터 없음)';
+      } else {
+        try {
+          content.textContent = JSON.stringify(data.data, null, 2);
+        } catch (e) {
+          content.textContent = String(data.data);
+        }
+      }
+    })
+    .catch(e => {
+      document.getElementById('data-content').textContent = '오류: ' + e.message;
+    });
+}
+
+async function deleteData() {
+  if (!currentUser) return;
+  if (!confirm(`${currentUser}의 상품 데이터를 삭제하시겠습니까?`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/data?username=${currentUser}`, {
+      method: 'DELETE',
+      headers: { 'X-Admin-Key': adminKey }
+    });
+    const result = await res.json();
+    if (result.ok) {
+      showToast('데이터 삭제 완료', 'success');
+      closeModal('modal-data');
+      loadUsers();
+    } else {
+      showToast('삭제 실패: ' + (result.error || ''), 'error');
+    }
+  } catch (e) {
+    showToast('오류: ' + e.message, 'error');
+  }
+}
+
+function resetPassword(username) {
+  currentUser = username;
+  document.getElementById('reset-username').textContent = username;
+  document.getElementById('reset-password').value = '';
+  document.getElementById('modal-reset').classList.add('active');
+}
+
+async function confirmReset() {
+  const newPassword = document.getElementById('reset-password').value;
+  if (!newPassword || newPassword.length < 6) {
+    showToast('비밀번호는 6자 이상이어야 합니다', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+      body: JSON.stringify({ username: currentUser, newPassword })
+    });
+    const result = await res.json();
+    if (result.ok) {
+      showToast('비밀번호 재설정 완료', 'success');
+      closeModal('modal-reset');
+    } else {
+      showToast('실패: ' + (result.error || ''), 'error');
+    }
+  } catch (e) {
+    showToast('오류: ' + e.message, 'error');
+  }
+}
+
+function deleteAccount(username) {
+  currentUser = username;
+  document.getElementById('delete-username').textContent = username;
+  document.getElementById('modal-delete').classList.add('active');
+}
+
+async function confirmDelete() {
+  try {
+    const res = await fetch(`/api/admin/user?username=${currentUser}`, {
+      method: 'DELETE',
+      headers: { 'X-Admin-Key': adminKey }
+    });
+    const result = await res.json();
+    if (result.ok) {
+      showToast('계정 삭제 완료', 'success');
+      closeModal('modal-delete');
+      loadUsers();
+    } else {
+      showToast('삭제 실패: ' + (result.error || ''), 'error');
+    }
+  } catch (e) {
+    showToast('오류: ' + e.message, 'error');
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showToast(msg, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show ' + (type || '');
+  setTimeout(() => { toast.className = 'toast'; }, 3000);
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+// 엔터키로 로그인
+document.getElementById('admin-key-input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') adminLogin();
+});
+</script>
+
+</body>
+</html>
