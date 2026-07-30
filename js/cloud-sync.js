@@ -17,7 +17,7 @@ const CloudSync = {
 
   /** 초기화 - 인증 상태 확인 */
   init() {
-    this.lastSyncTs = parseInt(localStorage.getItem('cloud_last_sync') || '0', 10) || 0;
+    this.lastSyncTs = parseInt(localStorage.getItem(getSyncKey()) || '0', 10) || 0;
     this.enabled = Auth.isAuthenticated();
 
     if (this.enabled) {
@@ -68,7 +68,7 @@ const CloudSync = {
 
       if (res.ok) {
         this.lastSyncTs = ts;
-        localStorage.setItem('cloud_last_sync', ts.toString());
+        localStorage.setItem(getSyncKey(), ts.toString());
         return true;
       }
 

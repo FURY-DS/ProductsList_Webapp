@@ -6,12 +6,13 @@
  *  @returns {{ ok: boolean, imagesRemoved?: boolean, msg?: string }}
  */
 function save() {
+  const storageKey = getStorageKey();
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
     const data = JSON.stringify(state.cards);
-    localStorage.setItem(CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -30,9 +31,9 @@ function save() {
   const cleaned = cleanCardsForSave(state.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -64,17 +65,34 @@ function cleanCardsForSave(cards) {
 
 /** localStorage에서 상품 데이터 불러오기 (손상 시 백업 복구) */
 function load() {
+  const storageKey = getStorageKey();
   try {
-    let raw = localStorage.getItem(CONFIG.STORAGE_KEY);
+    let raw = localStorage.getItem(storageKey);
     let data = null;
 
     if (raw) {
       try { data = JSON.parse(raw); } catch (e) { data = null; }
     }
 
+    // 마이그레이션: per-user 키가 비어있으면 기존 공유 키에서 복사 (일회성)
+    if (!Array.isArray(data)) {
+      const oldRaw = localStorage.getItem(CONFIG.STORAGE_KEY);
+      if (oldRaw) {
+        try {
+          const oldData = JSON.parse(oldRaw);
+          if (Array.isArray(oldData) && oldData.length > 0) {
+            localStorage.setItem(storageKey, oldRaw);
+            localStorage.setItem(storageKey + '_backup', oldRaw);
+            data = oldData;
+            console.log('[Storage] 기존 데이터를 마이그레이션했습니다');
+          }
+        } catch (e) { /* ignore */ }
+      }
+    }
+
     // 원본이 손상된 경우 백업에서 복구
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(storageKey + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }

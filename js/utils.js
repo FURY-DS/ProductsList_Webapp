@@ -2,6 +2,22 @@
    utils.js - 공용 유틸리티 함수
    ===================================================== */
 
+/** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
+function getStorageKey() {
+  const username = (typeof Auth !== 'undefined' && Auth.username)
+    || localStorage.getItem('auth_username')
+    || 'guest';
+  return CONFIG.STORAGE_KEY + '_' + username;
+}
+
+/** 현재 로그인한 사용자의 클라우드 동기화 타임스탬프 키 반환 */
+function getSyncKey() {
+  const username = (typeof Auth !== 'undefined' && Auth.username)
+    || localStorage.getItem('auth_username')
+    || 'guest';
+  return 'cloud_last_sync_' + username;
+}
+
 /** HTML 속성값 이스케이프 (XSS 방지) */
 function escapeAttr(s) {
   return String(s)

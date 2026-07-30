@@ -204,6 +204,12 @@ async function handleAuthSubmit() {
 async function handleLogout() {
   CloudSync.stopAutoSync();
   await Auth.logout();
+
+  // state 초기화 (이전 사용자 데이터가 남지 않도록)
+  if (typeof state !== 'undefined' && state.cards) {
+    state.cards = [];
+  }
+
   showAuthOverlay();
 
   // 폼 초기화
@@ -270,7 +276,7 @@ async function cloudPullAndRender() {
 
     // localStorage에도 저장
     try {
-      localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.cards));
+      localStorage.setItem(getStorageKey(), JSON.stringify(state.cards));
     } catch (e) { /* ignore */ }
 
     render();
