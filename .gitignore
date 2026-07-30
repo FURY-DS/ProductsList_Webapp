@@ -1,0 +1,20 @@
+# WorkBuddy / IDE
+.workbuddy/
+.claude/
+
+# Deploy scripts (local only)
+cloudbase-setup-guide.html
+tcb-deploy.bat
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+
+# Data exports (local only)
+data/
