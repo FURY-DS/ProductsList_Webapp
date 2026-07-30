@@ -6,12 +6,13 @@
  *  @returns {{ ok: boolean, imagesRemoved?: boolean, msg?: string }}
  */
 function saveOWNERCLAN() {
+  const storageKey = getUserScopedKey(OWNERCLAN_CONFIG.STORAGE_KEY);
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
     const data = JSON.stringify(ownerclanState.cards);
-    localStorage.setItem(OWNERCLAN_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(OWNERCLAN_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -26,9 +27,9 @@ function saveOWNERCLAN() {
   const cleaned = cleanOWNERCLANCardsForSave(ownerclanState.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(OWNERCLAN_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(OWNERCLAN_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -63,7 +64,8 @@ function isStorageQuotaError(e) {
 /** 오너클랜 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
 function loadOWNERCLAN() {
   try {
-    let raw = localStorage.getItem(OWNERCLAN_CONFIG.STORAGE_KEY);
+    const storageKey = migrateLegacyKeyToUserScope(OWNERCLAN_CONFIG.STORAGE_KEY, Array.isArray);
+    let raw = localStorage.getItem(storageKey);
     let data = null;
 
     if (raw) {
@@ -71,7 +73,7 @@ function loadOWNERCLAN() {
     }
 
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(OWNERCLAN_CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(storageKey + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }
@@ -107,7 +109,7 @@ function loadOWNERCLAN() {
 /** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistDataOWNERCLAN() {
   try {
-    const raw = localStorage.getItem(OWNERCLAN_CONFIG.PRODUCTLIST_STORAGE_KEY);
+    const raw = getUserScopedItemWithFallback(OWNERCLAN_CONFIG.PRODUCTLIST_STORAGE_KEY);
     if (!raw) return [];
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];

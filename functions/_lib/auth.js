@@ -15,6 +15,10 @@ const SESSION_TTL = 30 * 24 * 60 * 60; // 30일 (초)
 // 마이그레이션용 초기 관리자 아이디 (기존 가입자 중 role이 없는 경우)
 const INITIAL_ADMINS = ['alcave'];
 
+// 존재하지 않는 사용자도 동일한 PBKDF2 비용을 치르게 해서 로그인 타이밍 차이를 줄인다.
+const DUMMY_SALT = 'AAAAAAAAAAAAAAAAAAAAAA==';
+const DUMMY_HASH = '';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
@@ -87,21 +91,20 @@ export async function createUser(kv, username, password) {
   return { ok: true, username: normalized, role: 'user' };
 }
 
+// 로그인 실패 시 공통 메시지 (아이디 존재 여부가 드러나지 않도록 동일한 문구 사용)
+const LOGIN_FAIL_MESSAGE = '아이디 또는 비밀번호가 올바르지 않습니다';
+
 /** 사용자 인증 - role 포함 반환 */
 export async function verifyUser(kv, username, password) {
   const normalized = username.toLowerCase();
   const userKey = `user:${normalized}`;
 
   const raw = await kv.get(userKey);
-  if (!raw) {
-    return { error: '존재하지 않는 아이디입니다' };
-  }
-
-  const user = JSON.parse(raw);
+  const user = raw ? JSON.parse(raw) : { salt: DUMMY_SALT, hash: DUMMY_HASH };
   const hash = await hashPassword(password, user.salt);
 
-  if (hash !== user.hash) {
-    return { error: '비밀번호가 올바르지 않습니다' };
+  if (!raw || hash !== user.hash) {
+    return { error: LOGIN_FAIL_MESSAGE };
   }
 
   // 마이그레이션: role이 없으면 초기 관리자 목록으로 판단
@@ -189,6 +192,80 @@ export async function verifyAdmin(kv, request, env) {
   }
 
   return { ok: false };
+}
+
+/* =====================================================
+   요청 제한 (Rate Limiting) - IP 기준, 실패 횟수 카운트
+   KV 키: ratelimit:<bucket>:<ip> → { count }  (TTL로 자동 만료)
+   실제 서비스 중단 없이 브루트포스만 막도록 넉넉한 임계값 사용
+   ===================================================== */
+
+const RATE_LIMITS = {
+  login:    { windowSec: 15 * 60,      max: 10 }, // 15분에 실패 10회
+  register: { windowSec: 60 * 60,      max: 5  }  // 1시간에 시도 5회
+};
+
+/** 요청에서 클라이언트 IP 추출 (Cloudflare가 엣지에서 신뢰성 있게 설정) */
+export function getClientIp(request) {
+  const cfIp = request.headers.get('CF-Connecting-IP');
+  if (cfIp) return cfIp;
+
+  const forwardedFor = request.headers.get('X-Forwarded-For');
+  if (forwardedFor) return forwardedFor.split(',')[0].trim() || 'unknown';
+
+  return 'unknown';
+}
+
+/** rate limit 키에 넣을 값을 안정적인 길이로 정리 */
+export function getRateLimitScope(request, username = '') {
+  const ip = getClientIp(request);
+  const userPart = String(username || 'unknown')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_@.-]/g, '_')
+    .slice(0, 64) || 'unknown';
+  return `${ip}:${userPart}`;
+}
+
+/** 현재 제한 초과 상태인지 확인 (카운트를 늘리지 않음) */
+export async function isRateLimited(kv, bucket, scope) {
+  const cfg = RATE_LIMITS[bucket];
+  if (!cfg) return false;
+
+  const raw = await kv.get(`ratelimit:${bucket}:${scope}`);
+  if (!raw) return false;
+
+  try {
+    const entry = JSON.parse(raw);
+    return (entry.count || 0) >= cfg.max;
+  } catch (e) {
+    return false;
+  }
+}
+
+/** 시도 횟수 1 증가 (윈도우 만료 시 자동으로 다시 0부터 시작) */
+export async function recordAttempt(kv, bucket, scope) {
+  const cfg = RATE_LIMITS[bucket];
+  if (!cfg) return;
+
+  const key = `ratelimit:${bucket}:${scope}`;
+  const raw = await kv.get(key);
+  let count = 1;
+
+  if (raw) {
+    try {
+      count = (JSON.parse(raw).count || 0) + 1;
+    } catch (e) {
+      // 손상된 카운터는 무시하고 1부터 다시 시작
+    }
+  }
+
+  await kv.put(key, JSON.stringify({ count }), { expirationTtl: cfg.windowSec });
+}
+
+/** 로그인 성공 시 실패 카운터 초기화 (정상 사용자가 잠기지 않도록) */
+export async function clearRateLimit(kv, bucket, scope) {
+  await kv.delete(`ratelimit:${bucket}:${scope}`);
 }
 
 /** 아이디 검증: 3~20자 영문/숫자/언더스코어 */

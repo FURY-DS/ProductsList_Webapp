@@ -5,7 +5,8 @@
 
 import {
   verifyUser, createSession,
-  jsonResponse, handleOptions
+  jsonResponse, handleOptions,
+  getRateLimitScope, isRateLimited, recordAttempt, clearRateLimit
 } from '../../_lib/auth.js';
 
 export async function onRequestPost(context) {
@@ -24,10 +25,19 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '아이디와 비밀번호를 입력해주세요' }, 400);
   }
 
+  const rateLimitScope = getRateLimitScope(request, username);
+
+  if (await isRateLimited(env.DATA_KV, 'login', rateLimitScope)) {
+    return jsonResponse({ error: '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
+  }
+
   const result = await verifyUser(env.DATA_KV, username, password);
   if (result.error) {
+    await recordAttempt(env.DATA_KV, 'login', rateLimitScope);
     return jsonResponse({ error: result.error }, 401);
   }
+
+  await clearRateLimit(env.DATA_KV, 'login', rateLimitScope);
 
   const token = await createSession(env.DATA_KV, result.username);
 

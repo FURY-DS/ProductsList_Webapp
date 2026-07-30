@@ -3,19 +3,64 @@
    ===================================================== */
 
 /** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
-function getStorageKey() {
+function getCurrentStorageUsername() {
   const username = (typeof Auth !== 'undefined' && Auth.username)
     || localStorage.getItem('auth_username')
+    || sessionStorage.getItem('auth_username')
     || 'guest';
+  return username;
+}
+
+/** 기본 localStorage 키를 현재 사용자 전용 키로 변환 */
+function getUserScopedKey(baseKey) {
+  return baseKey + '_' + getCurrentStorageUsername();
+}
+
+/** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
+function getStorageKey() {
+  const username = getCurrentStorageUsername();
   return CONFIG.STORAGE_KEY + '_' + username;
 }
 
 /** 현재 로그인한 사용자의 클라우드 동기화 타임스탬프 키 반환 */
 function getSyncKey() {
-  const username = (typeof Auth !== 'undefined' && Auth.username)
-    || localStorage.getItem('auth_username')
-    || 'guest';
+  const username = getCurrentStorageUsername();
   return 'cloud_last_sync_' + username;
+}
+
+/** 사용자별 키가 비어 있으면 기존 전역 키 데이터를 한 번 복사 */
+function migrateLegacyKeyToUserScope(baseKey, isValidData) {
+  const scopedKey = getUserScopedKey(baseKey);
+  if (localStorage.getItem(scopedKey)) return scopedKey;
+
+  const legacyRaw = localStorage.getItem(baseKey);
+  if (!legacyRaw) return scopedKey;
+
+  try {
+    const parsed = JSON.parse(legacyRaw);
+    if (typeof isValidData === 'function' && !isValidData(parsed)) return scopedKey;
+    localStorage.setItem(scopedKey, legacyRaw);
+    try {
+      localStorage.setItem(scopedKey + '_backup', legacyRaw);
+    } catch (e) { /* ignore */ }
+  } catch (e) { /* ignore */ }
+
+  return scopedKey;
+}
+
+/** 사용자별 키 우선, 없으면 기존 전역 키를 fallback으로 읽기 */
+function getUserScopedItemWithFallback(baseKey) {
+  const scopedRaw = localStorage.getItem(getUserScopedKey(baseKey));
+  if (scopedRaw) return scopedRaw;
+  return localStorage.getItem(baseKey);
+}
+
+/** 로그인 토큰 없이 보조 페이지에 직접 접근하면 로그인 화면으로 돌려보냄 */
+function requireAuthenticatedPage() {
+  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+  if (token) return true;
+  window.location.replace('index.html');
+  return false;
 }
 
 /** HTML 속성값 이스케이프 (XSS 방지) */

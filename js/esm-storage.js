@@ -4,12 +4,13 @@
 
 /** ESM 카드 데이터를 localStorage에 저장 (동시에 백업도 갱신) */
 function saveEsm() {
+  const storageKey = getUserScopedKey(ESM_CONFIG.STORAGE_KEY);
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
     const data = JSON.stringify(esmState.cards);
-    localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -24,9 +25,9 @@ function saveEsm() {
   const cleaned = cleanEsmCardsForSave(esmState.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(ESM_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(ESM_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -61,7 +62,8 @@ function isStorageQuotaError(e) {
 /** ESM 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
 function loadEsm() {
   try {
-    let raw = localStorage.getItem(ESM_CONFIG.STORAGE_KEY);
+    const storageKey = migrateLegacyKeyToUserScope(ESM_CONFIG.STORAGE_KEY, Array.isArray);
+    let raw = localStorage.getItem(storageKey);
     let data = null;
 
     if (raw) {
@@ -69,7 +71,7 @@ function loadEsm() {
     }
 
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(ESM_CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(storageKey + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }
@@ -105,7 +107,7 @@ function loadEsm() {
 /** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistData() {
   try {
-    const raw = localStorage.getItem(ESM_CONFIG.PRODUCTLIST_STORAGE_KEY);
+    const raw = getUserScopedItemWithFallback(ESM_CONFIG.PRODUCTLIST_STORAGE_KEY);
     if (!raw) return [];
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];
