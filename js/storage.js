@@ -15,6 +15,10 @@ function save() {
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
+    // 클라우드 동기화 (비동기, 실패 무시)
+    if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
+      CloudSync.push(CONFIG.STORAGE_KEY, state.cards);
+    }
     return { ok: true };
   } catch (e) {
     if (!isStorageQuotaError(e) || !CONFIG.IMAGE_REMOVE_ON_SAVE_FAIL) {
@@ -34,6 +38,10 @@ function save() {
     }
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     state.cards = cleaned;
+    // 클라우드 동기화 (비동기, 실패 무시)
+    if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
+      CloudSync.push(CONFIG.STORAGE_KEY, state.cards);
+    }
     return { ok: true, imagesRemoved: true };
   } catch (e2) {
     return { ok: false, msg: CONFIG.MESSAGES.SAVE_FAIL_QUOTA };
