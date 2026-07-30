@@ -33,6 +33,7 @@ async function startApp() {
   initMenu();
   initActions();
   initRateBulk();
+  initPercentBulk();
 
   // 사용자 정보 표시
   updateUserInfo();

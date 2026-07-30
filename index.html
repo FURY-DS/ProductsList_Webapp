@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>상품리스트</title>
-<link rel="stylesheet" href="css/style.css?v=9" />
+<link rel="stylesheet" href="css/style.css?v=10" />
 </head>
 <body class="app-hidden">
 
@@ -65,6 +65,12 @@
       title="모든 카드의 환율을 한 번에 수정"
       style="background-color:#0d9488 !important; color:#ffffff !important; border:2px solid #064e3b !important; padding:8px 16px !important; margin:0 4px !important; border-radius:8px !important; font-weight:700 !important; font-size:14px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 2px 6px rgba(13,148,136,0.4) !important;"
     >💱 환율 일괄수정 ✨</button>
+    <button
+      class="btn btn-percent-bulk"
+      id="btn-percent-bulk"
+      title="모든 카드의 퍼센트를 한 번에 수정"
+      style="background-color:#6366f1 !important; color:#ffffff !important; border:2px solid #4338ca !important; padding:8px 16px !important; margin:0 4px !important; border-radius:8px !important; font-weight:700 !important; font-size:14px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 2px 6px rgba(99,102,241,0.4) !important;"
+    >📊 퍼센트 일괄수정 ✨</button>
     <span class="icon">🔍</span>
     <input type="text" id="search-input" autocomplete="off" />
     <button class="clear" id="search-clear" title="검색어 지우기">×</button>
@@ -157,25 +163,77 @@
   </div>
 </div>
 
+<!-- 퍼센트 일괄 수정 모달 -->
+<div class="modal-backdrop" id="percent-bulk-modal">
+  <div class="modal modal-rate-bulk">
+    <h3 id="percent-bulk-title">퍼센트 일괄 수정</h3>
+    <p class="modal-desc">모든 카드의 퍼센트를 한 번에 수정할 수 있어요.</p>
+
+    <div class="rate-bulk-section">
+      <div class="rate-bulk-mode">
+        <label class="rate-bulk-radio">
+          <input type="radio" name="pct-mode" value="absolute" checked />
+          <span>모든 퍼센트를 같은 값으로 설정</span>
+        </label>
+        <label class="rate-bulk-radio">
+          <input type="radio" name="pct-mode" value="multiplier" />
+          <span>모든 퍼센트에 같은 비율(배수) 적용</span>
+        </label>
+      </div>
+
+      <div class="rate-bulk-input-wrap" id="pct-input-absolute">
+        <label>새 퍼센트 값 (예: 0.16)</label>
+        <input type="number" id="percent-bulk-absolute" placeholder="예: 0.16" step="any" />
+      </div>
+
+      <div class="rate-bulk-input-wrap hidden" id="pct-input-multiplier">
+        <label>곱할 비율 (1.0 = 그대로, 1.1 = 10% 인상)</label>
+        <input type="number" id="percent-bulk-multiplier" placeholder="예: 1.1" step="any" />
+      </div>
+
+      <div class="rate-bulk-scope">
+        <label>적용 범위</label>
+        <select id="percent-bulk-scope">
+          <option value="all">모든 카드</option>
+          <option value="filled">퍼센트가 입력된 카드만</option>
+          <option value="empty">퍼센트가 비어있는 카드만</option>
+        </select>
+      </div>
+
+      <div class="rate-bulk-preview" id="percent-bulk-preview">
+        <div class="preview-row"><span>변경 대상</span><strong id="pct-preview-count">0개</strong></div>
+        <div class="preview-row"><span>변경 전 평균</span><strong id="pct-preview-before">-</strong></div>
+        <div class="preview-row"><span>변경 후 평균</span><strong id="pct-preview-after">-</strong></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="percent-bulk-cancel">취소</button>
+      <button class="btn btn-confirm" id="percent-bulk-apply">적용</button>
+    </div>
+  </div>
+</div>
+
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
 <!-- 스크립트 (의존성 순서대로 로드) -->
-<script src="js/config.js?v=9"></script>
-<script src="js/utils.js?v=9"></script>
-<script src="js/state.js?v=9"></script>
-<script src="js/toast.js?v=9"></script>
-<script src="js/modal.js?v=9"></script>
-<script src="js/storage.js?v=9"></script>
-<script src="js/photo.js?v=9"></script>
-<script src="js/search.js?v=9"></script>
-<script src="js/card.js?v=9"></script>
-<script src="js/menu.js?v=9"></script>
-<script src="js/actions.js?v=9"></script>
-<script src="js/rate-bulk.js?v=9"></script>
-<script src="js/auth.js?v=9"></script>
-<script src="js/cloud-sync.js?v=9"></script>
-<script src="js/app.js?v=9"></script>
+<script src="js/config.js?v=10"></script>
+<script src="js/utils.js?v=10"></script>
+<script src="js/state.js?v=10"></script>
+<script src="js/toast.js?v=10"></script>
+<script src="js/modal.js?v=10"></script>
+<script src="js/storage.js?v=10"></script>
+<script src="js/photo.js?v=10"></script>
+<script src="js/search.js?v=10"></script>
+<script src="js/card.js?v=10"></script>
+<script src="js/menu.js?v=10"></script>
+<script src="js/actions.js?v=10"></script>
+<script src="js/rate-bulk.js?v=10"></script>
+<script src="js/percent-bulk.js?v=10"></script>
+<script src="js/auth.js?v=10"></script>
+<script src="js/cloud-sync.js?v=10"></script>
+<script src="js/app.js?v=10"></script>
 
 </body>
 </html>

@@ -686,6 +686,16 @@ html, body {
 .btn-rate-bulk:hover { background: #0f766e; }
 .btn-rate-bulk:active { background: #115e59; }
 
+/* ===== 퍼센트 일괄수정 버튼 ===== */
+.btn-percent-bulk {
+  background: #6366f1;
+  color: #ffffff;
+  border: 1px solid #4f46e5;
+  font-weight: 600;
+}
+.btn-percent-bulk:hover { background: #4f46e5; }
+.btn-percent-bulk:active { background: #4338ca; }
+
 /* 환율 일괄수정 모달은 좀 더 넓게 */
 .modal-rate-bulk { max-width: 440px; }
 .modal-rate-bulk .modal-desc {

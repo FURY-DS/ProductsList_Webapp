@@ -30,6 +30,7 @@ function initActions() {
   document.getElementById('csv-import-input').addEventListener('change', handleCsvImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAll);
   document.getElementById('btn-rate-bulk').addEventListener('click', openRateBulkModal);
+  document.getElementById('btn-percent-bulk').addEventListener('click', openPctBulkModal);
 }
 
 /** 전체 데이터 내보내기 (상품리스트 + 마켓플레이스 + 오픈마켓정산) */
