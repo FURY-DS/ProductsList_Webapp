@@ -55,7 +55,7 @@ const CONFIG = {
         { page: 'tossshopping', label: '토스쇼핑',     url: 'tossshopping.html', ready: true }
       ]
     },
-    { page: 'settlement',   label: '오픈마켓정산', url: 'settlement.html',   active: false, ready: true, adminOnly: true }
+    { page: 'settlement',   label: '오픈마켓정산', url: 'settlement.html',   active: false, ready: true, exclusiveUser: 'alcave' }
   ],
 
   // 필드 정의 - 카드에 표시되는 입력 필드

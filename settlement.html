@@ -8,11 +8,11 @@
 <link rel="stylesheet" href="css/smartstore.css" />
 <link rel="stylesheet" href="css/settlement.css" />
 <script>
-  // 관리자 전용 페이지 가드 - 권한 없으면 즉시 리다이렉트
+  // alcave 전용 페이지 가드 - 다른 사용자는 즉시 리다이렉트
   (function () {
-    var role = localStorage.getItem('auth_role') || sessionStorage.getItem('auth_role');
-    if (role !== 'admin') {
-      alert('오픈마켓정산 페이지는 관리자만 이용할 수 있어요.');
+    var user = localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username');
+    if (user !== 'alcave') {
+      alert('오픈마켓정산 페이지는 alcave만 이용할 수 있어요.');
       window.location.replace('index.html');
     }
   })();
@@ -80,31 +80,31 @@
 
 <div id="toast-container"></div>
 
-<script src="js/config.js?v=11"></script>
-<script src="js/settlement-config.js?v=11"></script>
-<script src="js/settlement-state.js?v=11"></script>
-<script src="js/settlement-storage.js?v=11"></script>
-<script src="js/settlement-render.js?v=11"></script>
-<script src="js/settlement-actions.js?v=11"></script>
-<script src="js/utils.js?v=11"></script>
-<script src="js/toast.js?v=11"></script>
-<script src="js/modal.js?v=11"></script>
-<script src="js/menu.js?v=11"></script>
-<script src="js/settlement-app.js?v=11"></script>
+<script src="js/config.js?v=12"></script>
+<script src="js/settlement-config.js?v=12"></script>
+<script src="js/settlement-state.js?v=12"></script>
+<script src="js/settlement-storage.js?v=12"></script>
+<script src="js/settlement-render.js?v=12"></script>
+<script src="js/settlement-actions.js?v=12"></script>
+<script src="js/utils.js?v=12"></script>
+<script src="js/toast.js?v=12"></script>
+<script src="js/modal.js?v=12"></script>
+<script src="js/menu.js?v=12"></script>
+<script src="js/settlement-app.js?v=12"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
     initMenu();
 
-    // 서버에서 세션/권한 재확인 (로컬스토리지 조작 우회 방지)
+    // 서버에서 세션/사용자 재확인 (로컬스토리지 조작 우회 방지)
     try {
       var token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
       if (!token) { window.location.replace('index.html'); return; }
       var res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
       if (!res.ok) { window.location.replace('index.html'); return; }
       var data = await res.json();
-      if (data.role !== 'admin') {
-        alert('오픈마켓정산 페이지는 관리자만 이용할 수 있어요.');
+      if (data.username !== 'alcave') {
+        alert('오픈마켓정산 페이지는 alcave만 이용할 수 있어요.');
         window.location.replace('index.html');
         return;
       }

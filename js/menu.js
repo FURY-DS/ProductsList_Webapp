@@ -10,9 +10,20 @@ function getCurrentRole() {
   return localStorage.getItem('auth_role') || sessionStorage.getItem('auth_role') || null;
 }
 
+/** 현재 사용자명 (localStorage / sessionStorage에서 읽기) */
+function getCurrentUsername() {
+  return localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username') || null;
+}
+
 /** 관리자 여부 */
 function isCurrentUserAdmin() {
   return getCurrentRole() === 'admin';
+}
+
+/** 특정 사용자 전용 항목 접근 가능 여부 */
+function canAccessExclusiveUser(item) {
+  if (!item.exclusiveUser) return true;
+  return getCurrentUsername() === item.exclusiveUser;
 }
 
 /** 메뉴 초기화 (DOM 로드 후 호출) */
@@ -57,7 +68,9 @@ function renderMenuItems() {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
   CONFIG.MENU_ITEMS.forEach(item => {
-    // adminOnly 항목은 관리자에게만 표시
+    // exclusiveUser: 특정 사용자만 접근 가능
+    if (item.exclusiveUser && !canAccessExclusiveUser(item)) return;
+    // adminOnly 항목은 관리자에게만 표시 (레거시 호환)
     if (item.adminOnly && !isCurrentUserAdmin()) return;
 
     if (item.children && item.children.length > 0) {
@@ -83,7 +96,8 @@ function renderMenuItems() {
       if (hasActiveChild) sub.classList.add('show');
 
       item.children.forEach(child => {
-        // 하위 항목도 adminOnly 필터링
+        // 하위 항목도 exclusiveUser / adminOnly 필터링
+        if (child.exclusiveUser && !canAccessExclusiveUser(child)) return;
         if (child.adminOnly && !isCurrentUserAdmin()) return;
         const btn = createMenuButton(child, currentPage);
         sub.appendChild(btn);
