@@ -10,6 +10,7 @@
 const Auth = {
   token: null,
   username: null,
+  role: null,
 
   /** 초기화 - localStorage 또는 sessionStorage에서 토큰 복원 */
   init() {
@@ -21,11 +22,20 @@ const Auth = {
       localStorage.getItem('auth_username') ||
       sessionStorage.getItem('auth_username') ||
       null;
+    this.role =
+      localStorage.getItem('auth_role') ||
+      sessionStorage.getItem('auth_role') ||
+      null;
   },
 
   /** 인증 여부 */
   isAuthenticated() {
     return !!this.token;
+  },
+
+  /** 관리자 여부 */
+  isAdmin() {
+    return this.role === 'admin';
   },
 
   /** 회원가입 */
@@ -40,7 +50,7 @@ const Auth = {
       if (!res.ok) {
         return { ok: false, msg: data.error || '회원가입 실패' };
       }
-      this._setSession(data.token, data.username, options.autoLogin !== false);
+      this._setSession(data.token, data.username, data.role || 'user', options.autoLogin !== false);
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: '네트워크 오류: ' + e.message };
@@ -59,7 +69,7 @@ const Auth = {
       if (!res.ok) {
         return { ok: false, msg: data.error || '로그인 실패' };
       }
-      this._setSession(data.token, data.username, options.autoLogin !== false);
+      this._setSession(data.token, data.username, data.role || 'user', options.autoLogin !== false);
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: '네트워크 오류: ' + e.message };
@@ -90,6 +100,9 @@ const Auth = {
         const data = await res.json();
         if (data.username) {
           this.username = data.username;
+          this.role = data.role || 'user';
+          // storage에도 role 업데이트
+          this._updateRole(data.role || 'user');
           return true;
         }
       }
@@ -108,32 +121,49 @@ const Auth = {
   },
 
   /** 세션 저장 (내부) */
-  _setSession(token, username, autoLogin) {
+  _setSession(token, username, role, autoLogin) {
     this.token = token;
     this.username = username;
+    this.role = role || 'user';
 
     // 양쪽 다 정리
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_username');
+    localStorage.removeItem('auth_role');
     sessionStorage.removeItem('auth_token');
     sessionStorage.removeItem('auth_username');
+    sessionStorage.removeItem('auth_role');
 
     // 자동로그인이면 localStorage (영구), 아니면 sessionStorage (탭 닫으면 삭제)
     const storage = autoLogin ? localStorage : sessionStorage;
     storage.setItem('auth_token', token);
     storage.setItem('auth_username', username);
+    storage.setItem('auth_role', this.role);
 
     localStorage.removeItem('cloud_auth_key');
+  },
+
+  /** role만 업데이트 (checkSession 후) */
+  _updateRole(role) {
+    this.role = role;
+    if (localStorage.getItem('auth_token')) {
+      localStorage.setItem('auth_role', role);
+    } else if (sessionStorage.getItem('auth_token')) {
+      sessionStorage.setItem('auth_role', role);
+    }
   },
 
   /** 세션 삭제 (내부) */
   _clearSession() {
     this.token = null;
     this.username = null;
+    this.role = null;
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_username');
+    localStorage.removeItem('auth_role');
     sessionStorage.removeItem('auth_token');
     sessionStorage.removeItem('auth_username');
+    sessionStorage.removeItem('auth_role');
     localStorage.removeItem('cloud_auth_key');
   },
 

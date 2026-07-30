@@ -291,7 +291,14 @@ async function handleLogout() {
 function updateUserInfo() {
   const badge = document.getElementById('user-badge');
   if (badge && Auth.username) {
-    badge.textContent = Auth.username;
+    const roleLabel = Auth.isAdmin() ? ' 👑관리자' : '';
+    badge.textContent = Auth.username + roleLabel;
+  }
+
+  // 관리자 패널 링크 표시/숨김
+  const adminLink = document.getElementById('admin-link');
+  if (adminLink) {
+    adminLink.style.display = Auth.isAdmin() ? 'inline-block' : 'none';
   }
 
   const syncBtn = document.getElementById('btn-cloud-sync');

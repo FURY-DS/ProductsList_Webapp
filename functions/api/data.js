@@ -13,12 +13,12 @@ import { verifySession, jsonResponse, handleOptions } from '../_lib/auth.js';
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const username = await verifySession(env.DATA_KV, request);
-  if (!username) {
+  const session = await verifySession(env.DATA_KV, request);
+  if (!session) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 
-  const dataKey = `data:${username}`;
+  const dataKey = `data:${session.username}`;
   const raw = await env.DATA_KV.get(dataKey);
 
   if (!raw) {
@@ -37,8 +37,8 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  const username = await verifySession(env.DATA_KV, request);
-  if (!username) {
+  const session = await verifySession(env.DATA_KV, request);
+  if (!session) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 
@@ -53,7 +53,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Missing fields (data, ts)' }, 400);
   }
 
-  const dataKey = `data:${username}`;
+  const dataKey = `data:${session.username}`;
 
   // last-write-wins: 기존 데이터의 타임스탬프 확인
   const existing = await env.DATA_KV.get(dataKey);

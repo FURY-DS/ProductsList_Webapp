@@ -1,6 +1,8 @@
 /* =====================================================
    api/auth/register.js - 회원가입
-   POST /api/auth/register  { username, password } → { token, username }
+   POST /api/auth/register  { username, password } → { token, username, role }
+
+   모든 신규 가입자는 role: "user"
    ===================================================== */
 
 import {
@@ -36,7 +38,11 @@ export async function onRequestPost(context) {
 
   const token = await createSession(env.DATA_KV, result.username);
 
-  return jsonResponse({ token, username: result.username });
+  return jsonResponse({
+    token,
+    username: result.username,
+    role: result.role || 'user'
+  });
 }
 
 export async function onRequestOptions() {

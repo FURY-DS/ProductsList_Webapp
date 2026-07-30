@@ -3,11 +3,11 @@
    DELETE /api/admin/user?username=xxx  → 계정+데이터+세션 전체 삭제
    POST   /api/admin/user  { username, newPassword } → 비밀번호 재설정
 
-   인증: X-Admin-Key header
+   인증: X-Admin-Key (마스터 키) 또는 admin 역할 Bearer 토큰
    ===================================================== */
 
 import {
-  jsonResponse, handleOptions,
+  verifyAdmin, jsonResponse, handleOptions,
   validateUsername, validatePassword
 } from '../../_lib/auth.js';
 
@@ -37,8 +37,8 @@ async function deleteAllSessions(kv, username) {
 export async function onRequestDelete(context) {
   const { request, env } = context;
 
-  const adminKey = request.headers.get('X-Admin-Key');
-  if (!adminKey || adminKey !== env.ADMIN_KEY) {
+  const admin = await verifyAdmin(env.DATA_KV, request, env);
+  if (!admin.ok) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 
@@ -58,6 +58,11 @@ export async function onRequestDelete(context) {
     return jsonResponse({ error: '존재하지 않는 사용자입니다' }, 404);
   }
 
+  // 자기 자신 삭제 방지 (토큰 인증 시)
+  if (admin.username && admin.username === username) {
+    return jsonResponse({ error: '자기 자신의 계정은 삭제할 수 없습니다' }, 400);
+  }
+
   // 계정 + 데이터 삭제
   await env.DATA_KV.delete(userKey);
   await env.DATA_KV.delete(dataKey);
@@ -72,8 +77,8 @@ export async function onRequestDelete(context) {
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  const adminKey = request.headers.get('X-Admin-Key');
-  if (!adminKey || adminKey !== env.ADMIN_KEY) {
+  const admin = await verifyAdmin(env.DATA_KV, request, env);
+  if (!admin.ok) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 

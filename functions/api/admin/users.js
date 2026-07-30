@@ -1,18 +1,17 @@
 /* =====================================================
    api/admin/users.js - 전체 사용자 목록 조회
-   GET /api/admin/users  (X-Admin-Key header) → { users: [...] }
+   GET /api/admin/users  → { users: [...] }
 
-   KV list() 로 user: 접두사 키를 모두 가져옴
+   인증: X-Admin-Key (마스터 키) 또는 admin 역할 Bearer 토큰
    ===================================================== */
 
-import { jsonResponse, handleOptions } from '../../_lib/auth.js';
+import { verifyAdmin, jsonResponse, handleOptions } from '../../_lib/auth.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  // 관리자 인증
-  const adminKey = request.headers.get('X-Admin-Key');
-  if (!adminKey || adminKey !== env.ADMIN_KEY) {
+  const admin = await verifyAdmin(env.DATA_KV, request, env);
+  if (!admin.ok) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 
@@ -28,6 +27,7 @@ export async function onRequestGet(context) {
           const user = JSON.parse(raw);
           users.push({
             username: user.username,
+            role: user.role || 'user',
             createdAt: user.createdAt || 0
           });
         } catch (e) {

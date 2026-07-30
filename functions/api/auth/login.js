@@ -1,6 +1,6 @@
 /* =====================================================
    api/auth/login.js - 로그인
-   POST /api/auth/login  { username, password } → { token, username }
+   POST /api/auth/login  { username, password } → { token, username, role }
    ===================================================== */
 
 import {
@@ -31,7 +31,11 @@ export async function onRequestPost(context) {
 
   const token = await createSession(env.DATA_KV, result.username);
 
-  return jsonResponse({ token, username: result.username });
+  return jsonResponse({
+    token,
+    username: result.username,
+    role: result.role || 'user'
+  });
 }
 
 export async function onRequestOptions() {

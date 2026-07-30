@@ -3,17 +3,17 @@
    GET    /api/admin/data?username=xxx  → { data, ts }
    DELETE /api/admin/data?username=xxx  → { ok }
 
-   인증: X-Admin-Key header
+   인증: X-Admin-Key (마스터 키) 또는 admin 역할 Bearer 토큰
    ===================================================== */
 
-import { jsonResponse, handleOptions } from '../../_lib/auth.js';
+import { verifyAdmin, jsonResponse, handleOptions } from '../../_lib/auth.js';
 
 // GET: 사용자 데이터 조회
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const adminKey = request.headers.get('X-Admin-Key');
-  if (!adminKey || adminKey !== env.ADMIN_KEY) {
+  const admin = await verifyAdmin(env.DATA_KV, request, env);
+  if (!admin.ok) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 
@@ -41,8 +41,8 @@ export async function onRequestGet(context) {
 export async function onRequestDelete(context) {
   const { request, env } = context;
 
-  const adminKey = request.headers.get('X-Admin-Key');
-  if (!adminKey || adminKey !== env.ADMIN_KEY) {
+  const admin = await verifyAdmin(env.DATA_KV, request, env);
+  if (!admin.ok) {
     return jsonResponse({ error: 'Unauthorized' }, 401);
   }
 

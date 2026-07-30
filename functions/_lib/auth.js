@@ -1,19 +1,24 @@
 /* =====================================================
    _lib/auth.js - 공통 인증 유틸리티
-   PBKDF2 비밀번호 해싱, 세션 관리, CORS 헬퍼
+   PBKDF2 비밀번호 해싱, 세션 관리, CORS 헬퍼, 관리자 인증
 
    KV 구조:
-   user:<username>    → { username, salt, hash, createdAt }
+   user:<username>    → { username, salt, hash, role, createdAt }
    session:<token>    → { username, createdAt }  (TTL 30일)
    data:<username>    → { data, ts }
+
+   role: "admin" | "user"  (기본값 "user")
    ===================================================== */
 
 const SESSION_TTL = 30 * 24 * 60 * 60; // 30일 (초)
 
+// 마이그레이션용 초기 관리자 아이디 (기존 가입자 중 role이 없는 경우)
+const INITIAL_ADMINS = ['alcave'];
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Key'
 };
 
 /** JSON 응답 (CORS 포함) */
@@ -58,7 +63,7 @@ async function hashPassword(password, saltB64) {
   return btoa(String.fromCharCode(...new Uint8Array(hash)));
 }
 
-/** 사용자 생성 */
+/** 사용자 생성 (기본 role: "user") */
 export async function createUser(kv, username, password) {
   const normalized = username.toLowerCase();
   const userKey = `user:${normalized}`;
@@ -75,13 +80,14 @@ export async function createUser(kv, username, password) {
     username: normalized,
     salt,
     hash,
+    role: 'user',
     createdAt: Date.now()
   }));
 
-  return { ok: true, username: normalized };
+  return { ok: true, username: normalized, role: 'user' };
 }
 
-/** 사용자 인증 */
+/** 사용자 인증 - role 포함 반환 */
 export async function verifyUser(kv, username, password) {
   const normalized = username.toLowerCase();
   const userKey = `user:${normalized}`;
@@ -98,7 +104,13 @@ export async function verifyUser(kv, username, password) {
     return { error: '비밀번호가 올바르지 않습니다' };
   }
 
-  return { ok: true, username: user.username };
+  // 마이그레이션: role이 없으면 초기 관리자 목록으로 판단
+  if (!user.role) {
+    user.role = INITIAL_ADMINS.includes(normalized) ? 'admin' : 'user';
+    await kv.put(userKey, JSON.stringify(user));
+  }
+
+  return { ok: true, username: user.username, role: user.role };
 }
 
 /** 세션 생성 (UUID 토큰, 30일 TTL) */
@@ -114,7 +126,10 @@ export async function createSession(kv, username) {
   return token;
 }
 
-/** 세션 검증 - 요청에서 토큰 추출 후 username 반환 */
+/**
+ * 세션 검증 - 요청에서 토큰 추출 후 { username, role } 반환
+ * role을 얻기 위해 user 레코드를 추가 조회 + 마이그레이션
+ */
 export async function verifySession(kv, request) {
   const token = extractToken(request);
   if (!token) return null;
@@ -123,7 +138,21 @@ export async function verifySession(kv, request) {
   if (!raw) return null;
 
   const session = JSON.parse(raw);
-  return session.username;
+  const username = session.username;
+
+  // user 레코드에서 role 조회 + 마이그레이션
+  const userRaw = await kv.get(`user:${username}`);
+  if (!userRaw) return null;
+
+  const user = JSON.parse(userRaw);
+
+  // 마이그레이션: role이 없으면 초기 관리자 목록으로 판단
+  if (!user.role) {
+    user.role = INITIAL_ADMINS.includes(username) ? 'admin' : 'user';
+    await kv.put(`user:${username}`, JSON.stringify(user));
+  }
+
+  return { username, role: user.role };
 }
 
 /** Authorization 헤더에서 Bearer 토큰 추출 */
@@ -138,6 +167,28 @@ export async function deleteSession(kv, token) {
   if (token) {
     await kv.delete(`session:${token}`);
   }
+}
+
+/**
+ * 관리자 접근 확인
+ * 방법 1: X-Admin-Key 헤더 (마스터 키)
+ * 방법 2: Bearer 토큰 (role이 "admin"인 사용자)
+ * → { ok: true, method, username } 또는 { ok: false }
+ */
+export async function verifyAdmin(kv, request, env) {
+  // 방법 1: X-Admin-Key (마스터 키)
+  const adminKey = request.headers.get('X-Admin-Key');
+  if (adminKey && env.ADMIN_KEY && adminKey === env.ADMIN_KEY) {
+    return { ok: true, method: 'key', username: null };
+  }
+
+  // 방법 2: Bearer 토큰 (admin 역할 사용자)
+  const session = await verifySession(kv, request);
+  if (session && session.role === 'admin') {
+    return { ok: true, method: 'token', username: session.username };
+  }
+
+  return { ok: false };
 }
 
 /** 아이디 검증: 3~20자 영문/숫자/언더스코어 */
