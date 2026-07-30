@@ -4,12 +4,13 @@
 
 /** 11번가 카드 데이터를 localStorage에 저장 (동시에 백업도 갱신) */
 function saveElevenst() {
+  const storageKey = getUserScopedKey(ELEVENST_CONFIG.STORAGE_KEY);
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
     const data = JSON.stringify(elevenstState.cards);
-    localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -24,9 +25,9 @@ function saveElevenst() {
   const cleaned = cleanElevenstCardsForSave(elevenstState.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(ELEVENST_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -61,7 +62,8 @@ function isStorageQuotaError(e) {
 /** 11번가 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
 function loadElevenst() {
   try {
-    let raw = localStorage.getItem(ELEVENST_CONFIG.STORAGE_KEY);
+    const storageKey = migrateLegacyKeyToUserScope(ELEVENST_CONFIG.STORAGE_KEY, Array.isArray);
+    let raw = localStorage.getItem(storageKey);
     let data = null;
 
     if (raw) {
@@ -69,7 +71,7 @@ function loadElevenst() {
     }
 
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(ELEVENST_CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(storageKey + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }
@@ -105,7 +107,7 @@ function loadElevenst() {
 /** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistData() {
   try {
-    const raw = localStorage.getItem(ELEVENST_CONFIG.PRODUCTLIST_STORAGE_KEY);
+    const raw = getUserScopedItemWithFallback(ELEVENST_CONFIG.PRODUCTLIST_STORAGE_KEY);
     if (!raw) return [];
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];

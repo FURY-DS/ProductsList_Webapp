@@ -13,6 +13,7 @@ const CloudSync = {
   enabled: false,
   lastSyncTs: 0,
   syncing: false,
+  pendingPushData: null,
   _pollTimer: null,
 
   /** 초기화 - 인증 상태 확인 */
@@ -52,7 +53,10 @@ const CloudSync = {
   /** 클라우드에 데이터 저장 */
   async push(data) {
     if (!this.enabled || !Auth.token) return false;
-    if (this.syncing) return false;
+    if (this.syncing) {
+      this.pendingPushData = data;
+      return false;
+    }
     this.syncing = true;
 
     try {
@@ -94,6 +98,11 @@ const CloudSync = {
       return false;
     } finally {
       this.syncing = false;
+      if (this.pendingPushData) {
+        const pending = this.pendingPushData;
+        this.pendingPushData = null;
+        this.push(pending);
+      }
     }
   },
 

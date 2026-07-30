@@ -4,6 +4,7 @@
 
 /** DOM 로드 후 각 모듈 초기화 */
 function initALWAYS() {
+  if (!requireAuthenticatedPage()) return;
   // 페이지 제목 설정
   document.title = ALWAYS_CONFIG.PAGE_TITLE;
   const titleEl = document.querySelector('.topbar .title');

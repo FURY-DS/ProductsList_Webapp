@@ -4,12 +4,13 @@
 
 /** 로켓그로스 카드 데이터를 localStorage에 저장 (동시에 백업도 갱신) */
 function saveRocketgrowth() {
+  const storageKey = getUserScopedKey(ROCKETGROWTH_CONFIG.STORAGE_KEY);
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
     const data = JSON.stringify(rocketgrowthState.cards);
-    localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -24,9 +25,9 @@ function saveRocketgrowth() {
   const cleaned = cleanRocketgrowthCardsForSave(rocketgrowthState.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -61,7 +62,8 @@ function isRocketgrowthStorageQuotaError(e) {
 /** 로켓그로스 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
 function loadRocketgrowth() {
   try {
-    let raw = localStorage.getItem(ROCKETGROWTH_CONFIG.STORAGE_KEY);
+    const storageKey = migrateLegacyKeyToUserScope(ROCKETGROWTH_CONFIG.STORAGE_KEY, Array.isArray);
+    let raw = localStorage.getItem(storageKey);
     let data = null;
 
     if (raw) {
@@ -69,7 +71,7 @@ function loadRocketgrowth() {
     }
 
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(ROCKETGROWTH_CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(storageKey + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }
@@ -105,7 +107,7 @@ function loadRocketgrowth() {
 /** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistDataForRocketgrowth() {
   try {
-    const raw = localStorage.getItem(ROCKETGROWTH_CONFIG.PRODUCTLIST_STORAGE_KEY);
+    const raw = getUserScopedItemWithFallback(ROCKETGROWTH_CONFIG.PRODUCTLIST_STORAGE_KEY);
     if (!raw) return [];
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];

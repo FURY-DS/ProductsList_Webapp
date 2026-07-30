@@ -6,12 +6,13 @@
  *  @returns {{ ok: boolean, imagesRemoved?: boolean, msg?: string }}
  */
 function saveSmartstore() {
+  const storageKey = getUserScopedKey(SMARTSTORE_CONFIG.STORAGE_KEY);
   // 먼저 이미지를 포함한 원본 데이터로 저장 시도
   try {
     const data = JSON.stringify(smartstoreState.cards);
-    localStorage.setItem(SMARTSTORE_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(SMARTSTORE_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -26,9 +27,9 @@ function saveSmartstore() {
   const cleaned = cleanSmartstoreCardsForSave(smartstoreState.cards);
   try {
     const data = JSON.stringify(cleaned);
-    localStorage.setItem(SMARTSTORE_CONFIG.STORAGE_KEY, data);
+    localStorage.setItem(storageKey, data);
     try {
-      localStorage.setItem(SMARTSTORE_CONFIG.STORAGE_KEY + '_backup', data);
+      localStorage.setItem(storageKey + '_backup', data);
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
@@ -63,7 +64,8 @@ function isStorageQuotaError(e) {
 /** 스마트스토어 카드 데이터를 localStorage에서 불러오기 (손상 시 백업 복구) */
 function loadSmartstore() {
   try {
-    let raw = localStorage.getItem(SMARTSTORE_CONFIG.STORAGE_KEY);
+    const storageKey = migrateLegacyKeyToUserScope(SMARTSTORE_CONFIG.STORAGE_KEY, Array.isArray);
+    let raw = localStorage.getItem(storageKey);
     let data = null;
 
     if (raw) {
@@ -71,7 +73,7 @@ function loadSmartstore() {
     }
 
     if (!Array.isArray(data)) {
-      const backupRaw = localStorage.getItem(SMARTSTORE_CONFIG.STORAGE_KEY + '_backup');
+      const backupRaw = localStorage.getItem(storageKey + '_backup');
       if (backupRaw) {
         try { data = JSON.parse(backupRaw); } catch (e) { data = null; }
       }
@@ -107,7 +109,7 @@ function loadSmartstore() {
 /** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistData() {
   try {
-    const raw = localStorage.getItem(SMARTSTORE_CONFIG.PRODUCTLIST_STORAGE_KEY);
+    const raw = getUserScopedItemWithFallback(SMARTSTORE_CONFIG.PRODUCTLIST_STORAGE_KEY);
     if (!raw) return [];
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];
