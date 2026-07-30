@@ -87,7 +87,7 @@ function renderMenuItems() {
       toggle.className = 'menu-group-toggle';
       toggle.dataset.group = item.page;
       toggle.title = `${item.label} 메뉴`;
-      toggle.innerHTML = `<span>${item.label}</span><span class="menu-group-arrow">▾</span>`;
+      toggle.innerHTML = `<span>${item.label}</span><span class="menu-group-arrow">▸</span>`;
 
       // 현재 페이지가 그룹 하위에 있으면 그룹을 활성/펼침 표시
       const hasActiveChild = item.children.some(child => child.url === currentPage || (currentPage === '' && child.url === 'index.html'));

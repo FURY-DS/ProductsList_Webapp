@@ -180,7 +180,7 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  overflow: visible;
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
@@ -225,6 +225,7 @@ html, body {
 
 /* ===== Nested menu group ===== */
 .dropdown .menu-group {
+  position: relative;
   border-bottom: 1px solid var(--border);
 }
 .dropdown .menu-group:last-child {
@@ -252,28 +253,39 @@ html, body {
   transition: transform 0.2s;
 }
 .dropdown .menu-group.open .menu-group-arrow {
-  transform: rotate(180deg);
+  transform: rotate(90deg);
 }
 .dropdown .menu-sub {
   display: none;
-  background: #f9f9fb;
-  border-top: 1px dashed var(--border);
+  position: absolute;
+  top: -1px;
+  left: 100%;
+  margin-left: 6px;
+  min-width: 160px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 70;
 }
 .dropdown .menu-sub.show {
   display: block;
 }
 .dropdown .menu-sub button {
-  padding-left: 28px;
+  padding: 12px 16px;
   font-size: 13px;
   font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+.dropdown .menu-sub button:last-child {
   border-bottom: none;
-  background: transparent;
 }
 .dropdown .menu-sub button:hover {
-  background: #f0eff5;
+  background: #f5f6fa;
 }
 .dropdown .menu-sub button.active {
-  background: #e8e4ff;
+  background: #ede9ff;
   color: var(--primary);
 }
 .dropdown .menu-group.active-group > .menu-group-toggle {
