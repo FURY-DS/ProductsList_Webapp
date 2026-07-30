@@ -1,9 +1,31 @@
 /* =====================================================
-   app.js - 앱 초기화, 키보드 단축키, 부팅
+   app.js - 앱 초기화, 인증 흐름, 키보드 단축키
    ===================================================== */
 
-/** DOM 로드 후 각 모듈 초기화 */
-function init() {
+/** DOM 로드 후 시작: 인증 확인 → 앱 시작 or 로그인 화면 */
+async function init() {
+  Auth.init();
+
+  // 인증 UI 이벤트 바인딩
+  initAuthUI();
+
+  // 세션 확인
+  const isValid = await Auth.checkSession();
+
+  if (isValid) {
+    await startApp();
+  } else {
+    showAuthOverlay();
+  }
+
+  bindKeyboardShortcuts();
+}
+
+/** 인증된 사용자를 위한 앱 초기화 */
+async function startApp() {
+  hideAuthOverlay();
+
+  // 모듈 초기화
   initToast();
   initModal();
   initBoard();
@@ -12,11 +34,11 @@ function init() {
   initActions();
   initRateBulk();
 
-  // 클라우드 동기화 초기화
-  CloudSync.init();
-  initCloudSyncButton();
+  // 사용자 정보 표시
+  updateUserInfo();
 
-  // 자동 동기화 시작 (10초 간격 폴링)
+  // 클라우드 동기화
+  CloudSync.init();
   CloudSync.startAutoSync(10000);
 
   // 탭이 다시 활성화될 때 즉시 pull
@@ -25,8 +47,6 @@ function init() {
       cloudPullAndRender();
     }
   });
-
-  bindKeyboardShortcuts();
 
   // 데이터 로드
   load();
@@ -43,11 +63,190 @@ function init() {
   cloudPullAndRender();
 }
 
+// =====================================================
+//  인증 UI
+// =====================================================
+
+/** 인증 오버레이 표시 */
+function showAuthOverlay() {
+  document.body.classList.add('app-hidden');
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  // 폼 초기화
+  const errEl = document.getElementById('auth-error');
+  if (errEl) errEl.textContent = '';
+  const submitBtn = document.getElementById('auth-submit');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = '로그인';
+  }
+}
+
+/** 인증 오버레이 숨기기 + 앱 표시 */
+function hideAuthOverlay() {
+  document.body.classList.remove('app-hidden');
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+/** 인증 UI 이벤트 바인딩 */
+function initAuthUI() {
+  // 탭 전환 (로그인 ↔ 회원가입)
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const mode = tab.dataset.mode;
+      const submitBtn = document.getElementById('auth-submit');
+      const confirmField = document.getElementById('auth-confirm-field');
+
+      if (mode === 'register') {
+        if (submitBtn) submitBtn.textContent = '회원가입';
+        if (confirmField) confirmField.classList.remove('hidden');
+      } else {
+        if (submitBtn) submitBtn.textContent = '로그인';
+        if (confirmField) confirmField.classList.add('hidden');
+      }
+
+      // 에러 메시지 초기화
+      const errEl = document.getElementById('auth-error');
+      if (errEl) errEl.textContent = '';
+    });
+  });
+
+  // 폼 제출
+  const form = document.getElementById('auth-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await handleAuthSubmit();
+    });
+  }
+
+  // 로그아웃 버튼
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
+  }
+
+  // 수동 동기화 버튼
+  const syncBtn = document.getElementById('btn-cloud-sync');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', manualCloudSync);
+  }
+}
+
+/** 로그인 / 회원가입 처리 */
+async function handleAuthSubmit() {
+  const usernameInput = document.getElementById('auth-username');
+  const passwordInput = document.getElementById('auth-password');
+  const passwordConfirmInput = document.getElementById('auth-password-confirm');
+  const errEl = document.getElementById('auth-error');
+  const submitBtn = document.getElementById('auth-submit');
+
+  const username = usernameInput ? usernameInput.value.trim() : '';
+  const password = passwordInput ? passwordInput.value : '';
+  const activeTab = document.querySelector('.auth-tab.active');
+  const mode = activeTab ? activeTab.dataset.mode : 'login';
+
+  // 에러 초기화
+  if (errEl) errEl.textContent = '';
+
+  // 입력값 검증
+  if (!username || !password) {
+    if (errEl) errEl.textContent = '아이디와 비밀번호를 입력해주세요';
+    return;
+  }
+
+  if (mode === 'register') {
+    const confirm = passwordConfirmInput ? passwordConfirmInput.value : '';
+    if (password !== confirm) {
+      if (errEl) errEl.textContent = '비밀번호가 일치하지 않습니다';
+      return;
+    }
+  }
+
+  // 버튼 비활성화
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = '처리 중...';
+  }
+
+  try {
+    let result;
+    if (mode === 'register') {
+      result = await Auth.register(username, password);
+    } else {
+      result = await Auth.login(username, password);
+    }
+
+    if (result.ok) {
+      await startApp();
+    } else {
+      if (errEl) errEl.textContent = result.msg;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = mode === 'register' ? '회원가입' : '로그인';
+      }
+    }
+  } catch (e) {
+    if (errEl) errEl.textContent = '오류가 발생했습니다: ' + e.message;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = mode === 'register' ? '회원가입' : '로그인';
+    }
+  }
+}
+
+/** 로그아웃 처리 */
+async function handleLogout() {
+  CloudSync.stopAutoSync();
+  await Auth.logout();
+  showAuthOverlay();
+
+  // 폼 초기화
+  const usernameInput = document.getElementById('auth-username');
+  const passwordInput = document.getElementById('auth-password');
+  const passwordConfirmInput = document.getElementById('auth-password-confirm');
+  if (usernameInput) usernameInput.value = '';
+  if (passwordInput) passwordInput.value = '';
+  if (passwordConfirmInput) passwordConfirmInput.value = '';
+
+  // 로그인 탭으로 초기화
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  const loginTab = document.querySelector('.auth-tab[data-mode="login"]');
+  if (loginTab) loginTab.classList.add('active');
+  const submitBtn = document.getElementById('auth-submit');
+  if (submitBtn) submitBtn.textContent = '로그인';
+  const confirmField = document.getElementById('auth-confirm-field');
+  if (confirmField) confirmField.classList.add('hidden');
+}
+
+/** 헤더에 사용자 정보 + 동기화 상태 표시 */
+function updateUserInfo() {
+  const badge = document.getElementById('user-badge');
+  if (badge && Auth.username) {
+    badge.textContent = Auth.username;
+  }
+
+  const syncBtn = document.getElementById('btn-cloud-sync');
+  if (syncBtn) {
+    syncBtn.classList.add('active');
+    syncBtn.title = CloudSync.getStatusText();
+  }
+}
+
+// =====================================================
+//  클라우드 동기화
+// =====================================================
+
 /** 클라우드에서 최신 데이터를 가져와서 교체 + 재렌더링 */
 async function cloudPullAndRender() {
   if (!CloudSync.enabled) return;
 
-  const cloudData = await CloudSync.pull(CONFIG.STORAGE_KEY);
+  const cloudData = await CloudSync.pull();
   if (!cloudData || !cloudData.data || !Array.isArray(cloudData.data)) return;
 
   // 클라우드가 더 최신이면 교체
@@ -81,107 +280,10 @@ async function cloudPullAndRender() {
   }
 }
 
-/** 헤더에 클라우드 동기화 설정 버튼 초기화 */
-function initCloudSyncButton() {
-  const btn = document.getElementById('btn-cloud-sync');
-  if (!btn) return;
-
-  updateCloudSyncButton();
-
-  btn.addEventListener('click', openCloudSyncModal);
-
-  // 모달 내부 버튼 바인딩
-  const closeBtn = document.getElementById('cloud-sync-close');
-  if (closeBtn) closeBtn.addEventListener('click', closeCloudSyncModal);
-
-  const saveBtn = document.getElementById('cloud-sync-save');
-  if (saveBtn) saveBtn.addEventListener('click', saveCloudSyncSettings);
-
-  const manualBtn = document.getElementById('cloud-sync-manual');
-  if (manualBtn) manualBtn.addEventListener('click', manualCloudSync);
-
-  // 배경 클릭 시 닫기
-  const modal = document.getElementById('cloud-sync-modal');
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeCloudSyncModal();
-    });
-  }
-}
-
-/** 클라우드 동기화 버튼 상태 업데이트 */
-function updateCloudSyncButton() {
-  const btn = document.getElementById('btn-cloud-sync');
-  if (!btn) return;
-
-  if (CloudSync.enabled) {
-    btn.classList.add('active');
-    btn.title = CloudSync.getStatusText();
-  } else {
-    btn.classList.remove('active');
-    btn.title = '클라우드 동기화 설정';
-  }
-}
-
-/** 클라우드 동기화 설정 모달 열기 */
-function openCloudSyncModal() {
-  const modal = document.getElementById('cloud-sync-modal');
-  if (!modal) return;
-
-  // 현재 상태 표시
-  const statusEl = document.getElementById('cloud-sync-status');
-  if (statusEl) {
-    statusEl.textContent = CloudSync.getStatusText();
-  }
-
-  // API 키 입력 필드
-  const keyInput = document.getElementById('cloud-api-key');
-  if (keyInput) {
-    keyInput.value = CloudSync.apiKey || '';
-  }
-
-  modal.style.display = 'flex';
-}
-
-/** 클라우드 동기화 설정 모달 닫기 */
-function closeCloudSyncModal() {
-  const modal = document.getElementById('cloud-sync-modal');
-  if (modal) modal.style.display = 'none';
-}
-
-/** 클라우드 동기화 저장 (API 키 적용) */
-async function saveCloudSyncSettings() {
-  const keyInput = document.getElementById('cloud-api-key');
-  const key = keyInput ? keyInput.value.trim() : '';
-
-  if (key) {
-    CloudSync.setApiKey(key);
-
-    // 연결 테스트
-    const result = await CloudSync.testConnection();
-    if (result.ok) {
-      showToast('☁️ 클라우드 동기화가 켜졌어요!');
-      closeCloudSyncModal();
-
-      // 즉시 클라우드에서 데이터 pull
-      cloudPullAndRender();
-    } else {
-      showToast('❌ ' + result.msg);
-      // 키는 저장하되, 에러 메시지 표시
-    }
-  } else {
-    CloudSync.setApiKey('');
-    showToast('클라우드 동기화를 껐어요');
-    closeCloudSyncModal();
-  }
-
-  updateCloudSyncButton();
-}
-
 /** 수동 클라우드 동기화 (버튼) */
 async function manualCloudSync() {
   if (!CloudSync.enabled) {
-    showToast('먼저 API 키를 입력해주세요');
+    showToast('로그인이 필요합니다');
     return;
   }
 
@@ -191,19 +293,20 @@ async function manualCloudSync() {
   await cloudPullAndRender();
 
   // 2. 현재 데이터를 클라우드에 push
-  const ok = await CloudSync.push(CONFIG.STORAGE_KEY, state.cards);
+  const ok = await CloudSync.push(state.cards);
 
   if (ok) {
     showToast('☁️ 동기화 완료!');
-    updateCloudSyncButton();
-    const statusEl = document.getElementById('cloud-sync-status');
-    if (statusEl) statusEl.textContent = CloudSync.getStatusText();
+    updateUserInfo();
   } else {
-    showToast('❌ 동기화 실패. 네트워크를 확인해주세요.');
+    showToast('❌ 동기화 실패');
   }
 }
 
-/** 키보드 단축키 바인딩 */
+// =====================================================
+//  키보드 단축키
+// =====================================================
+
 function bindKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
     // ESC: 드롭다운 / 모달 닫기

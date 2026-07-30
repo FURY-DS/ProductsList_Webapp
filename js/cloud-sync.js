@@ -1,52 +1,44 @@
 /* =====================================================
-   cloud-sync.js - 클라우드 데이터 동기화 모듈
+   cloud-sync.js - 클라우드 데이터 동기화 모듈 (세션 기반)
    localStorage + Cloudflare KV 양방향 동기화
 
    작동 방식:
    - 저장 시: localStorage 저장 + 클라우드 push (비동기)
    - 로드 시: localStorage 먼저 → 클라우드에서 최신 확인 → 교체
    - 충돌 처리: last-write-wins (타임스탬프 비교)
+   - 인증: Auth.token (Bearer 토큰)
    ===================================================== */
 
 const CloudSync = {
   enabled: false,
-  apiKey: '',
   lastSyncTs: 0,
   syncing: false,
   _pollTimer: null,
 
-  /** 초기화 - localStorage에서 API 키 복원 */
+  /** 초기화 - 인증 상태 확인 */
   init() {
-    this.apiKey = localStorage.getItem('cloud_auth_key') || '';
-    this.enabled = !!this.apiKey;
     this.lastSyncTs = parseInt(localStorage.getItem('cloud_last_sync') || '0', 10) || 0;
+    this.enabled = Auth.isAuthenticated();
 
     if (this.enabled) {
-      console.log('[CloudSync] 활성화됨 (마지막 동기화:', new Date(this.lastSyncTs).toLocaleString(), ')');
-    }
-  },
-
-  /** API 키 설정 */
-  setApiKey(key) {
-    this.apiKey = key;
-    this.enabled = !!key;
-    if (key) {
-      localStorage.setItem('cloud_auth_key', key);
-      this.startAutoSync();
-    } else {
-      localStorage.removeItem('cloud_auth_key');
-      this.stopAutoSync();
+      console.log('[CloudSync] 활성화됨 (사용자:', Auth.username, ')');
     }
   },
 
   /** 클라우드에서 데이터 가져오기 */
-  async pull(key) {
-    if (!this.enabled) return null;
+  async pull() {
+    if (!this.enabled || !Auth.token) return null;
     try {
-      const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`, {
-        headers: { 'X-Auth-Key': this.apiKey }
+      const res = await fetch('/api/data', {
+        headers: { 'Authorization': `Bearer ${Auth.token}` }
       });
       if (!res.ok) {
+        if (res.status === 401) {
+          console.warn('[CloudSync] 세션 만료');
+          await Auth.logout();
+          location.reload();
+          return null;
+        }
         console.warn('[CloudSync] Pull 실패:', res.status);
         return null;
       }
@@ -58,8 +50,8 @@ const CloudSync = {
   },
 
   /** 클라우드에 데이터 저장 */
-  async push(key, data) {
-    if (!this.enabled) return false;
+  async push(data) {
+    if (!this.enabled || !Auth.token) return false;
     if (this.syncing) return false;
     this.syncing = true;
 
@@ -69,9 +61,9 @@ const CloudSync = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Auth-Key': this.apiKey
+          'Authorization': `Bearer ${Auth.token}`
         },
-        body: JSON.stringify({ key, data, ts })
+        body: JSON.stringify({ data, ts })
       });
 
       if (res.ok) {
@@ -87,6 +79,14 @@ const CloudSync = {
         return false;
       }
 
+      // 401: 세션 만료
+      if (res.status === 401) {
+        console.warn('[CloudSync] 세션 만료');
+        await Auth.logout();
+        location.reload();
+        return false;
+      }
+
       console.warn('[CloudSync] Push 실패:', res.status);
       return false;
     } catch (e) {
@@ -97,44 +97,9 @@ const CloudSync = {
     }
   },
 
-  /** 클라우드에서 최신 데이터를 가져와서 state와 병합 */
-  async pullAndMerge(storageKey, currentCards, onUpdated) {
-    if (!this.enabled) return;
-
-    const cloudData = await this.pull(storageKey);
-    if (!cloudData || !cloudData.data) return;
-
-    // 클라우드가 더 최신이면 교체
-    if (cloudData.ts > this.lastSyncTs) {
-      console.log('[CloudSync] 클라우드에서 최신 데이터 발견');
-      this.lastSyncTs = cloudData.ts;
-      localStorage.setItem('cloud_last_sync', cloudData.ts.toString());
-
-      // 콜백으로 데이터 교체 + 재렌더링
-      if (typeof onUpdated === 'function') {
-        onUpdated(cloudData.data);
-      }
-    }
-  },
-
-  /** 연결 테스트 */
-  async testConnection() {
-    if (!this.apiKey) return { ok: false, msg: 'API 키가 없어요' };
-    try {
-      const res = await fetch(`/api/data?key=__test__`, {
-        headers: { 'X-Auth-Key': this.apiKey }
-      });
-      if (res.ok) return { ok: true, msg: '연결 성공!' };
-      if (res.status === 401) return { ok: false, msg: 'API 키가 올바르지 않아요' };
-      return { ok: false, msg: `서버 응답: ${res.status}` };
-    } catch (e) {
-      return { ok: false, msg: '연결 실패: ' + e.message };
-    }
-  },
-
   /** 동기화 상태 텍스트 */
   getStatusText() {
-    if (!this.enabled) return '클라우드 동기화 끄짐';
+    if (!this.enabled) return '동기화 끄짐';
     if (!this.lastSyncTs) return '동기화 전';
     const date = new Date(this.lastSyncTs);
     const now = new Date();

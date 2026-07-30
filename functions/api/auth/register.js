@@ -1,0 +1,44 @@
+/* =====================================================
+   api/auth/register.js - 회원가입
+   POST /api/auth/register  { username, password } → { token, username }
+   ===================================================== */
+
+import {
+  createUser, createSession,
+  validateUsername, validatePassword,
+  jsonResponse, handleOptions
+} from '../../_lib/auth.js';
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
+  }
+
+  const { username, password } = body;
+
+  if (!validateUsername(username)) {
+    return jsonResponse({ error: '아이디는 3~20자의 영문/숫자만 가능합니다' }, 400);
+  }
+
+  if (!validatePassword(password)) {
+    return jsonResponse({ error: '비밀번호는 6자 이상이어야 합니다' }, 400);
+  }
+
+  const result = await createUser(env.DATA_KV, username, password);
+  if (result.error) {
+    return jsonResponse({ error: result.error }, 409);
+  }
+
+  const token = await createSession(env.DATA_KV, result.username);
+
+  return jsonResponse({ token, username: result.username });
+}
+
+export async function onRequestOptions() {
+  return handleOptions();
+}

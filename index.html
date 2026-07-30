@@ -7,9 +7,37 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>상품리스트</title>
-<link rel="stylesheet" href="css/style.css?v=4" />
+<link rel="stylesheet" href="css/style.css?v=6" />
 </head>
-<body>
+<body class="app-hidden">
+
+<!-- 인증 오버레이 (로그인/회원가입) -->
+<div id="auth-overlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">📋 상품리스트</div>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" data-mode="login">로그인</button>
+      <button type="button" class="auth-tab" data-mode="register">회원가입</button>
+    </div>
+    <form id="auth-form">
+      <div class="auth-field">
+        <label for="auth-username">아이디</label>
+        <input type="text" id="auth-username" placeholder="3~20자 영문/숫자" autocomplete="username" />
+      </div>
+      <div class="auth-field">
+        <label for="auth-password">비밀번호</label>
+        <input type="password" id="auth-password" placeholder="6자 이상" autocomplete="current-password" />
+      </div>
+      <div class="auth-field hidden" id="auth-confirm-field">
+        <label for="auth-password-confirm">비밀번호 확인</label>
+        <input type="password" id="auth-password-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+      </div>
+      <p class="auth-error" id="auth-error"></p>
+      <button type="submit" class="btn-auth-submit" id="auth-submit">로그인</button>
+    </form>
+    <p class="auth-hint">첫 방문이면 회원가입을 먼저 해주세요.<br />각 사용자의 상품리스트가 독립적으로 관리됩니다.</p>
+  </div>
+</div>
 
 <header class="topbar">
   <div class="menu-wrapper">
@@ -33,7 +61,7 @@
     <span class="count" id="search-count"></span>
     <button class="btn btn-global" id="btn-export-all" title="전체 데이터 내보내기">전체내보내기</button>
     <button class="btn btn-global" id="btn-import-all" title="전체 데이터 가져오기">전체가져오기</button>
-    <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="클라우드 동기화 설정">☁️</button>
+    <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="수동 동기화">☁️</button>
   </div>
   <div class="actions">
     <button id="btn-export" title="데이터 내보내기">내보내기</button>
@@ -41,6 +69,10 @@
     <button id="btn-csv-template" title="엑셀 템플릿 다운로드" class="btn-csv">엑셀 템플릿</button>
     <button id="btn-csv-import" title="엑셀 파일 가져오기" class="btn-csv">엑셀 가져오기</button>
     <button id="btn-clear" title="전체 삭제">전체삭제</button>
+  </div>
+  <div class="user-area" id="user-area">
+    <span class="user-badge" id="user-badge"></span>
+    <button class="btn-logout" id="btn-logout" title="로그아웃">로그아웃</button>
   </div>
   <input type="file" id="import-input" accept="application/json" style="display:none" />
   <input type="file" id="import-all-input" accept="application/json" style="display:none" />
@@ -117,46 +149,22 @@
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
-<!-- 클라우드 동기화 모달 -->
-<div class="modal-backdrop" id="cloud-sync-modal" style="display:none;">
-  <div class="modal" style="max-width:460px;">
-    <h3>☁️ 클라우드 동기화</h3>
-    <p class="modal-desc">여러 기기에서 같은 데이터를 자동으로 공유합니다.</p>
-
-    <div class="cloud-sync-status-bar">
-      <span class="status-label">현재 상태:</span>
-      <strong id="cloud-sync-status">확인 중...</strong>
-    </div>
-
-    <div class="cloud-sync-input-wrap">
-      <label>API 키 (동기화 비밀번호)</label>
-      <input type="password" id="cloud-api-key" placeholder="API 키를 입력하세요" autocomplete="off" />
-      <p class="cloud-sync-hint">Cloudflare 대시보드에서 설정한 AUTH_KEY 값을 입력하세요.<br />키를 비우면 동기화가 꺼져요.</p>
-    </div>
-
-    <div class="modal-actions" style="flex-wrap:wrap; gap:8px;">
-      <button class="btn btn-cancel" id="cloud-sync-close">닫기</button>
-      <button class="btn btn-secondary" id="cloud-sync-manual">지금 동기화</button>
-      <button class="btn btn-confirm" id="cloud-sync-save">저장</button>
-    </div>
-  </div>
-</div>
-
 <!-- 스크립트 (의존성 순서대로 로드) -->
-<script src="js/config.js?v=5"></script>
-<script src="js/utils.js?v=5"></script>
-<script src="js/state.js?v=5"></script>
-<script src="js/toast.js?v=5"></script>
-<script src="js/modal.js?v=5"></script>
-<script src="js/storage.js?v=5"></script>
-<script src="js/photo.js?v=5"></script>
-<script src="js/search.js?v=5"></script>
-<script src="js/card.js?v=5"></script>
-<script src="js/menu.js?v=5"></script>
-<script src="js/actions.js?v=5"></script>
-<script src="js/rate-bulk.js?v=5"></script>
-<script src="js/cloud-sync.js?v=5"></script>
-<script src="js/app.js?v=5"></script>
+<script src="js/config.js?v=6"></script>
+<script src="js/utils.js?v=6"></script>
+<script src="js/state.js?v=6"></script>
+<script src="js/toast.js?v=6"></script>
+<script src="js/modal.js?v=6"></script>
+<script src="js/storage.js?v=6"></script>
+<script src="js/photo.js?v=6"></script>
+<script src="js/search.js?v=6"></script>
+<script src="js/card.js?v=6"></script>
+<script src="js/menu.js?v=6"></script>
+<script src="js/actions.js?v=6"></script>
+<script src="js/rate-bulk.js?v=6"></script>
+<script src="js/auth.js?v=6"></script>
+<script src="js/cloud-sync.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
 
 </body>
 </html>

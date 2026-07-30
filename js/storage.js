@@ -17,7 +17,7 @@ function save() {
     }
     // 클라우드 동기화 (비동기, 실패 무시)
     if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
-      CloudSync.push(CONFIG.STORAGE_KEY, state.cards);
+      CloudSync.push(state.cards);
     }
     return { ok: true };
   } catch (e) {
@@ -40,7 +40,7 @@ function save() {
     state.cards = cleaned;
     // 클라우드 동기화 (비동기, 실패 무시)
     if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
-      CloudSync.push(CONFIG.STORAGE_KEY, state.cards);
+      CloudSync.push(state.cards);
     }
     return { ok: true, imagesRemoved: true };
   } catch (e2) {
