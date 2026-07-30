@@ -4,6 +4,7 @@
 
 let btnMenuEl = null;
 let menuDropdownEl = null;
+let _menuInitialized = false;
 
 /** 현재 사용자 역할 (localStorage / sessionStorage에서 읽기) */
 function getCurrentRole() {
@@ -31,8 +32,12 @@ function initMenu() {
   btnMenuEl = document.getElementById('btn-menu');
   menuDropdownEl = document.getElementById('menu-dropdown');
 
-  // CONFIG.MENU_ITEMS 기반으로 메뉴 항목 렌더링
+  // 메뉴 항목 렌더링 (사용자 변경 시 필터링을 위해 매번 재렌더링)
   renderMenuItems();
+
+  // 이미 이벤트 리스너가 바인딩된 경우 재바인딩하지 않음
+  if (_menuInitialized) return;
+  _menuInitialized = true;
 
   // 메뉴 버튼 토글
   btnMenuEl.addEventListener('click', (e) => {

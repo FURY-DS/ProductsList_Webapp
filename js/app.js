@@ -25,15 +25,17 @@ async function init() {
 async function startApp() {
   hideAuthOverlay();
 
-  // 모듈 초기화
-  initToast();
-  initModal();
-  initBoard();
-  initSearch();
-  initMenu();
-  initActions();
-  initRateBulk();
-  initPercentBulk();
+  // 메뉴를 최우선으로 초기화 (다른 init 실패해도 메뉴는 작동해야 함)
+  try { initMenu(); } catch (e) { console.error('initMenu error:', e); }
+
+  // 나머지 모듈 초기화 (각각 독립적으로 try-catch)
+  try { initToast(); } catch (e) { console.error('initToast error:', e); }
+  try { initModal(); } catch (e) { console.error('initModal error:', e); }
+  try { initBoard(); } catch (e) { console.error('initBoard error:', e); }
+  try { initSearch(); } catch (e) { console.error('initSearch error:', e); }
+  try { initActions(); } catch (e) { console.error('initActions error:', e); }
+  try { initRateBulk(); } catch (e) { console.error('initRateBulk error:', e); }
+  try { initPercentBulk(); } catch (e) { console.error('initPercentBulk error:', e); }
 
   // 사용자 정보 표시
   updateUserInfo();
