@@ -13,6 +13,7 @@ const CloudSync = {
   apiKey: '',
   lastSyncTs: 0,
   syncing: false,
+  _pollTimer: null,
 
   /** 초기화 - localStorage에서 API 키 복원 */
   init() {
@@ -31,8 +32,10 @@ const CloudSync = {
     this.enabled = !!key;
     if (key) {
       localStorage.setItem('cloud_auth_key', key);
+      this.startAutoSync();
     } else {
       localStorage.removeItem('cloud_auth_key');
+      this.stopAutoSync();
     }
   },
 
@@ -141,5 +144,37 @@ const CloudSync = {
     if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전 동기화`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전 동기화`;
     return date.toLocaleDateString() + ' 동기화';
+  },
+
+  /** 자동 동기화 시작 (폴링) */
+  startAutoSync(intervalMs = 10000) {
+    this.stopAutoSync();
+    if (!this.enabled) return;
+
+    this._pollTimer = setInterval(async () => {
+      if (!this.enabled || this.syncing) return;
+
+      // 사용자가 편집 중이면 건너뜀 (덮어쓰기 방지)
+      if (typeof state !== 'undefined' && state.cards) {
+        const isEditing = state.cards.some(c => c.isEditing);
+        if (isEditing) return;
+      }
+
+      // 클라우드에서 당겨오기
+      if (typeof cloudPullAndRender === 'function') {
+        await cloudPullAndRender();
+      }
+    }, intervalMs);
+
+    console.log(`[CloudSync] 자동 동기화 시작 (${intervalMs / 1000}초 간격)`);
+  },
+
+  /** 자동 동기화 중지 */
+  stopAutoSync() {
+    if (this._pollTimer) {
+      clearInterval(this._pollTimer);
+      this._pollTimer = null;
+      console.log('[CloudSync] 자동 동기화 중지');
+    }
   }
 };

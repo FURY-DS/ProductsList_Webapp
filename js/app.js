@@ -16,6 +16,16 @@ function init() {
   CloudSync.init();
   initCloudSyncButton();
 
+  // 자동 동기화 시작 (10초 간격 폴링)
+  CloudSync.startAutoSync(10000);
+
+  // 탭이 다시 활성화될 때 즉시 pull
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && CloudSync.enabled) {
+      cloudPullAndRender();
+    }
+  });
+
   bindKeyboardShortcuts();
 
   // 데이터 로드
