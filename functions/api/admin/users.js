@@ -28,6 +28,8 @@ export async function onRequestGet(context) {
           users.push({
             username: user.username,
             role: user.role || 'user',
+            name: user.name || '',
+            email: user.email || '',
             createdAt: user.createdAt || 0
           });
         } catch (e) {

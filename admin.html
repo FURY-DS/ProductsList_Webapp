@@ -160,7 +160,7 @@
     }
 
     .admin-content {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 24px;
     }
@@ -494,13 +494,15 @@
         <thead>
           <tr>
             <th>아이디</th>
+            <th>이름</th>
+            <th>이메일</th>
             <th>등급</th>
             <th>가입일</th>
             <th>작업</th>
           </tr>
         </thead>
         <tbody id="user-tbody">
-          <tr><td colspan="4" class="loading">불러오는 중...</td></tr>
+          <tr><td colspan="6" class="loading">불러오는 중...</td></tr>
         </tbody>
       </table>
     </div>
@@ -780,7 +782,7 @@ function showPanel(displayName) {
 
 async function loadUsers() {
   const tbody = document.getElementById('user-tbody');
-  tbody.innerHTML = '<tr><td colspan="4" class="loading">불러오는 중...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="6" class="loading">불러오는 중...</td></tr>';
 
   try {
     const res = await fetch('/api/admin/users', { headers: adminHeaders() });
@@ -792,7 +794,7 @@ async function loadUsers() {
     document.getElementById('stat-admins').textContent = adminCount;
 
     if (users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">등록된 사용자가 없습니다</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">등록된 사용자가 없습니다</td></tr>';
       document.getElementById('stat-data').textContent = '0';
       return;
     }
@@ -816,6 +818,8 @@ async function loadUsers() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><strong>${escapeHtml(user.username)}</strong></td>
+        <td>${escapeHtml(user.name || '—')}</td>
+        <td>${escapeHtml(user.email || '—')}</td>
         <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
         <td>${date}</td>
         <td>
@@ -832,7 +836,7 @@ async function loadUsers() {
 
     document.getElementById('stat-data').textContent = dataCount;
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">오류: ${escapeHtml(e.message)}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">오류: ${escapeHtml(e.message)}</td></tr>`;
   }
 }
 
