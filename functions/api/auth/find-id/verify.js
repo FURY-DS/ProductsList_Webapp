@@ -1,5 +1,5 @@
 /* =====================================================
-   api/auth/find-id-verify.js - 아이디 찾기 (2단계: 인증번호 검증)
+   api/auth/find-id/verify.js - 아이디 찾기 (2단계: 인증번호 검증)
    POST /api/auth/find-id/verify  { name, email, code } → { username, maskedEmail }
 
    - 인증번호 일치 시 username 반환 + KV에서 코드 삭제 (일회용)

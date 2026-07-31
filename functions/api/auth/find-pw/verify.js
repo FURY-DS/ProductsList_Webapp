@@ -1,5 +1,5 @@
 /* =====================================================
-   api/auth/find-pw-verify.js - 비밀번호 찾기 (2단계: 인증번호 + 새 비밀번호)
+   api/auth/find-pw/verify.js - 비밀번호 찾기 (2단계: 인증번호 + 새 비밀번호)
    POST /api/auth/find-pw/verify
      { name, username, email, code, newPassword } → { ok }
 

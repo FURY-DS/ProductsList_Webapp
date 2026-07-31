@@ -18,3 +18,4 @@ node_modules/
 
 # Data exports (local only)
 data/
+.wrangler/

@@ -13,8 +13,8 @@ import {
   generateVerificationCode, storeVerificationCode,
   getClientIp, isRateLimited, recordAttempt,
   jsonResponse, handleOptions
-} from '../../../_lib/auth.js';
-import { sendEmail, buildVerificationEmailBody } from '../../../_lib/email.js';
+} from '../../_lib/auth.js';
+import { sendEmail, buildVerificationEmailBody } from '../../_lib/email.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
