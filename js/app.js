@@ -9,6 +9,10 @@ async function init() {
   // 인증 UI 이벤트 바인딩
   initAuthUI();
 
+  // 아이디찾기/비밀번호찾기/비밀번호변경 모달 초기화 (오버레이 단계에서 필요)
+  try { AccountRecovery.init(); } catch (e) { console.error('AccountRecovery.init error:', e); }
+  try { bindUserBadgeClick(); } catch (e) { console.error('bindUserBadgeClick error:', e); }
+
   // 세션 확인
   const isValid = await Auth.checkSession();
 
@@ -36,8 +40,7 @@ async function startApp() {
   try { initActions(); } catch (e) { console.error('initActions error:', e); }
   try { initRateBulk(); } catch (e) { console.error('initRateBulk error:', e); }
   try { initPercentBulk(); } catch (e) { console.error('initPercentBulk error:', e); }
-  try { AccountRecovery.init(); } catch (e) { console.error('AccountRecovery.init error:', e); }
-  try { bindUserBadgeClick(); } catch (e) { console.error('bindUserBadgeClick error:', e); }
+  // AccountRecovery.init() & bindUserBadgeClick()은 init()에서 이미 호출됨 (로그인 전 오버레이에서도 작동해야 함)
 
   // 사용자 정보 표시
   updateUserInfo();
