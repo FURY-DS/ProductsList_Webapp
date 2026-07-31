@@ -19,6 +19,10 @@ export async function sendEmail(env, to, subject, text, html) {
   const gasUrl = env.GAS_WEBHOOK_URL;
   const gasSecret = env.GAS_SECRET;
 
+  console.log('[email:debug] gasUrl:', gasUrl ? `${gasUrl.substring(0, 50)}...` : 'NOT_SET');
+  console.log('[email:debug] gasSecret:', gasSecret ? `${gasSecret.substring(0, 10)}...` : 'NOT_SET');
+  console.log('[email:debug] all env keys:', Object.keys(env).filter(k => k.includes('GAS') || k.includes('RESEND') || k.includes('EMAIL')));
+
   if (gasUrl && gasSecret) {
     try {
       const res = await fetch(gasUrl, {
