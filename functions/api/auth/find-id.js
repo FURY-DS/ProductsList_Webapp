@@ -61,8 +61,8 @@ export async function onRequestPost(context) {
 
   // 이메일 발송
   const subject = '[상품리스트] 아이디 찾기 인증번호';
-  const text = buildVerificationEmailBody('findid', user.name, code);
-  const result = await sendEmail(env, user.email, subject, text);
+  const { text, html } = buildVerificationEmailBody('findid', user.name, code);
+  const result = await sendEmail(env, user.email, subject, text, html);
 
   if (!result.ok) {
     return jsonResponse({ error: result.error || '이메일 발송에 실패했습니다' }, 500);

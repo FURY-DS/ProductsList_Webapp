@@ -59,8 +59,8 @@ export async function onRequestPost(context) {
   await storeVerificationCode(env.DATA_KV, 'findpw', scope, code, user.username);
 
   const subject = '[상품리스트] 비밀번호 찾기 인증번호';
-  const text = buildVerificationEmailBody('findpw', user.name, code);
-  const result = await sendEmail(env, user.email, subject, text);
+  const { text, html } = buildVerificationEmailBody('findpw', user.name, code);
+  const result = await sendEmail(env, user.email, subject, text, html);
 
   if (!result.ok) {
     return jsonResponse({ error: result.error || '이메일 발송에 실패했습니다' }, 500);
