@@ -36,6 +36,8 @@ async function startApp() {
   try { initActions(); } catch (e) { console.error('initActions error:', e); }
   try { initRateBulk(); } catch (e) { console.error('initRateBulk error:', e); }
   try { initPercentBulk(); } catch (e) { console.error('initPercentBulk error:', e); }
+  try { AccountRecovery.init(); } catch (e) { console.error('AccountRecovery.init error:', e); }
+  try { bindUserBadgeClick(); } catch (e) { console.error('bindUserBadgeClick error:', e); }
 
   // 사용자 정보 표시
   updateUserInfo();
@@ -107,6 +109,10 @@ function showAuthOverlay() {
   }
   const passwordConfirmInput = document.getElementById('auth-password-confirm');
   if (passwordConfirmInput) passwordConfirmInput.value = '';
+  const nameInput = document.getElementById('auth-name');
+  if (nameInput) nameInput.value = '';
+  const emailInput = document.getElementById('auth-email');
+  if (emailInput) emailInput.value = '';
 
   // auth-options 표시 (로그인 탭일 때만)
   const activeTab = document.querySelector('.auth-tab.active');
@@ -136,13 +142,19 @@ function initAuthUI() {
       const mode = tab.dataset.mode;
       const submitBtn = document.getElementById('auth-submit');
       const confirmField = document.getElementById('auth-confirm-field');
+      const nameField = document.getElementById('auth-name-field');
+      const emailField = document.getElementById('auth-email-field');
 
       if (mode === 'register') {
         if (submitBtn) submitBtn.textContent = '회원가입';
         if (confirmField) confirmField.classList.remove('hidden');
+        if (nameField) nameField.classList.remove('hidden');
+        if (emailField) emailField.classList.remove('hidden');
       } else {
         if (submitBtn) submitBtn.textContent = '로그인';
         if (confirmField) confirmField.classList.add('hidden');
+        if (nameField) nameField.classList.add('hidden');
+        if (emailField) emailField.classList.add('hidden');
       }
 
       // 체크박스 옵션은 로그인 탭에서만 표시
@@ -185,6 +197,8 @@ async function handleAuthSubmit() {
   const usernameInput = document.getElementById('auth-username');
   const passwordInput = document.getElementById('auth-password');
   const passwordConfirmInput = document.getElementById('auth-password-confirm');
+  const nameInput = document.getElementById('auth-name');
+  const emailInput = document.getElementById('auth-email');
   const errEl = document.getElementById('auth-error');
   const submitBtn = document.getElementById('auth-submit');
 
@@ -208,6 +222,16 @@ async function handleAuthSubmit() {
       if (errEl) errEl.textContent = '비밀번호가 일치하지 않습니다';
       return;
     }
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    if (!name) {
+      if (errEl) errEl.textContent = '이름을 입력해주세요';
+      return;
+    }
+    if (!email) {
+      if (errEl) errEl.textContent = '이메일을 입력해주세요';
+      return;
+    }
   }
 
   // 버튼 비활성화
@@ -228,7 +252,9 @@ async function handleAuthSubmit() {
 
     let result;
     if (mode === 'register') {
-      result = await Auth.register(username, password, { autoLogin });
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim() : '';
+      result = await Auth.register(username, password, name, email, { autoLogin });
       // 회원가입 시에도 비밀번호 저장 (로그인과 동일하게)
       if (result.ok && savePw) {
         Auth.saveCredentials(username, password);
@@ -277,6 +303,10 @@ async function handleLogout() {
   // 폼 초기화는 showAuthOverlay에서 처리하므로 여기서는 체크박스만 정리
   const passwordConfirmInput = document.getElementById('auth-password-confirm');
   if (passwordConfirmInput) passwordConfirmInput.value = '';
+  const nameInput = document.getElementById('auth-name');
+  if (nameInput) nameInput.value = '';
+  const emailInput = document.getElementById('auth-email');
+  if (emailInput) emailInput.value = '';
 
   // 로그인 탭으로 초기화
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -286,6 +316,10 @@ async function handleLogout() {
   if (submitBtn) submitBtn.textContent = '로그인';
   const confirmField = document.getElementById('auth-confirm-field');
   if (confirmField) confirmField.classList.add('hidden');
+  const nameField = document.getElementById('auth-name-field');
+  if (nameField) nameField.classList.add('hidden');
+  const emailField = document.getElementById('auth-email-field');
+  if (emailField) emailField.classList.add('hidden');
   const optionsEl = document.getElementById('auth-options');
   if (optionsEl) optionsEl.classList.remove('hidden');
 }

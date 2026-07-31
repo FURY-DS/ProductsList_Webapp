@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>상품리스트</title>
-<link rel="stylesheet" href="css/style.css?v=15" />
+<link rel="stylesheet" href="css/style.css?v=16" />
 </head>
 <body class="app-hidden">
 
@@ -20,6 +20,10 @@
       <button type="button" class="auth-tab" data-mode="register">회원가입</button>
     </div>
     <form id="auth-form">
+      <div class="auth-field hidden" id="auth-name-field">
+        <label for="auth-name">이름</label>
+        <input type="text" id="auth-name" placeholder="실명 입력" autocomplete="name" maxlength="20" />
+      </div>
       <div class="auth-field">
         <label for="auth-username">아이디</label>
         <input type="text" id="auth-username" placeholder="3~20자 영문/숫자" autocomplete="username" />
@@ -31,6 +35,10 @@
       <div class="auth-field hidden" id="auth-confirm-field">
         <label for="auth-password-confirm">비밀번호 확인</label>
         <input type="password" id="auth-password-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+      </div>
+      <div class="auth-field hidden" id="auth-email-field">
+        <label for="auth-email">이메일</label>
+        <input type="email" id="auth-email" placeholder="example@email.com" autocomplete="email" />
       </div>
       <div class="auth-options" id="auth-options">
         <label class="auth-checkbox">
@@ -45,6 +53,11 @@
       <p class="auth-error" id="auth-error"></p>
       <button type="submit" class="btn-auth-submit" id="auth-submit">로그인</button>
     </form>
+    <div class="auth-links">
+      <button type="button" class="auth-link" id="link-find-id">아이디 찾기</button>
+      <span class="auth-link-sep">|</span>
+      <button type="button" class="auth-link" id="link-find-pw">비밀번호 찾기</button>
+    </div>
     <p class="auth-hint">첫 방문이면 회원가입을 먼저 해주세요.<br />각 사용자의 상품리스트가 독립적으로 관리됩니다.</p>
   </div>
 </div>
@@ -88,7 +101,7 @@
   </div>
   <div class="user-area" id="user-area">
     <a href="admin.html" id="admin-link" class="admin-link" style="display:none;" title="관리자 패널">🔧 관리</a>
-    <span class="user-badge" id="user-badge"></span>
+    <button type="button" class="user-badge user-badge-btn" id="user-badge" title="비밀번호 변경"></button>
     <button class="btn-logout" id="btn-logout" title="로그아웃">로그아웃</button>
   </div>
   <input type="file" id="import-input" accept="application/json" style="display:none" />
@@ -217,23 +230,161 @@
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
+<!-- 아이디 찾기 모달 -->
+<div class="modal-backdrop" id="find-id-modal">
+  <div class="modal modal-find">
+    <h3 id="find-id-title">🔍 아이디 찾기</h3>
+
+    <!-- 1단계: 이름 + 이메일 입력 -->
+    <div class="find-step" id="find-id-step1">
+      <p class="modal-desc">가입 시 등록한 이름과 이메일을 입력하시면 인증번호를 보내드려요.</p>
+      <div class="auth-field">
+        <label for="find-id-name">이름</label>
+        <input type="text" id="find-id-name" placeholder="가입 시 등록한 이름" maxlength="20" />
+      </div>
+      <div class="auth-field">
+        <label for="find-id-email">이메일</label>
+        <input type="email" id="find-id-email" placeholder="가입 시 등록한 이메일" />
+      </div>
+      <p class="auth-error" id="find-id-error"></p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="find-id-cancel">취소</button>
+        <button class="btn btn-confirm" id="find-id-send">인증번호 발송</button>
+      </div>
+    </div>
+
+    <!-- 2단계: 인증번호 입력 -->
+    <div class="find-step hidden" id="find-id-step2">
+      <p class="modal-desc">이메일로 발송된 인증번호 6자리를 입력해주세요.</p>
+      <div class="dev-code-hint hidden" id="find-id-dev-hint"></div>
+      <div class="auth-field">
+        <label for="find-id-code">인증번호</label>
+        <input type="text" id="find-id-code" placeholder="6자리 숫자" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
+      </div>
+      <p class="auth-error" id="find-id-error2"></p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="find-id-back">이전</button>
+        <button class="btn btn-confirm" id="find-id-verify">확인</button>
+      </div>
+    </div>
+
+    <!-- 3단계: 결과 -->
+    <div class="find-step hidden" id="find-id-step3">
+      <p class="find-result-label">회원님의 아이디는</p>
+      <p class="find-result-value" id="find-id-result-username"></p>
+      <p class="find-result-meta" id="find-id-result-email"></p>
+      <div class="modal-actions">
+        <button class="btn btn-confirm" id="find-id-done">로그인하러 가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 비밀번호 찾기 모달 -->
+<div class="modal-backdrop" id="find-pw-modal">
+  <div class="modal modal-find">
+    <h3 id="find-pw-title">🔐 비밀번호 찾기</h3>
+
+    <!-- 1단계: 이름 + 아이디 + 이메일 -->
+    <div class="find-step" id="find-pw-step1">
+      <p class="modal-desc">가입 시 등록한 이름, 아이디, 이메일을 입력하시면 인증번호를 보내드려요.</p>
+      <div class="auth-field">
+        <label for="find-pw-name">이름</label>
+        <input type="text" id="find-pw-name" placeholder="가입 시 등록한 이름" maxlength="20" />
+      </div>
+      <div class="auth-field">
+        <label for="find-pw-username">아이디</label>
+        <input type="text" id="find-pw-username" placeholder="가입 시 등록한 아이디" />
+      </div>
+      <div class="auth-field">
+        <label for="find-pw-email">이메일</label>
+        <input type="email" id="find-pw-email" placeholder="가입 시 등록한 이메일" />
+      </div>
+      <p class="auth-error" id="find-pw-error"></p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="find-pw-cancel">취소</button>
+        <button class="btn btn-confirm" id="find-pw-send">인증번호 발송</button>
+      </div>
+    </div>
+
+    <!-- 2단계: 인증번호 + 새 비밀번호 -->
+    <div class="find-step hidden" id="find-pw-step2">
+      <p class="modal-desc">이메일로 발송된 인증번호와 새로 사용할 비밀번호를 입력해주세요.</p>
+      <div class="dev-code-hint hidden" id="find-pw-dev-hint"></div>
+      <div class="auth-field">
+        <label for="find-pw-code">인증번호</label>
+        <input type="text" id="find-pw-code" placeholder="6자리 숫자" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
+      </div>
+      <div class="auth-field">
+        <label for="find-pw-new">새 비밀번호</label>
+        <input type="password" id="find-pw-new" placeholder="6자 이상" autocomplete="new-password" />
+      </div>
+      <div class="auth-field">
+        <label for="find-pw-new-confirm">새 비밀번호 확인</label>
+        <input type="password" id="find-pw-new-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+      </div>
+      <p class="auth-error" id="find-pw-error2"></p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="find-pw-back">이전</button>
+        <button class="btn btn-confirm" id="find-pw-verify">비밀번호 재설정</button>
+      </div>
+    </div>
+
+    <!-- 3단계: 완료 -->
+    <div class="find-step hidden" id="find-pw-step3">
+      <p class="find-result-icon">✅</p>
+      <p class="find-result-label">비밀번호가 재설정되었습니다.</p>
+      <p class="find-result-meta">새 비밀번호로 로그인해주세요.</p>
+      <div class="modal-actions">
+        <button class="btn btn-confirm" id="find-pw-done">로그인하러 가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 모달 (로그인 상태에서 본인 아이디 클릭) -->
+<div class="modal-backdrop" id="change-pw-modal">
+  <div class="modal modal-find">
+    <h3>🔑 비밀번호 변경</h3>
+    <p class="modal-desc">현재 비밀번호와 새 비밀번호를 입력해주세요.</p>
+    <div class="auth-field">
+      <label for="change-pw-current">현재 비밀번호</label>
+      <input type="password" id="change-pw-current" placeholder="현재 비밀번호" autocomplete="current-password" />
+    </div>
+    <div class="auth-field">
+      <label for="change-pw-new">새 비밀번호</label>
+      <input type="password" id="change-pw-new" placeholder="6자 이상" autocomplete="new-password" />
+    </div>
+    <div class="auth-field">
+      <label for="change-pw-confirm">새 비밀번호 확인</label>
+      <input type="password" id="change-pw-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+    </div>
+    <p class="auth-error" id="change-pw-error"></p>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="change-pw-cancel">취소</button>
+      <button class="btn btn-confirm" id="change-pw-submit">변경하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 스크립트 (의존성 순서대로 로드) -->
-<script src="js/config.js?v=15"></script>
-<script src="js/utils.js?v=15"></script>
-<script src="js/state.js?v=15"></script>
-<script src="js/toast.js?v=15"></script>
-<script src="js/modal.js?v=15"></script>
-<script src="js/storage.js?v=15"></script>
-<script src="js/photo.js?v=15"></script>
-<script src="js/search.js?v=15"></script>
-<script src="js/card.js?v=15"></script>
-<script src="js/menu.js?v=15"></script>
-<script src="js/actions.js?v=15"></script>
-<script src="js/rate-bulk.js?v=15"></script>
-<script src="js/percent-bulk.js?v=15"></script>
-<script src="js/auth.js?v=15"></script>
-<script src="js/cloud-sync.js?v=15"></script>
-<script src="js/app.js?v=15"></script>
+<script src="js/config.js?v=16"></script>
+<script src="js/utils.js?v=16"></script>
+<script src="js/state.js?v=16"></script>
+<script src="js/toast.js?v=16"></script>
+<script src="js/modal.js?v=16"></script>
+<script src="js/storage.js?v=16"></script>
+<script src="js/photo.js?v=16"></script>
+<script src="js/search.js?v=16"></script>
+<script src="js/card.js?v=16"></script>
+<script src="js/menu.js?v=16"></script>
+<script src="js/actions.js?v=16"></script>
+<script src="js/rate-bulk.js?v=16"></script>
+<script src="js/percent-bulk.js?v=16"></script>
+<script src="js/auth.js?v=16"></script>
+<script src="js/cloud-sync.js?v=16"></script>
+<script src="js/account-recovery.js?v=16"></script>
+<script src="js/app.js?v=16"></script>
 
 </body>
 </html>

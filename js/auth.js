@@ -39,18 +39,126 @@ const Auth = {
   },
 
   /** 회원가입 */
-  async register(username, password, options = {}) {
+  async register(username, password, name, email, options = {}) {
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, name, email })
       });
       const data = await res.json();
       if (!res.ok) {
         return { ok: false, msg: data.error || '회원가입 실패' };
       }
       this._setSession(data.token, data.username, data.role || 'user', options.autoLogin !== false);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, msg: '네트워크 오류: ' + e.message };
+    }
+  },
+
+  // =====================================================
+  //  아이디 찾기 (이메일 인증번호)
+  // =====================================================
+
+  /** 1단계: 인증번호 발송 요청 */
+  async findIdRequest(name, email) {
+    try {
+      const res = await fetch('/api/auth/find-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, msg: data.error || '인증번호 발송 실패' };
+      }
+      return { ok: true, devCode: data.devCode || null };
+    } catch (e) {
+      return { ok: false, msg: '네트워크 오류: ' + e.message };
+    }
+  },
+
+  /** 2단계: 인증번호 검증 → username 반환 */
+  async findIdVerify(name, email, code) {
+    try {
+      const res = await fetch('/api/auth/find-id/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, code })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, msg: data.error || '인증 실패' };
+      }
+      return { ok: true, username: data.username, maskedEmail: data.maskedEmail };
+    } catch (e) {
+      return { ok: false, msg: '네트워크 오류: ' + e.message };
+    }
+  },
+
+  // =====================================================
+  //  비밀번호 찾기 (이메일 인증번호 → 새 비밀번호)
+  // =====================================================
+
+  /** 1단계: 인증번호 발송 요청 */
+  async findPasswordRequest(name, username, email) {
+    try {
+      const res = await fetch('/api/auth/find-pw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username, email })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, msg: data.error || '인증번호 발송 실패' };
+      }
+      return { ok: true, devCode: data.devCode || null };
+    } catch (e) {
+      return { ok: false, msg: '네트워크 오류: ' + e.message };
+    }
+  },
+
+  /** 2단계: 인증번호 + 새 비밀번호 → 재설정 */
+  async findPasswordVerify(name, username, email, code, newPassword) {
+    try {
+      const res = await fetch('/api/auth/find-pw/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username, email, code, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, msg: data.error || '비밀번호 재설정 실패' };
+      }
+      return { ok: true, invalidatedSessions: data.invalidatedSessions || 0 };
+    } catch (e) {
+      return { ok: false, msg: '네트워크 오류: ' + e.message };
+    }
+  },
+
+  // =====================================================
+  //  비밀번호 변경 (로그인 상태)
+  // =====================================================
+
+  /** 현재 세션으로 비밀번호 변경 (현재 비번 검증 필요) */
+  async changePassword(oldPassword, newPassword) {
+    if (!this.token) {
+      return { ok: false, msg: '로그인이 필요합니다' };
+    }
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`
+        },
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { ok: false, msg: data.error || '비밀번호 변경 실패' };
+      }
       return { ok: true };
     } catch (e) {
       return { ok: false, msg: '네트워크 오류: ' + e.message };
