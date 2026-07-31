@@ -19,9 +19,11 @@ export async function sendEmail(env, to, subject, text, html) {
   const gasUrl = env.GAS_WEBHOOK_URL;
   const gasSecret = env.GAS_SECRET;
 
-  console.log('[email:debug] gasUrl:', gasUrl ? `${gasUrl.substring(0, 50)}...` : 'NOT_SET');
-  console.log('[email:debug] gasSecret:', gasSecret ? `${gasSecret.substring(0, 10)}...` : 'NOT_SET');
-  console.log('[email:debug] all env keys:', Object.keys(env).filter(k => k.includes('GAS') || k.includes('RESEND') || k.includes('EMAIL')));
+  const debug = {
+    gasUrl: gasUrl ? 'SET' : 'NOT_SET',
+    gasSecret: gasSecret ? 'SET' : 'NOT_SET',
+    resendKey: env.RESEND_API_KEY ? 'SET' : 'NOT_SET'
+  };
 
   if (gasUrl && gasSecret) {
     try {
@@ -40,13 +42,13 @@ export async function sendEmail(env, to, subject, text, html) {
 
       const data = await res.json();
       if (data.ok) {
-        return { ok: true, method: 'gas' };
+        return { ok: true, method: 'gas', debug };
       }
       console.error('[email:GAS] 발송 실패:', data.error);
-      return { ok: false, error: '이메일 발송 실패 (GAS)' };
+      return { ok: false, error: '이메일 발송 실패 (GAS)', debug };
     } catch (e) {
       console.error('[email:GAS] 네트워크 오류:', e);
-      return { ok: false, error: '이메일 발송 중 네트워크 오류 (GAS)' };
+      return { ok: false, error: '이메일 발송 중 네트워크 오류 (GAS)', debug };
     }
   }
 
@@ -96,7 +98,7 @@ export async function sendEmail(env, to, subject, text, html) {
   console.log('[email:dev mode] to:', to);
   console.log('[email:dev mode] subject:', subject);
   if (devCode) console.log('[email:dev mode] dev code:', devCode);
-  return { ok: true, devMode: true, devCode };
+  return { ok: true, devMode: true, devCode, debug };
 }
 
 /**
