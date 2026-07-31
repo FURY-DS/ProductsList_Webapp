@@ -1142,6 +1142,12 @@ body.app-hidden .container {
 }
 
 /* ===== 아이디/비밀번호 찾기 + 비밀번호 변경 모달 ===== */
+/* 인증 오버레이(z-index:9999) 위에 표시되도록 z-index 상향 */
+#find-id-modal,
+#find-pw-modal,
+#change-pw-modal {
+  z-index: 10000;
+}
 .modal-find {
   max-width: 420px;
   width: 100%;
