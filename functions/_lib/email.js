@@ -45,10 +45,10 @@ export async function sendEmail(env, to, subject, text, html) {
         return { ok: true, method: 'gas', debug };
       }
       console.error('[email:GAS] 발송 실패:', data.error);
-      return { ok: false, error: '이메일 발송 실패 (GAS)', debug };
+      return { ok: false, error: `GAS 오류: ${data.error || 'unknown'}`, debug, gasResponse: data };
     } catch (e) {
-      console.error('[email:GAS] 네트워크 오류:', e);
-      return { ok: false, error: '이메일 발송 중 네트워크 오류 (GAS)', debug };
+      console.error('[email:GAS] 네트워크 오류:', e.message, e.stack);
+      return { ok: false, error: `GAS 네트워크 오류: ${e.message}`, debug };
     }
   }
 
