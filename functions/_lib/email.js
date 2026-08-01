@@ -19,12 +19,6 @@ export async function sendEmail(env, to, subject, text, html) {
   const gasUrl = env.GAS_WEBHOOK_URL;
   const gasSecret = env.GAS_SECRET;
 
-  const debug = {
-    gasUrl: gasUrl ? 'SET' : 'NOT_SET',
-    gasSecret: gasSecret ? 'SET' : 'NOT_SET',
-    resendKey: env.RESEND_API_KEY ? 'SET' : 'NOT_SET'
-  };
-
   if (gasUrl && gasSecret) {
     try {
       const res = await fetch(gasUrl, {
@@ -42,13 +36,13 @@ export async function sendEmail(env, to, subject, text, html) {
 
       const data = await res.json();
       if (data.ok) {
-        return { ok: true, method: 'gas', debug };
+        return { ok: true, method: 'gas' };
       }
       console.error('[email:GAS] 발송 실패:', data.error);
-      return { ok: false, error: `GAS 오류: ${data.error || 'unknown'}`, debug, gasResponse: data };
+      return { ok: false, error: `GAS 오류: ${data.error || 'unknown'}` };
     } catch (e) {
-      console.error('[email:GAS] 네트워크 오류:', e.message, e.stack);
-      return { ok: false, error: `GAS 네트워크 오류: ${e.message}`, debug };
+      console.error('[email:GAS] 네트워크 오류:', e.message);
+      return { ok: false, error: `GAS 네트워크 오류: ${e.message}` };
     }
   }
 
@@ -98,7 +92,7 @@ export async function sendEmail(env, to, subject, text, html) {
   console.log('[email:dev mode] to:', to);
   console.log('[email:dev mode] subject:', subject);
   if (devCode) console.log('[email:dev mode] dev code:', devCode);
-  return { ok: true, devMode: true, devCode, debug };
+  return { ok: true, devMode: true, devCode };
 }
 
 /**

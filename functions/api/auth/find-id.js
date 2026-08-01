@@ -70,7 +70,7 @@ export async function onRequestPost(context) {
 
   // dev mode에서는 인증번호를 응답에 포함 (테스트용)
   if (result.devMode && result.devCode) {
-    return jsonResponse({ sent: true, devCode: result.devCode, debug: result.debug });
+    return jsonResponse({ sent: true, devCode: result.devCode });
   }
 
   return jsonResponse(genericResponse);
