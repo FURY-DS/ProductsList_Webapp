@@ -63,12 +63,7 @@ async function startApp() {
   }
   load();
 
-  // 첫 실행 시 카드 1개 생성
-  if (state.cards.length === 0) {
-    state.cards.push(newCard());
-  }
-
-  // 첫 렌더링
+  // 첫 렌더링 (데이터가 0개면 빈 상태 그대로 표시)
   render();
 
   // 클라우드에서 최신 데이터 확인 (백그라운드)

@@ -24,10 +24,6 @@ async function initCoupang() {
 
   loadCoupang();
 
-  if (coupangState.cards.length === 0) {
-    coupangState.cards.push(newCoupangCard());
-  }
-
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveCoupangCards();
   reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);

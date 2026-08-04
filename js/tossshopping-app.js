@@ -24,10 +24,6 @@ async function initTOSSSHOPPING() {
 
   loadTOSSSHOPPING();
 
-  if (tossshoppingState.cards.length === 0) {
-    tossshoppingState.cards.push(newTOSSSHOPPINGCard());
-  }
-
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveTOSSSHOPPINGCards();
   reportSaveResult(saveTOSSSHOPPING(), TOSSSHOPPING_CONFIG.MESSAGES);

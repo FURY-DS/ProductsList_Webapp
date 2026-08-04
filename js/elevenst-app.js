@@ -24,10 +24,6 @@ async function initElevenst() {
 
   loadElevenst();
 
-  if (elevenstState.cards.length === 0) {
-    elevenstState.cards.push(newElevenstCard());
-  }
-
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveElevenstCards();
   reportSaveResult(saveElevenst(), ELEVENST_CONFIG.MESSAGES);

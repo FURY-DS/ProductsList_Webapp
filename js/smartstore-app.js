@@ -24,10 +24,6 @@ async function initSmartstore() {
 
   loadSmartstore();
 
-  if (smartstoreState.cards.length === 0) {
-    smartstoreState.cards.push(newSmartstoreCard());
-  }
-
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveSmartstoreCards();
   reportSaveResult(saveSmartstore(), SMARTSTORE_CONFIG.MESSAGES);

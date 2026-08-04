@@ -25,10 +25,6 @@ async function initNshipping() {
 
   loadNshipping();
 
-  if (nshippingState.cards.length === 0) {
-    nshippingState.cards.push(newNshippingCard());
-  }
-
   // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveNshippingCards();
   reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
