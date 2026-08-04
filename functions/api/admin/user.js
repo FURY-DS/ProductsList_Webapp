@@ -52,7 +52,7 @@ export async function onRequestDelete(context) {
   const userKey = `user:${username}`;
   const dataKey = `data:${username}`;
 
-  // 존재 확인
+  // 존재 확인 + 이메일 추출 (삭제 전에 미리 읽어둠)
   const existing = await env.DATA_KV.get(userKey);
   if (!existing) {
     return jsonResponse({ error: '존재하지 않는 사용자입니다' }, 404);
@@ -63,9 +63,19 @@ export async function onRequestDelete(context) {
     return jsonResponse({ error: '자기 자신의 계정은 삭제할 수 없습니다' }, 400);
   }
 
-  // 계정 + 데이터 삭제
+  // user record에서 email 추출 (이메일 인덱스 삭제용)
+  let userEmail = null;
+  try {
+    const userRecord = JSON.parse(existing);
+    userEmail = userRecord.email ? userRecord.email.toLowerCase() : null;
+  } catch (e) { /* skip */ }
+
+  // 계정 + 데이터 + 이메일 인덱스 삭제
   await env.DATA_KV.delete(userKey);
   await env.DATA_KV.delete(dataKey);
+  if (userEmail) {
+    await env.DATA_KV.delete(`email:${userEmail}`);
+  }
 
   // 세션 삭제
   await deleteAllSessions(env.DATA_KV, username);
