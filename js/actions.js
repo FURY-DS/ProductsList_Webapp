@@ -39,7 +39,12 @@ function exportAllData() {
     const pages = {};
     let exportedCount = 0;
     ALL_PAGES.forEach(p => {
-      const raw = localStorage.getItem(p.key);
+      // 사용자별 키(`<key>_<username>`)를 우선 읽고, 없으면 기존 전역 키(`<key>`)에서 fallback.
+      // 단순히 localStorage.getItem(p.key)만 쓰면 실제 데이터가 있는 user-scoped 키를
+      // 놓쳐서 빈 export가 만들어짐.
+      const raw = typeof getUserScopedItemWithFallback === 'function'
+        ? getUserScopedItemWithFallback(p.key)
+        : localStorage.getItem(p.key);
       if (raw === null) return;
       let data;
       try { data = JSON.parse(raw); } catch (e) { data = raw; }
@@ -104,12 +109,22 @@ function handleImportAllFile(e) {
             const cfg = ALL_PAGES.find(ap => ap.id === id);
             if (!cfg) return;
             const value = typeof p.data === 'string' ? p.data : JSON.stringify(p.data);
+            // 사용자별 키(`<key>_<username>`)에 저장해야 앱이 실제로 읽음.
+            // 단순히 localStorage.setItem(cfg.key, value)만 쓰면 legacy 글로벌 키에만
+            // 저장되어 새 데이터가 보이지 않음. 호환을 위해 legacy 키도 같이 업데이트.
+            const writeKeys = (typeof getUserScopedKey === 'function'
+              ? [getUserScopedKey(cfg.key), cfg.key]
+              : [cfg.key]);
+            // 중복 방지
+            const uniqKeys = Array.from(new Set(writeKeys));
             try {
-              localStorage.setItem(cfg.key, value);
-              try { localStorage.setItem(cfg.key + '_backup', value); } catch (e) { /* ignore */ }
+              uniqKeys.forEach(k => {
+                localStorage.setItem(k, value);
+                try { localStorage.setItem(k + '_backup', value); } catch (e) { /* ignore */ }
+              });
               applied++;
 
-              // 현재 상품리스트 페이지라면 상태도 바로 갱신
+              // 현재 상품리스트 페이지라면 상태도 바로 갱신 + 클라우드 동기화
               if (id === 'productlist') {
                 let arr;
                 try { arr = JSON.parse(value); } catch (e) { arr = []; }
@@ -125,6 +140,12 @@ function handleImportAllFile(e) {
                     image: c.image || ''
                   };
                 });
+                // 클라우드에 새 데이터 반영 (save()는 사용자에게 토스트를 띄우므로 직접 push)
+                if (typeof save === 'function') {
+                  save();
+                } else if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
+                  CloudSync.push(state.cards);
+                }
               }
             } catch (err) {
               console.warn(`Failed to write ${cfg.key}`, err);
