@@ -157,10 +157,13 @@ const CloudSync = {
  * 서버 메인 데이터가 비어있고 (계정 신규/삭제된 상태) 해당 페이지의 localStorage에
  * 데이터가 남아있으면 정리. N배송/쿠팡/도매꾹 등 각 페이지 진입 시 한 번 호출.
  *
- * 주의: 메인 페이지의 data:<username> KV 값을 사용함.
+ * 안전장치: 서버에 메인 데이터가 비어있는 사용자라도, **계정 생성 후 10분 이상 지난**
+ * 경우에는 정리하지 않음. (서버 데이터가 비어있어도 그건 단순히 메인 페이지를 안 쓴
+ * 것일 수 있으므로 기존 localStorage 데이터를 보존.)
+ *
  *   - ts > 0 이거나 data가 비어있지 않으면 → 사용 중인 계정이므로 정리하지 않음
- *   - ts === 0 이고 data가 비어있으면 → 계정이 신규 또는 삭제된 상태이므로
- *     user-scoped localStorage 키와 legacy 글로벌 키를 모두 삭제
+ *   - ts === 0 이고 data가 비어있고 계정이 최근 10분 이내 생성됐으면 → 신규/삭제된
+ *     상태이므로 user-scoped localStorage 키와 legacy 글로벌 키를 모두 삭제
  *
  * @param {string|string[]} baseKey 페이지의 base storage key (예: 'nshipping_v1').
  *        배열로 여러 키를 전달하면 한 번의 API 호출로 모두 정리 (예: 페이지 자체 키 + productlist_v1)
@@ -172,21 +175,37 @@ async function clearStalePageDataIfServerEmpty(baseKey) {
   const username = localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username');
   if (!token || !username) return false;
   try {
-    const res = await fetch('/api/data', {
+    // 1) 메인 데이터 확인
+    const dataRes = await fetch('/api/data', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) return false;
-    const result = await res.json();
-    if (!result.ok || !result.data) return false;
-
-    const cloudData = result.data.data;
-    const cloudTs = result.data.ts || 0;
-    const hasCloudData = cloudData && Array.isArray(cloudData) && cloudData.length > 0;
+    if (!dataRes.ok) return false;
+    // /api/data GET 응답 형식: { data: null|Array, ts: 0|Number } (ok 필드 없음)
+    const dataResult = await dataRes.json();
+    const cloudData = dataResult.data;
+    const cloudTs = dataResult.ts || 0;
+    const hasCloudData = Array.isArray(cloudData) && cloudData.length > 0;
 
     // 서버에 사용자의 메인 데이터가 있으면 → 정상 사용 중인 계정. 정리 안 함.
     if (hasCloudData || cloudTs !== 0) return false;
 
-    // baseKey가 문자열이면 배열로 변환
+    // 2) 계정 생성 시각 확인 (안전장치: 메인 데이터가 비어있어도 오래된 계정은 보존)
+    const meRes = await fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!meRes.ok) return false;
+    const meResult = await meRes.json();
+    const createdAt = meResult.createdAt || 0;
+    const accountAgeMs = Date.now() - createdAt;
+    const isFreshAccount = createdAt > 0 && accountAgeMs < 10 * 60 * 1000; // 10분 이내
+
+    // 10분 이상 지난 계정은 정리하지 않음 (단순히 메인 페이지 미사용자)
+    if (!isFreshAccount) {
+      console.log('[clearStale] 오래된 계정(' + Math.round(accountAgeMs / 60000) + '분) → localStorage 보존');
+      return false;
+    }
+
+    // 3) 정리 실행
     const keys = Array.isArray(baseKey) ? baseKey : [baseKey];
 
     let cleared = false;
