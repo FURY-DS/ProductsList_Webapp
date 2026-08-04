@@ -3,7 +3,7 @@
    ===================================================== */
 
 /** DOM 로드 후 각 모듈 초기화 */
-function initElevenst() {
+async function initElevenst() {
   if (!requireAuthenticatedPage()) return;
   // 페이지 제목 설정
   document.title = ELEVENST_CONFIG.PAGE_TITLE;
@@ -18,6 +18,9 @@ function initElevenst() {
   initElevenstActions();
   bindElevenstKeyboardShortcuts();
   bindElevenstPageLifecycle();
+
+  // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 페이지 데이터 + 상품리스트 데이터 정리
+  await clearStalePageDataIfServerEmpty([ELEVENST_CONFIG.STORAGE_KEY, ELEVENST_CONFIG.PRODUCTLIST_STORAGE_KEY]);
 
   loadElevenst();
 

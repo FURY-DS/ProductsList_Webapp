@@ -21,7 +21,7 @@ async function initNshipping() {
 
   // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 N배송 데이터도 정리
   // loadNshipping() 전에 await 해야 정리된 상태로 카드를 로드함
-  await clearStalePageDataIfServerEmpty(NSHIPPING_CONFIG.STORAGE_KEY);
+  await clearStalePageDataIfServerEmpty([NSHIPPING_CONFIG.STORAGE_KEY, NSHIPPING_CONFIG.PRODUCTLIST_STORAGE_KEY]);
 
   loadNshipping();
 

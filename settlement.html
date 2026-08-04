@@ -80,17 +80,18 @@
 
 <div id="toast-container"></div>
 
-<script src="js/config.js?v=17"></script>
-<script src="js/settlement-config.js?v=17"></script>
-<script src="js/settlement-state.js?v=17"></script>
-<script src="js/settlement-storage.js?v=17"></script>
-<script src="js/settlement-render.js?v=17"></script>
-<script src="js/settlement-actions.js?v=17"></script>
-<script src="js/utils.js?v=17"></script>
-<script src="js/toast.js?v=17"></script>
-<script src="js/modal.js?v=17"></script>
-<script src="js/menu.js?v=17"></script>
-<script src="js/settlement-app.js?v=17"></script>
+<script src="js/config.js?v=24"></script>
+<script src="js/settlement-config.js?v=24"></script>
+<script src="js/settlement-state.js?v=24"></script>
+<script src="js/settlement-storage.js?v=24"></script>
+<script src="js/settlement-render.js?v=24"></script>
+<script src="js/settlement-actions.js?v=24"></script>
+<script src="js/utils.js?v=24"></script>
+<script src="js/toast.js?v=24"></script>
+<script src="js/modal.js?v=24"></script>
+<script src="js/menu.js?v=24"></script>
+<script src="js/cloud-sync.js?v=24"></script>
+<script src="js/settlement-app.js?v=24"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
@@ -112,7 +113,7 @@
       // 네트워크 오류 시 head 스크립트의 로컬 검증으로 폴백
     }
 
-    initSettlement();
+    await initSettlement();
   });
 </script>
 </body>

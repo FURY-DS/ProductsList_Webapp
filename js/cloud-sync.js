@@ -162,7 +162,8 @@ const CloudSync = {
  *   - ts === 0 이고 data가 비어있으면 → 계정이 신규 또는 삭제된 상태이므로
  *     user-scoped localStorage 키와 legacy 글로벌 키를 모두 삭제
  *
- * @param {string} baseKey 페이지의 base storage key (예: 'nshipping_v1')
+ * @param {string|string[]} baseKey 페이지의 base storage key (예: 'nshipping_v1').
+ *        배열로 여러 키를 전달하면 한 번의 API 호출로 모두 정리 (예: 페이지 자체 키 + productlist_v1)
  * @returns {Promise<boolean>} 정리했으면 true
  */
 async function clearStalePageDataIfServerEmpty(baseKey) {
@@ -185,21 +186,26 @@ async function clearStalePageDataIfServerEmpty(baseKey) {
     // 서버에 사용자의 메인 데이터가 있으면 → 정상 사용 중인 계정. 정리 안 함.
     if (hasCloudData || cloudTs !== 0) return false;
 
-    const scopedKey = baseKey + '_' + username;
-    const backupKey = scopedKey + '_backup';
-    const legacyKey = baseKey;
-    const legacyBackupKey = baseKey + '_backup';
+    // baseKey가 문자열이면 배열로 변환
+    const keys = Array.isArray(baseKey) ? baseKey : [baseKey];
 
     let cleared = false;
-    if (localStorage.getItem(scopedKey)) {
-      localStorage.removeItem(scopedKey);
-      localStorage.removeItem(backupKey);
-      cleared = true;
-    }
-    if (localStorage.getItem(legacyKey)) {
-      localStorage.removeItem(legacyKey);
-      localStorage.removeItem(legacyBackupKey);
-      cleared = true;
+    for (const key of keys) {
+      const scopedKey = key + '_' + username;
+      const backupKey = scopedKey + '_backup';
+      const legacyKey = key;
+      const legacyBackupKey = key + '_backup';
+
+      if (localStorage.getItem(scopedKey)) {
+        localStorage.removeItem(scopedKey);
+        localStorage.removeItem(backupKey);
+        cleared = true;
+      }
+      if (localStorage.getItem(legacyKey)) {
+        localStorage.removeItem(legacyKey);
+        localStorage.removeItem(legacyBackupKey);
+        cleared = true;
+      }
     }
     if (cleared && typeof showToast === 'function') {
       showToast('서버에 데이터가 없어 초기화했어요');

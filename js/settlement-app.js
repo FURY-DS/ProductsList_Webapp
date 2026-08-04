@@ -2,9 +2,12 @@
    settlement-app.js - 오픈마켓정산 초기화 및 라이프사이클
    ===================================================== */
 
-function initSettlement() {
+async function initSettlement() {
   initModal();
   initSettlementRender();
+
+  // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 정산 데이터 정리
+  await clearStalePageDataIfServerEmpty(SETTLEMENT_CONFIG.STORAGE_KEY);
 
   loadSettlement();
 
