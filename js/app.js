@@ -56,7 +56,11 @@ async function startApp() {
     }
   });
 
-  // 데이터 로드
+  // 데이터 로드 — 클라우드를 먼저 확인해서 stale localStorage를 정리한 뒤 localStorage를 읽음
+  // (계정 삭제 후 재가입 시 옛 데이터가 잠깐이라도 보이지 않도록)
+  if (CloudSync.enabled) {
+    await cloudPullAndRender();
+  }
   load();
 
   // 첫 실행 시 카드 1개 생성
@@ -540,7 +544,28 @@ async function cloudPullAndRender() {
   if (!CloudSync.enabled) return;
 
   const cloudData = await CloudSync.pull();
-  if (!cloudData || !cloudData.data || !Array.isArray(cloudData.data)) return;
+  if (!cloudData) return; // 네트워크 오류 또는 인증 실패 → 아무것도 하지 않음
+
+  // 클라우드 데이터가 비어있으면 (계정 삭제 후 재가입 등) localStorage도 정리
+  if (!cloudData.data || !Array.isArray(cloudData.data)) {
+    const storageKey = getStorageKey();
+    const hadLocal = !!localStorage.getItem(storageKey);
+    if (hadLocal) {
+      console.log('[CloudSync] 서버에 데이터 없음 → localStorage 정리 (계정 삭제됨)');
+      state.cards = [];
+      try {
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(storageKey + '_backup');
+      } catch (e) { /* ignore */ }
+      CloudSync.lastSyncTs = 0;
+      try { localStorage.setItem(getSyncKey(), '0'); } catch (e) { /* ignore */ }
+      render();
+      if (typeof showToast === 'function') {
+        showToast('☁️ 서버에 데이터가 없어 초기화했어요');
+      }
+    }
+    return;
+  }
 
   // 클라우드가 더 최신이면 교체
   if (cloudData.ts > CloudSync.lastSyncTs) {
