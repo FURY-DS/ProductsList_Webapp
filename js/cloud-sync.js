@@ -152,3 +152,61 @@ const CloudSync = {
     }
   }
 };
+
+/**
+ * 서버 메인 데이터가 비어있고 (계정 신규/삭제된 상태) 해당 페이지의 localStorage에
+ * 데이터가 남아있으면 정리. N배송/쿠팡/도매꾹 등 각 페이지 진입 시 한 번 호출.
+ *
+ * 주의: 메인 페이지의 data:<username> KV 값을 사용함.
+ *   - ts > 0 이거나 data가 비어있지 않으면 → 사용 중인 계정이므로 정리하지 않음
+ *   - ts === 0 이고 data가 비어있으면 → 계정이 신규 또는 삭제된 상태이므로
+ *     user-scoped localStorage 키와 legacy 글로벌 키를 모두 삭제
+ *
+ * @param {string} baseKey 페이지의 base storage key (예: 'nshipping_v1')
+ * @returns {Promise<boolean>} 정리했으면 true
+ */
+async function clearStalePageDataIfServerEmpty(baseKey) {
+  // 인증 토큰을 localStorage/sessionStorage에서 직접 읽음 (Auth 전역 객체 의존 X)
+  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+  const username = localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username');
+  if (!token || !username) return false;
+  try {
+    const res = await fetch('/api/data', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) return false;
+    const result = await res.json();
+    if (!result.ok || !result.data) return false;
+
+    const cloudData = result.data.data;
+    const cloudTs = result.data.ts || 0;
+    const hasCloudData = cloudData && Array.isArray(cloudData) && cloudData.length > 0;
+
+    // 서버에 사용자의 메인 데이터가 있으면 → 정상 사용 중인 계정. 정리 안 함.
+    if (hasCloudData || cloudTs !== 0) return false;
+
+    const scopedKey = baseKey + '_' + username;
+    const backupKey = scopedKey + '_backup';
+    const legacyKey = baseKey;
+    const legacyBackupKey = baseKey + '_backup';
+
+    let cleared = false;
+    if (localStorage.getItem(scopedKey)) {
+      localStorage.removeItem(scopedKey);
+      localStorage.removeItem(backupKey);
+      cleared = true;
+    }
+    if (localStorage.getItem(legacyKey)) {
+      localStorage.removeItem(legacyKey);
+      localStorage.removeItem(legacyBackupKey);
+      cleared = true;
+    }
+    if (cleared && typeof showToast === 'function') {
+      showToast('서버에 데이터가 없어 초기화했어요');
+    }
+    return cleared;
+  } catch (e) {
+    console.warn('[clearStalePageDataIfServerEmpty] 실패:', e.message);
+    return false;
+  }
+}
