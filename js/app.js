@@ -561,7 +561,14 @@ async function cloudPullAndRender() {
       try { localStorage.setItem(getSyncKey(), '0'); } catch (e) { /* ignore */ }
       render();
       if (typeof showToast === 'function') {
-        showToast('☁️ 서버에 데이터가 없어 초기화했어요');
+        // 세션당 한 번만 토스트 (자동 동기화/탭전환마다 뜨는 것 방지)
+        const toastFlag = 'clearStaleToastShown_' + (Auth.username || '');
+        if (!sessionStorage.getItem(toastFlag)) {
+          sessionStorage.setItem(toastFlag, '1');
+          showToast('☁️ 서버에 데이터가 없어 초기화했어요');
+        } else {
+          console.log('[CloudSync] 정리 완료 (토스트는 이번 세션에서 이미 표시됨)');
+        }
       }
     }
     return;

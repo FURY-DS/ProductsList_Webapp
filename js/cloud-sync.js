@@ -226,8 +226,16 @@ async function clearStalePageDataIfServerEmpty(baseKey) {
         cleared = true;
       }
     }
+    // 토스트는 새 계정 세션당 한 번만 표시 (페이지 이동마다 뜨는 것 방지).
+    // 정리 자체는 페이지별로 계속 수행해야 하므로 cleared 플래그는 그대로 유지.
     if (cleared && typeof showToast === 'function') {
-      showToast('서버에 데이터가 없어 초기화했어요');
+      const toastFlag = 'clearStaleToastShown_' + username;
+      if (!sessionStorage.getItem(toastFlag)) {
+        sessionStorage.setItem(toastFlag, '1');
+        showToast('서버에 데이터가 없어 초기화했어요');
+      } else {
+        console.log('[clearStale] 정리 완료 (토스트는 이번 세션에서 이미 표시됨)');
+      }
     }
     return cleared;
   } catch (e) {
