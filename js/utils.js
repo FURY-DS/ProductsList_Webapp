@@ -108,6 +108,15 @@ function round4(n) {
   return Math.round(n * 10000) / 10000;
 }
 
+/** localStorage 용량 초과 에러인지 확인 (10개 서브페이지 storage에서 공유) */
+function isStorageQuotaError(e) {
+  if (!e) return false;
+  return e.name === 'QuotaExceededError' ||
+    e.code === 22 ||
+    e.code === 1014 ||
+    (e.message && /quota|exceeded|storage/i.test(e.message));
+}
+
 /**
  * 저장 결과를 토스트로 알림.
  * save 계열 함수는 토스트를 직접 띄우지 않고 { ok, imagesRemoved?, msg? }를 반환하므로,
