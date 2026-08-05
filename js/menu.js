@@ -57,8 +57,9 @@ function initMenu() {
       return;
     }
 
-    const item = e.target.closest('button[data-page]');
+    const item = e.target.closest('a[data-page], button[data-page]');
     if (!item) return;
+    e.preventDefault();
     handleMenuSelect(item.dataset.page, item.textContent.trim());
   });
 
