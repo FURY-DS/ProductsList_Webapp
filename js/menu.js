@@ -124,6 +124,17 @@ function renderMenuItems() {
 
 /** 단일 메뉴 버튼 생성 */
 function createMenuButton(item, currentPage) {
+  if (item.ready && item.url && item.url !== '#') {
+    const link = document.createElement('a');
+    link.dataset.page = item.page;
+    link.href = item.url;
+    link.title = `${item.label} 페이지`;
+    const isActive = item.url === currentPage || (currentPage === '' && item.url === 'index.html');
+    if (isActive) link.classList.add('active');
+    link.textContent = item.label;
+    return link;
+  }
+
   const btn = document.createElement('button');
   btn.dataset.page = item.page;
   btn.title = item.ready ? `${item.label} 페이지` : `${item.label} (준비 중)`;
