@@ -19,18 +19,18 @@ async function initALWAYS() {
   bindALWAYSKeyboardShortcuts();
   bindALWAYSPageLifecycle();
 
-  // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 페이지 데이터 + 상품리스트 데이터 정리
+  // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 페이지 데이터 + 마켓노트 데이터 정리
   await clearStalePageDataIfServerEmpty([ALWAYS_CONFIG.STORAGE_KEY, ALWAYS_CONFIG.PRODUCTLIST_STORAGE_KEY]);
 
   loadALWAYS();
 
-  // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
+  // 마켓노트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveALWAYSCards();
   reportSaveResult(saveALWAYS(), ALWAYS_CONFIG.MESSAGES);
 
   renderALWAYS();
 
-  // 다른 탭에서 상품리스트 데이터가 수정되면 자동으로 재연동
+  // 다른 탭에서 마켓노트 데이터가 수정되면 자동으로 재연동
   window.addEventListener('storage', (e) => {
     if (e.key === ALWAYS_CONFIG.PRODUCTLIST_STORAGE_KEY) {
       resolveALWAYSCards();

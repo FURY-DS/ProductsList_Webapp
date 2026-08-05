@@ -13,7 +13,7 @@ function loadEsm() {
   loadPageData(ESM_CONFIG, esmState, newEsmCard, newBundleItem);
 }
 
-/** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
+/** 마켓노트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistData() {
   return loadProductlistDataForPage(ESM_CONFIG);
 }

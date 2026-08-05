@@ -3,7 +3,7 @@
    ===================================================== */
 
 const ALL_PAGES = [
-  { id: 'productlist',  key: 'productlist_v1',  name: '상품리스트' },
+  { id: 'productlist',  key: 'productlist_v1',  name: '마켓노트' },
   { id: 'nshipping',    key: 'nshipping_v1',    name: 'N배송' },
   { id: 'rocketgrowth', key: 'rocketgrowth_v1', name: '로켓그로스' },
   { id: 'smartstore',   key: 'smartstore_v1',   name: '스마트스토어' },
@@ -33,7 +33,7 @@ function initActions() {
   document.getElementById('btn-percent-bulk').addEventListener('click', openPctBulkModal);
 }
 
-/** 전체 데이터 내보내기 (상품리스트 + 마켓플레이스 + 오픈마켓정산) */
+/** 전체 데이터 내보내기 (마켓노트 + 마켓플레이스 + 오픈마켓정산) */
 function exportAllData() {
   try {
     const pages = {};
@@ -124,7 +124,7 @@ function handleImportAllFile(e) {
               });
               applied++;
 
-              // 현재 상품리스트 페이지라면 상태도 바로 갱신 + 클라우드 동기화
+              // 현재 마켓노트 페이지라면 상태도 바로 갱신 + 클라우드 동기화
               if (id === 'productlist') {
                 let arr;
                 try { arr = JSON.parse(value); } catch (e) { arr = []; }
@@ -176,7 +176,7 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `상품리스트_${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `마켓노트_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(CONFIG.MESSAGES.EXPORT_DONE);
@@ -293,7 +293,7 @@ function downloadCsvTemplate() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = '상품리스트_템플릿.csv';
+  a.download = '마켓노트_템플릿.csv';
   a.click();
   URL.revokeObjectURL(url);
   showToast(CONFIG.MESSAGES.CSV_TEMPLATE_DONE);

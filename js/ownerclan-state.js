@@ -17,13 +17,13 @@ function newOWNERCLANCard() {
     // 단품 모드용: 판매자상품코드 입력
     sellerCode: '',
 
-    // 상품리스트에서 자동 불러오는 필드
+    // 마켓노트에서 자동 불러오는 필드
     image: '',
     name: '',
     option: '',
 
     // 비용/계산 필드
-    finalCost: '',     // 최종원가 (상품리스트 총합 또는 복수품 합계)
+    finalCost: '',     // 최종원가 (마켓노트 총합 또는 복수품 합계)
     sellingPrice: '',  // 판매가
     supplyPrice: '',   // 공급가입력
     feeRate: '',       // 판매수수료 비율 (예: 0.1)
@@ -46,7 +46,7 @@ function newBundleItem() {
     image: '',
     name: '',
     option: '',
-    total: '' // 상품리스트 총합
+    total: '' // 마켓노트 총합
   };
 }
 

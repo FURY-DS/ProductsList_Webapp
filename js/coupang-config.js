@@ -12,7 +12,7 @@ const COUPANG_CONFIG = {
   // localStorage 키
   STORAGE_KEY: 'coupang_v1',
 
-  // 상품리스트 데이터를 읽어올 키 (config.js의 CONFIG.STORAGE_KEY와 동일)
+  // 마켓노트 데이터를 읽어올 키 (config.js의 CONFIG.STORAGE_KEY와 동일)
   PRODUCTLIST_STORAGE_KEY: 'productlist_v1',
 
   // 레이아웃
@@ -58,7 +58,7 @@ const COUPANG_CONFIG = {
     SAVED:                 '저장되었어요',
     SAVED_WITHOUT_IMAGES:  '사진 용량 때문에 이미지 없이 저장되었어요',
     SAVE_FAIL:       '저장 실패: ',
-    SAVE_FAIL_QUOTA: '저장 공간이 부족해요. 상품리스트 사진 용량을 줄이거나 데이터를 정리해 주세요.',
+    SAVE_FAIL_QUOTA: '저장 공간이 부족해요. 마켓노트 사진 용량을 줄이거나 데이터를 정리해 주세요.',
     LOAD_FAIL:       '불러오기 실패',
     DELETED:         '삭제되었어요',
     ALL_DELETED:     '모두 삭제되었어요',
@@ -96,7 +96,7 @@ const COUPANG_CONFIG = {
     BTN_REMOVE_ITEM:  '－',
     ALL_COLLAPSED:   '모든 상품을 숨겼어요',
     ALL_EXPANDED:    '모든 상품을 펼쳤어요',
-    PRODUCT_NOT_FOUND: (code) => `'${code}'에 해당하는 상품리스트 상품을 찾을 수 없어요`,
+    PRODUCT_NOT_FOUND: (code) => `'${code}'에 해당하는 마켓노트 상품을 찾을 수 없어요`,
     BUNDLE:          '복수품'
   }
 };

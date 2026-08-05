@@ -25,13 +25,13 @@ async function initNshipping() {
 
   loadNshipping();
 
-  // 상품리스트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
+  // 마켓노트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveNshippingCards();
   reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
 
   renderNshipping();
 
-  // 다른 탭에서 상품리스트 데이터가 수정되면 자동으로 재연동
+  // 다른 탭에서 마켓노트 데이터가 수정되면 자동으로 재연동
   window.addEventListener('storage', (e) => {
     if (e.key === NSHIPPING_CONFIG.PRODUCTLIST_STORAGE_KEY) {
       resolveNshippingCards();

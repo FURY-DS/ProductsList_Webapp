@@ -106,7 +106,7 @@ function loadPageData(config, state, newCardFn, newBundleItemFn) {
         isBundle: typeof c.isBundle === 'boolean' ? c.isBundle : false,
         bundleItems: bundleItems
       };
-      // 이미지는 사용자가 직접 업로드한 경우에만 존재하며, 상품리스트 실시간 조회값은 저장하지 않음
+      // 이미지는 사용자가 직접 업로드한 경우에만 존재하며, 마켓노트 실시간 조회값은 저장하지 않음
       card.image = c.image || '';
       card.bundleItems.forEach(item => { item.image = item.image || ''; });
       return card;
@@ -117,9 +117,9 @@ function loadPageData(config, state, newCardFn, newBundleItemFn) {
 }
 
 /**
- * 상품리스트 페이지의 데이터를 localStorage에서 읽어오기.
+ * 마켓노트 페이지의 데이터를 localStorage에서 읽어오기.
  * @param {Object} config - 페이지 CONFIG 객체 (PRODUCTLIST_STORAGE_KEY 포함)
- * @returns {Array} 상품리스트 데이터 배열 (없으면 빈 배열)
+ * @returns {Array} 마켓노트 데이터 배열 (없으면 빈 배열)
  */
 function loadProductlistDataForPage(config) {
   try {
@@ -128,7 +128,7 @@ function loadProductlistDataForPage(config) {
     const data = JSON.parse(raw);
     return Array.isArray(data) ? data : [];
   } catch (e) {
-    console.warn('상품리스트 데이터 읽기 실패', e);
+    console.warn('마켓노트 데이터 읽기 실패', e);
     return [];
   }
 }

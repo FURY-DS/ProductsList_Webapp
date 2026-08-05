@@ -37,7 +37,7 @@ const SETTLEMENT_CONFIG = {
     { id: 'loanInterest',  label: '대출 이자',                      type: 'input',  section: 'expense' },
     { id: 'logistics',     label: '물류비(창고+택배+기타)\n- 로켓 제외 (수량+비용)', type: 'input', section: 'expense' },
     { id: 'rocketCost',    label: '로켓그로스',                     type: 'input',  section: 'expense' },
-    { id: 'warehouseCost', label: '상품리스트 - 창고 택배비 비용\n(기준 : 4050원)', type: 'input', section: 'expense' },
+    { id: 'warehouseCost', label: '마켓노트 - 창고 택배비 비용\n(기준 : 4050원)', type: 'input', section: 'expense' },
     { id: 'naverAd',       label: '네이버 광고비',                  type: 'input',  section: 'expense' },
     { id: 'gmarketAd',     label: '지마켓 광고비',                  type: 'input',  section: 'expense' },
     { id: 'coupangAd',     label: '쿠팡 광고비',                   type: 'input',  section: 'expense' },

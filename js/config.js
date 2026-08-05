@@ -33,12 +33,12 @@ const CONFIG = {
   },
 
   // 페이지 제목
-  PAGE_TITLE: '상품리스트',
-  PAGE_HEADER: '상품리스트',
+  PAGE_TITLE: '마켓노트',
+  PAGE_HEADER: '마켓노트',
 
   // 메뉴 항목 (드롭다운) - page 파일과 연결
   MENU_ITEMS: [
-    { page: 'products',     label: '상품리스트',   url: 'index.html',        active: true,  ready: true },
+    { page: 'products',     label: '마켓노트',   url: 'index.html',        active: true,  ready: true },
     {
       page: 'marketplace',
       label: '마켓플레이스',
@@ -132,7 +132,7 @@ const CONFIG = {
     IMPORT_DONE:     (n) => `${n}개 상품을 가져왔어요`,
     IMPORT_ADDED:    (n) => `${n}개 상품을 추가했어요`,
     IMPORT_FAIL:     '가져오기 실패: ',
-    IMPORT_WRONG_PAGE: (pageName) => `이 파일은 '${pageName}' 페이지의 데이터입니다.\n상품리스트 페이지에서는 가져올 수 없어요.`,
+    IMPORT_WRONG_PAGE: (pageName) => `이 파일은 '${pageName}' 페이지의 데이터입니다.\n마켓노트 페이지에서는 가져올 수 없어요.`,
     PAGE_COMING:     (name) => `${name} 페이지는 준비 중이에요`,
     DELETE_TITLE:    '정말 삭제할까요?',
     DELETE_TEXT:     (label) => `${label}을(를) 삭제하면 복구할 수 없어요. 계속할까요?`,

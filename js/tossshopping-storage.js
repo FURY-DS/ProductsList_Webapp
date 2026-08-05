@@ -13,7 +13,7 @@ function loadTOSSSHOPPING() {
   loadPageData(TOSSSHOPPING_CONFIG, tossshoppingState, newTOSSSHOPPINGCard, newBundleItem);
 }
 
-/** 상품리스트 페이지의 데이터를 localStorage에서 읽어오기 */
+/** 마켓노트 페이지의 데이터를 localStorage에서 읽어오기 */
 function loadProductlistDataTOSSSHOPPING() {
   return loadProductlistDataForPage(TOSSSHOPPING_CONFIG);
 }

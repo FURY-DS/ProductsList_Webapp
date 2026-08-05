@@ -13,7 +13,7 @@ function lookupProductlistByCodeFromGeneric(code, products) {
   return products.find(p => String(p.ny || '').trim().toLowerCase() === target) || null;
 }
 
-/** 상품리스트 상품의 총합 계산: cost × rate × percent */
+/** 마켓노트 상품의 총합 계산: cost × rate × percent */
 function computeProductlistTotalGeneric(product) {
   const cost = parseNum(product.cost);
   const rate = parseNum(product.rate);
@@ -61,18 +61,18 @@ function resizeImageToDataURLGeneric(file, config) {
 
 // ── Lookup / Image (ctx 기반) ─────────────────────────
 
-/** 페이지 컨텍스트로 상품리스트에서 코드 조회 */
+/** 페이지 컨텍스트로 마켓노트에서 코드 조회 */
 function lookupProductlistByCodePage(ctx, code) {
   return lookupProductlistByCodeFromGeneric(code, ctx.loadProductlistData());
 }
 
-/** 상품리스트에서 코드에 해당하는 상품 이미지 가져오기 */
+/** 마켓노트에서 코드에 해당하는 상품 이미지 가져오기 */
 function getProductlistImagePage(ctx, code) {
   const product = lookupProductlistByCodePage(ctx, code);
   return product && product.image ? product.image : '';
 }
 
-/** 카드용 이미지 결정 (직접 업로드 우선, 없으면 상품리스트 조회) */
+/** 카드용 이미지 결정 (직접 업로드 우선, 없으면 마켓노트 조회) */
 function getPageImage(ctx, card) {
   if (card.image) return card.image;
   return getProductlistImagePage(ctx, card.sellerCode);
@@ -86,7 +86,7 @@ function getPageBundleItemImage(ctx, item) {
 
 // ── 코드 조회 → 카드/항목 업데이트 ─────────────────────
 
-/** 단품: 판매자상품코드로 상품리스트에서 정보 불러오기 */
+/** 단품: 판매자상품코드로 마켓노트에서 정보 불러오기 */
 function updateSingleProductFromCodePage(ctx, card, code) {
   card.sellerCode = code;
   if (!code || !code.trim()) return;
@@ -101,7 +101,7 @@ function updateSingleProductFromCodePage(ctx, card, code) {
   ctx.recalc(card);
 }
 
-/** 복수품 항목: 판매자상품코드로 상품리스트에서 정보 불러오기 */
+/** 복수품 항목: 판매자상품코드로 마켓노트에서 정보 불러오기 */
 function updateBundleItemFromCodePage(ctx, card, itemId, code) {
   const item = ctx.findBundleItem(card.id, itemId);
   if (!item) return;
