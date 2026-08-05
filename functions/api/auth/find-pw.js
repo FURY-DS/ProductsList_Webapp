@@ -56,7 +56,7 @@ export async function onRequestPost(context) {
   const code = generateVerificationCode();
   await storeVerificationCode(env.DATA_KV, 'findpw', scope, code, user.username);
 
-  const subject = '[상품리스트] 비밀번호 찾기 인증번호';
+  const subject = '[마켓노트] 비밀번호 찾기 인증번호';
   const { text, html } = buildVerificationEmailBody('findpw', user.name, code);
   const result = await sendEmail(env, user.email, subject, text, html);
 

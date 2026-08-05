@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
   await storeVerificationCode(env.DATA_KV, 'findid', scope, code, user.username);
 
   // 이메일 발송
-  const subject = '[상품리스트] 아이디 찾기 인증번호';
+  const subject = '[마켓노트] 아이디 찾기 인증번호';
   const { text, html } = buildVerificationEmailBody('findid', user.name, code);
   const result = await sendEmail(env, user.email, subject, text, html);
 
