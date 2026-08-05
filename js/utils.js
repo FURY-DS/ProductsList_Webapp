@@ -4,14 +4,9 @@
 
 /** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
 function getCurrentStorageUsername() {
-  if (typeof Auth !== 'undefined') {
-    if (!Auth.username && typeof Auth.init === 'function') Auth.init();
-    if (Auth.username) return Auth.username;
-    if (typeof Auth._readStored === 'function') {
-      const stored = Auth._readStored('auth_username');
-      if (stored) return stored;
-    }
-  }
+  // Auth 객체가 정의되어 있고 username이 있으면 그 값 사용
+  if (typeof Auth !== 'undefined' && Auth.username) return Auth.username;
+  // localStorage / sessionStorage에서 직접 읽기 (페이지 로드 직후 Auth.init 전에도 동작)
   return localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username') || 'guest';
 }
 

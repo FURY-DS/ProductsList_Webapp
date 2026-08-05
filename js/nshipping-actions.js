@@ -179,7 +179,7 @@ function addNshippingCardAfter(cardId) {
 /** 카드로 부드러운 스크롤 */
 function scrollToNshippingCard(cardId) {
   setTimeout(() => {
-    const el = document.querySelector(`.smartstore-card[data-id="${cardId}"]`);
+    const el = document.querySelector(`.product-card[data-id="${cardId}"]`);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 50);
 }
@@ -194,7 +194,7 @@ function addNshippingBundleItem(cardId) {
   reportSaveResult(saveNshipping(), NSHIPPING_CONFIG.MESSAGES);
   renderNshipping();
   setTimeout(() => {
-    const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
+    const el = document.querySelector(`.product-card[data-id="${cardId}"] .bundle-item[data-item-id="${item.id}"] input[name="itemSellerCode"]`);
     if (el) el.focus();
   }, 50);
 }

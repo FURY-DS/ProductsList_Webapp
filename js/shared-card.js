@@ -177,7 +177,7 @@ function renderPageEmptyState(ctx, title, desc, showAddBtn) {
 function renderPageCard(ctx, card, idx) {
   const wrap = document.createElement('div');
   const extraClass = ctx.cardClass ? ' ' + ctx.cardClass : '';
-  wrap.className = 'card' + extraClass + ' smartstore-card'
+  wrap.className = 'card' + extraClass + ' product-card'
     + (card.isEditing ? '' : ' saved')
     + (card.isCollapsed ? ' collapsed' : '');
   wrap.dataset.id = card.id;
@@ -508,7 +508,7 @@ function savePageCard(ctx, cardId) {
 function syncPageCardFromDOM(ctx, cardId) {
   const card = ctx.findCard(cardId);
   if (!card) return;
-  const wrap = document.querySelector(`.smartstore-card[data-id="${cardId}"]`);
+  const wrap = document.querySelector(`.product-card[data-id="${cardId}"]`);
   if (!wrap) return;
 
   const getVal = (name) => {
@@ -546,7 +546,7 @@ function editPageCard(ctx, cardId) {
   reportSaveResult(ctx.save(), ctx.config.MESSAGES);
   renderCardsPage(ctx);
   setTimeout(() => {
-    const el = document.querySelector(`.smartstore-card[data-id="${cardId}"] input[name="sellerCode"], .smartstore-card[data-id="${cardId}"] input[name="itemSellerCode"]`);
+    const el = document.querySelector(`.product-card[data-id="${cardId}"] input[name="sellerCode"], .product-card[data-id="${cardId}"] input[name="itemSellerCode"]`);
     if (el) el.focus();
   }, 50);
 }
