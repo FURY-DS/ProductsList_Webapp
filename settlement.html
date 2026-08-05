@@ -90,29 +90,27 @@
 <script src="js/toast.js?v=29"></script>
 <script src="js/modal.js?v=29"></script>
 <script src="js/menu.js?v=29"></script>
+<script src="js/auth.js?v=29"></script>
 <script src="js/cloud-sync.js?v=29"></script>
 <script src="js/settlement-app.js?v=29"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-    initMenu();
+    Auth.init();
 
-    // 서버에서 세션/사용자 재확인 (로컬스토리지 조작 우회 방지)
-    try {
-      var token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-      if (!token) { window.location.replace('index.html'); return; }
-      var res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
-      if (!res.ok) { window.location.replace('index.html'); return; }
-      var data = await res.json();
-      if (data.username !== 'alcave') {
-        alert('오픈마켓정산 페이지는 alcave만 이용할 수 있어요.');
-        window.location.replace('index.html');
-        return;
-      }
-    } catch (e) {
-      // 네트워크 오류 시 head 스크립트의 로컬 검증으로 폴백
+    // 서버에서 세션/사용자 재확인 (네트워크 오류 시 저장된 세션으로 폴백)
+    const isValid = await Auth.checkSession();
+    if (!isValid) {
+      window.location.replace('index.html');
+      return;
+    }
+    if (Auth.username !== 'alcave') {
+      alert('오픈마켓정산 페이지는 alcave만 이용할 수 있어요.');
+      window.location.replace('index.html');
+      return;
     }
 
+    initMenu();
     await initSettlement();
   });
 </script>

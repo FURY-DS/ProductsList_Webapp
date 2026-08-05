@@ -4,10 +4,15 @@
 
 /** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
 function getCurrentStorageUsername() {
-  const username = (typeof Auth !== 'undefined' && Auth.username)
-    || Auth._readStored('auth_username')
-    || 'guest';
-  return username;
+  if (typeof Auth !== 'undefined') {
+    if (!Auth.username && typeof Auth.init === 'function') Auth.init();
+    if (Auth.username) return Auth.username;
+    if (typeof Auth._readStored === 'function') {
+      const stored = Auth._readStored('auth_username');
+      if (stored) return stored;
+    }
+  }
+  return localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username') || 'guest';
 }
 
 /** 기본 localStorage 키를 현재 사용자 전용 키로 변환 */
@@ -66,7 +71,10 @@ function getUserScopedItemWithFallback(baseKey) {
  * @returns {boolean} 인증되어 있으면 true
  */
 function requireAuthenticatedPage() {
-  if (typeof Auth !== 'undefined' && Auth.isAuthenticated()) return true;
+  if (typeof Auth !== 'undefined') {
+    if (!Auth.token && typeof Auth.init === 'function') Auth.init();
+    if (Auth.isAuthenticated()) return true;
+  }
   window.location.replace('index.html');
   return false;
 }
