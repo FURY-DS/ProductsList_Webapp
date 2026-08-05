@@ -6,14 +6,17 @@ let btnMenuEl = null;
 let menuDropdownEl = null;
 let _menuInitialized = false;
 
-/** 현재 사용자 역할 (localStorage / sessionStorage에서 읽기) */
-function getCurrentRole() {
-  return localStorage.getItem('auth_role') || sessionStorage.getItem('auth_role') || null;
+/**
+ * 현재 사용자명 반환. Auth.init() 후 호출되어야 함 (app.js 흐름 참고).
+ * @returns {string|null}
+ */
+function getCurrentUsername() {
+  return (typeof Auth !== 'undefined' && Auth.username) || null;
 }
 
-/** 현재 사용자명 (localStorage / sessionStorage에서 읽기) */
-function getCurrentUsername() {
-  return localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username') || null;
+/** 현재 역할 반환 */
+function getCurrentRole() {
+  return (typeof Auth !== 'undefined' && Auth.role) || null;
 }
 
 /** 관리자 여부 */

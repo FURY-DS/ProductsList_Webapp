@@ -26,20 +26,27 @@ const CloudSync = {
     }
   },
 
-  /** 클라우드에서 데이터 가져오기 */
+  /**
+   * 401 응답 시 세션 만료 처리 (apiFetch는 자동으로 _clearSession 호출).
+   * @returns {Promise<boolean>} 세션 만료 여부
+   */
+  async _handleUnauthorized() {
+    console.warn('[CloudSync] 세션 만료');
+    await Auth.logout();
+    location.reload();
+    return true;
+  },
+
+  /** 클라우드에서 데이터 가져오기 (401 시 세션 정리 + reload, 200이면 JSON 반환) */
   async pull() {
     if (!this.enabled || !Auth.token) return null;
     try {
-      const res = await fetch('/api/data', {
-        headers: { 'Authorization': `Bearer ${Auth.token}` }
-      });
+      const res = await fetch('/api/data', { headers: Auth.getAuthHeader() });
+      if (res.status === 401) {
+        await this._handleUnauthorized();
+        return null;
+      }
       if (!res.ok) {
-        if (res.status === 401) {
-          console.warn('[CloudSync] 세션 만료');
-          await Auth.logout();
-          location.reload();
-          return null;
-        }
         console.warn('[CloudSync] Pull 실패:', res.status);
         return null;
       }
@@ -50,7 +57,11 @@ const CloudSync = {
     }
   },
 
-  /** 클라우드에 데이터 저장 */
+  /**
+   * 클라우드에 데이터 저장. 충돌 시(409) false 반환, 401 시 세션 정리.
+   * @param {Array} data
+   * @returns {Promise<boolean>} 성공 여부
+   */
   async push(data) {
     if (!this.enabled || !Auth.token) return false;
     if (this.syncing) {
@@ -65,7 +76,7 @@ const CloudSync = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Auth.token}`
+          ...Auth.getAuthHeader()
         },
         body: JSON.stringify({ data, ts })
       });
@@ -83,11 +94,8 @@ const CloudSync = {
         return false;
       }
 
-      // 401: 세션 만료
       if (res.status === 401) {
-        console.warn('[CloudSync] 세션 만료');
-        await Auth.logout();
-        location.reload();
+        await this._handleUnauthorized();
         return false;
       }
 
@@ -170,15 +178,13 @@ const CloudSync = {
  * @returns {Promise<boolean>} 정리했으면 true
  */
 async function clearStalePageDataIfServerEmpty(baseKey) {
-  // 인증 토큰을 localStorage/sessionStorage에서 직접 읽음 (Auth 전역 객체 의존 X)
-  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-  const username = localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username');
-  if (!token || !username) return false;
+  // Auth 객체 사용 (이 시점에 init 완료). 토큰이 없으면 정리할 필요 없음.
+  if (!Auth.isAuthenticated() || !Auth.username) return false;
+  const username = Auth.username;
+
   try {
     // 1) 메인 데이터 확인
-    const dataRes = await fetch('/api/data', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const dataRes = await fetch('/api/data', { headers: Auth.getAuthHeader() });
     if (!dataRes.ok) return false;
     // /api/data GET 응답 형식: { data: null|Array, ts: 0|Number } (ok 필드 없음)
     const dataResult = await dataRes.json();
@@ -190,9 +196,7 @@ async function clearStalePageDataIfServerEmpty(baseKey) {
     if (hasCloudData || cloudTs !== 0) return false;
 
     // 2) 계정 생성 시각 확인 (안전장치: 메인 데이터가 비어있어도 오래된 계정은 보존)
-    const meRes = await fetch('/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const meRes = await fetch('/api/auth/me', { headers: Auth.getAuthHeader() });
     if (!meRes.ok) return false;
     const meResult = await meRes.json();
     const createdAt = meResult.createdAt || 0;

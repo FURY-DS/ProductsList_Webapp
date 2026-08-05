@@ -2,7 +2,10 @@
    app.js - 앱 초기화, 인증 흐름, 키보드 단축키
    ===================================================== */
 
-/** DOM 로드 후 시작: 인증 확인 → 앱 시작 or 로그인 화면 */
+/**
+ * DOM 로드 후 시작. 인증 확인 → 앱 시작 or 로그인 화면.
+ * @returns {Promise<void>}
+ */
 async function init() {
   Auth.init();
 
@@ -25,7 +28,11 @@ async function init() {
   bindKeyboardShortcuts();
 }
 
-/** 인증된 사용자를 위한 앱 초기화 */
+/**
+ * 인증된 사용자를 위한 앱 초기화.
+ * 각 모듈 init은 독립적 try-catch로 감싸져 있어, 하나가 실패해도 나머지는 작동.
+ * @returns {Promise<void>}
+ */
 async function startApp() {
   hideAuthOverlay();
 

@@ -5,8 +5,7 @@
 /** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
 function getCurrentStorageUsername() {
   const username = (typeof Auth !== 'undefined' && Auth.username)
-    || localStorage.getItem('auth_username')
-    || sessionStorage.getItem('auth_username')
+    || Auth._readStored('auth_username')
     || 'guest';
   return username;
 }
@@ -18,17 +17,20 @@ function getUserScopedKey(baseKey) {
 
 /** 현재 로그인한 사용자의 localStorage 데이터 키 반환 */
 function getStorageKey() {
-  const username = getCurrentStorageUsername();
-  return CONFIG.STORAGE_KEY + '_' + username;
+  return CONFIG.STORAGE_KEY + '_' + getCurrentStorageUsername();
 }
 
 /** 현재 로그인한 사용자의 클라우드 동기화 타임스탬프 키 반환 */
 function getSyncKey() {
-  const username = getCurrentStorageUsername();
-  return 'cloud_last_sync_' + username;
+  return 'cloud_last_sync_' + getCurrentStorageUsername();
 }
 
-/** 사용자별 키가 비어 있으면 기존 전역 키 데이터를 한 번 복사 */
+/**
+ * 사용자별 키가 비어 있으면 기존 전역 키 데이터를 한 번 복사 (구버전 호환).
+ * @param {string} baseKey
+ * @param {(data:any)=>boolean} [isValidData] - 데이터 유효성 검증 (선택)
+ * @returns {string} 최종 user-scoped 키 (정리 안 됐으면 scoped key 반환)
+ */
 function migrateLegacyKeyToUserScope(baseKey, isValidData) {
   const scopedKey = getUserScopedKey(baseKey);
   if (localStorage.getItem(scopedKey)) return scopedKey;
@@ -48,17 +50,23 @@ function migrateLegacyKeyToUserScope(baseKey, isValidData) {
   return scopedKey;
 }
 
-/** 사용자별 키 우선, 없으면 기존 전역 키를 fallback으로 읽기 */
+/**
+ * 사용자별 키 우선, 없으면 기존 전역 키를 fallback으로 읽기.
+ * @param {string} baseKey
+ * @returns {string|null} raw 문자열 (JSON.parse는 호출자에서)
+ */
 function getUserScopedItemWithFallback(baseKey) {
   const scopedRaw = localStorage.getItem(getUserScopedKey(baseKey));
   if (scopedRaw) return scopedRaw;
   return localStorage.getItem(baseKey);
 }
 
-/** 로그인 토큰 없이 보조 페이지에 직접 접근하면 로그인 화면으로 돌려보냄 */
+/**
+ * 로그인 토큰 없이 보조 페이지에 직접 접근하면 로그인 화면으로 돌려보냄.
+ * @returns {boolean} 인증되어 있으면 true
+ */
 function requireAuthenticatedPage() {
-  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-  if (token) return true;
+  if (typeof Auth !== 'undefined' && Auth.isAuthenticated()) return true;
   window.location.replace('index.html');
   return false;
 }
@@ -101,7 +109,7 @@ function round4(n) {
 }
 
 /**
- * 저장 결과를 토스트로 알림
+ * 저장 결과를 토스트로 알림.
  * save 계열 함수는 토스트를 직접 띄우지 않고 { ok, imagesRemoved?, msg? }를 반환하므로,
  * 호출한 쪽에서 반드시 이 함수로 결과를 전달해야 실패가 묻히지 않는다.
  * @param {Object} result - save 계열 함수의 반환값
