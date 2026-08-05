@@ -30,7 +30,7 @@ export async function sendEmail(env, to, subject, text, html) {
           subject: subject,
           body: text,
           html: html || text,
-          fromName: env.RESEND_FROM_NAME || '상품리스트'
+          fromName: env.RESEND_FROM_NAME || '마켓노트'
         })
       });
 
@@ -49,7 +49,7 @@ export async function sendEmail(env, to, subject, text, html) {
   // === 2순위: Resend API ===
   const apiKey = env.RESEND_API_KEY;
   const fromEmail = env.RESEND_FROM_EMAIL;
-  const fromName = env.RESEND_FROM_NAME || '상품리스트';
+  const fromName = env.RESEND_FROM_NAME || '마켓노트';
 
   if (apiKey) {
     if (!fromEmail) {
@@ -106,7 +106,7 @@ export function buildVerificationEmailBody(purpose, name, code) {
   };
   const title = titles[purpose] || '계정 찾기';
 
-  const text = `[상품리스트] ${title} 인증번호
+  const text = `[마켓노트] ${title} 인증번호
 
 안녕하세요, ${name}님.
 
@@ -117,14 +117,14 @@ export function buildVerificationEmailBody(purpose, name, code) {
 이 인증번호는 5분 동안만 유효하며, 한 번만 사용할 수 있어요.
 본인이 요청하지 않았다면 이 이메일을 무시해주세요.
 
-— 상품리스트
+— 마켓노트
 `;
 
   const html = `<!DOCTYPE html>
 <html>
 <body style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; max-width: 480px; margin: 0 auto; padding: 20px;">
   <div style="background: #f8f9fa; border-radius: 12px; padding: 32px; text-align: center;">
-    <h2 style="color: #333; margin-bottom: 8px;">상품리스트</h2>
+    <h2 style="color: #333; margin-bottom: 8px;">마켓노트</h2>
     <p style="color: #666; font-size: 14px; margin-bottom: 24px;">${title} 인증번호</p>
     <p style="color: #333; font-size: 15px;">안녕하세요, <strong>${name}</strong>님.</p>
     <p style="color: #333; font-size: 15px; margin-bottom: 24px;">요청하신 인증번호입니다.</p>
