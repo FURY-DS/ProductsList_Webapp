@@ -7,24 +7,20 @@
    - dev mode (RESEND_API_KEY 미설정) 시 devCode를 응답에 포함
    ===================================================== */
 
+import { parseJsonBody, checkRateLimit, recordAttempt, ipScope, onRequestOptions } from '../../_lib/helpers.js';
 import {
   validateName, validateEmail,
   findUserByNameAndEmail,
   generateVerificationCode, storeVerificationCode,
-  getClientIp, isRateLimited, recordAttempt,
-  jsonResponse, handleOptions
+  jsonResponse
 } from '../../_lib/auth.js';
 import { sendEmail, buildVerificationEmailBody } from '../../_lib/email.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { name, email } = body;
 
@@ -36,11 +32,13 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '올바른 이메일 형식이 아닙니다' }, 400);
   }
 
-  const ip = getClientIp(request);
+  const ip = ipScope(request);
 
-  if (await isRateLimited(env.DATA_KV, 'findid_request', ip)) {
-    return jsonResponse({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'findid_request', ip,
+    '요청이 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
 
   // 사용자 조회 (없어도 동일한 응답)
   const user = await findUserByNameAndEmail(env.DATA_KV, name, email);
@@ -76,6 +74,4 @@ export async function onRequestPost(context) {
   return jsonResponse(genericResponse);
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

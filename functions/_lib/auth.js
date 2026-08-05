@@ -471,13 +471,15 @@ export async function resetPassword(kv, username, newPassword) {
  * - session:<token> KV 키를 순회
  * - KV list는 페이지네이션이 있으므로 cursor 사용
  */
-export async function deleteAllSessionsForUser(kv, username) {
+export async function deleteAllSessionsForUser(kv, username, exceptToken = null) {
   const target = username.toLowerCase();
+  const skipKey = exceptToken ? `session:${exceptToken}` : null;
   let cursor = null;
   let deleted = 0;
   do {
     const list = await kv.list({ prefix: 'session:', cursor });
     for (const key of list.keys) {
+      if (skipKey && key.name === skipKey) continue;
       try {
         const raw = await kv.get(key.name);
         if (!raw) continue;

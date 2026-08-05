@@ -7,23 +7,19 @@
    - 모든 기존 세션 무효화 (탈취된 세션 차단)
    ===================================================== */
 
+import { parseJsonBody, checkRateLimit, recordAttempt, ipScope, onRequestOptions } from '../../../_lib/helpers.js';
 import {
   validateName, validateUsername, validateEmail, validatePassword,
   verifyAndConsumeCode, resetPassword, deleteAllSessionsForUser,
   findUserByNameUsernameAndEmail,
-  getClientIp, isRateLimited, recordAttempt,
-  jsonResponse, handleOptions
+  jsonResponse
 } from '../../../_lib/auth.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { name, username, email, code, newPassword } = body;
 
@@ -37,10 +33,12 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '새 비밀번호는 6자 이상이어야 합니다' }, 400);
   }
 
-  const ip = getClientIp(request);
-  if (await isRateLimited(env.DATA_KV, 'findpw_verify', ip)) {
-    return jsonResponse({ error: '시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const ip = ipScope(request);
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'findpw_verify', ip,
+    '시도가 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
 
   // 1) 인증번호 검증
   const scope = `${username.toLowerCase()}:${email.toLowerCase()}`;
@@ -78,6 +76,4 @@ export async function onRequestPost(context) {
   });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

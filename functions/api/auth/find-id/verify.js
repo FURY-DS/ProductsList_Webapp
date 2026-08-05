@@ -6,22 +6,18 @@
    - 실패 시 동일한 에러 (사용자/코드 정보 노출 방지)
    ===================================================== */
 
+import { parseJsonBody, checkRateLimit, recordAttempt, ipScope, onRequestOptions } from '../../../_lib/helpers.js';
 import {
   validateName, validateEmail,
   verifyAndConsumeCode,
-  getClientIp, isRateLimited, recordAttempt,
-  jsonResponse, handleOptions
+  jsonResponse
 } from '../../../_lib/auth.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { name, email, code } = body;
 
@@ -35,10 +31,12 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '인증번호 6자리를 입력해주세요' }, 400);
   }
 
-  const ip = getClientIp(request);
-  if (await isRateLimited(env.DATA_KV, 'findid_verify', ip)) {
-    return jsonResponse({ error: '시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const ip = ipScope(request);
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'findid_verify', ip,
+    '시도가 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
 
   // 인증번호 검증 (성공 시 자동 삭제)
   const scope = email.toLowerCase();
@@ -77,6 +75,4 @@ function maskEmail(email) {
   return `${local.slice(0, 2)}***@${domain}`;
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

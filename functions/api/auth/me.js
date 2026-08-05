@@ -1,18 +1,16 @@
 /* =====================================================
    api/auth/me.js - 세션 확인
-   GET /api/auth/me  (Authorization: Bearer <token>)
-   → { username, role, name, email, createdAt }
+   GET /api/auth/me  (Bearer) → { username, role, name, email, createdAt }
    ===================================================== */
 
-import { verifySession, jsonResponse, handleOptions } from '../../_lib/auth.js';
+import { requireAuth, onRequestOptions } from '../../_lib/helpers.js';
+import { jsonResponse } from '../../_lib/auth.js';
 
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const session = await verifySession(env.DATA_KV, request);
-  if (!session) {
-    return jsonResponse({ error: '인증되지 않음' }, 401);
-  }
+  const { session, response } = await requireAuth(env.DATA_KV, request, '인증되지 않음');
+  if (response) return response;
 
   // user 레코드를 한 번 더 읽어 추가 정보 반환 (name, email, createdAt)
   const userRaw = await env.DATA_KV.get(`user:${session.username}`);
@@ -30,6 +28,4 @@ export async function onRequestGet(context) {
   });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

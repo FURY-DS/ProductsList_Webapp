@@ -1,30 +1,30 @@
 /* =====================================================
-   smartstore.css - 스마트스토어 전용 스타일
+   card-features.css - 카드 공통 기능 스타일
    ===================================================== */
 
-.smartstore-card .photo-box,
-.smartstore-card .bundle-thumb {
+.product-card .photo-box,
+.product-card .bundle-thumb {
   cursor: pointer;
 }
-.smartstore-card .photo-box:hover,
-.smartstore-card .bundle-thumb:hover {
+.product-card .photo-box:hover,
+.product-card .bundle-thumb:hover {
   border-color: var(--primary);
 }
 
 /* ----- Header 내 판매자상품코드 입력 ----- */
-.smartstore-card .card-header .seller-code-field {
+.product-card .card-header .seller-code-field {
   flex: 1;
   min-width: 0;
   margin-left: 8px;
 }
-.smartstore-card .card-header .seller-code-field label {
+.product-card .card-header .seller-code-field label {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-soft);
   margin-bottom: 4px;
   display: block;
 }
-.smartstore-card .card-header .seller-code-field input {
+.product-card .card-header .seller-code-field input {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -34,30 +34,30 @@
   background: #fff;
   font-family: inherit;
 }
-.smartstore-card .card-header .seller-code-field input:focus {
+.product-card .card-header .seller-code-field input:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
 }
-.smartstore-card.saved .card-header .seller-code-field input {
+.product-card.saved .card-header .seller-code-field input {
   background: #f7f8fc;
   border-style: dashed;
 }
 
-.smartstore-card .bundle-badge {
+.product-card .bundle-badge {
   background: #fff3e0;
   color: #e65100;
   border-color: #ffe0b2;
 }
 
 /* ----- 판매수수료 필드 (비율 입력 + 금액 표시) ----- */
-.smartstore-card .fee-field label {
+.product-card .fee-field label {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
 }
-.smartstore-card .fee-field .fee-rate {
+.product-card .fee-field .fee-rate {
   width: 70px;
   padding: 4px 6px;
   font-size: 12px;
@@ -65,34 +65,34 @@
   border-radius: 6px;
   text-align: right;
 }
-.smartstore-card .fee-field .fee-rate:focus {
+.product-card .fee-field .fee-rate:focus {
   outline: none;
   border-color: var(--primary);
 }
 
 /* ----- 복수품 섹션 ----- */
-.smartstore-card .bundle-section {
+.product-card .bundle-section {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px dashed var(--border);
 }
-.smartstore-card .bundle-title {
+.product-card .bundle-title {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-soft);
   margin-bottom: 10px;
 }
-.smartstore-card .bundle-list {
+.product-card .bundle-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.smartstore-card .bundle-item {
+.product-card .bundle-item {
   display: flex;
   align-items: flex-end;
   gap: 10px;
 }
-.smartstore-card .bundle-thumb {
+.product-card .bundle-thumb {
   width: 56px;
   height: 56px;
   border: 2px dashed var(--border);
@@ -107,55 +107,55 @@
   flex-shrink: 0;
   overflow: hidden;
 }
-.smartstore-card .bundle-thumb.has-image {
+.product-card .bundle-thumb.has-image {
   border-style: solid;
 }
-.smartstore-card .bundle-thumb img {
+.product-card .bundle-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.smartstore-card .bundle-item-fields {
+.product-card .bundle-item-fields {
   flex: 1;
   min-width: 0;
   display: flex;
   gap: 10px;
 }
-.smartstore-card .bundle-code-field {
+.product-card .bundle-code-field {
   flex: 1 1 50%;
   min-width: 0;
 }
-.smartstore-card .bundle-total-field {
+.product-card .bundle-total-field {
   flex: 1 1 50%;
   min-width: 0;
 }
-.smartstore-card .bundle-code-field label,
-.smartstore-card .bundle-total-field label {
+.product-card .bundle-code-field label,
+.product-card .bundle-total-field label {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-soft);
 }
-.smartstore-card .bundle-code-field input,
-.smartstore-card .bundle-total-field input {
+.product-card .bundle-code-field input,
+.product-card .bundle-total-field input {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 13px;
 }
-.smartstore-card .bundle-total-field input {
+.product-card .bundle-total-field input {
   background: #f7f8fc;
   text-align: right;
 }
-.smartstore-card .bundle-remove {
+.product-card .bundle-remove {
   padding: 8px 12px;
   font-size: 12px;
   flex-shrink: 0;
 }
 /* ----- 복수품 추가 버튼 (캡슐 스타일) ----- */
-.smartstore-card .bundle-add button,
-.smartstore-card .bundle-add-item {
+.product-card .bundle-add button,
+.product-card .bundle-add-item {
   flex: 0 0 auto;
   width: auto;
   min-width: 140px;
@@ -169,22 +169,22 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.15s ease;
 }
-.smartstore-card .bundle-add button {
+.product-card .bundle-add button {
   display: inline-flex;
 }
-.smartstore-card .bundle-add-item {
+.product-card .bundle-add-item {
   display: flex;
   margin: 10px auto 0;
 }
-.smartstore-card .bundle-add button:hover,
-.smartstore-card .bundle-add-item:hover {
+.product-card .bundle-add button:hover,
+.product-card .bundle-add-item:hover {
   background: #eaeaec;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* ----- 복수품 전환 버튼 ----- */
-.smartstore-card .bundle-add {
+.product-card .bundle-add {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px dashed var(--border);
@@ -193,7 +193,7 @@
 }
 
 /* ----- Saved card 상태 ----- */
-.smartstore-card.saved .card-header .seller-code-field input[readonly] {
+.product-card.saved .card-header .seller-code-field input[readonly] {
   background: #f7f8fc;
   color: var(--text-soft);
   cursor: default;
@@ -245,38 +245,38 @@
 }
 
 /* ----- 2개이상구매 행: 최종이익 반절 + 2개이상구매 반절 ----- */
-.smartstore-card .field-row.split-profit {
+.product-card .field-row.split-profit {
   grid-template-columns: 1fr 1fr 0.5fr 0.5fr;
 }
 
 /* ----- 판매가+공급가입력 행: 판매가 반절 + 공급가입력 반절 ----- */
-.smartstore-card .field-row.split-price {
+.product-card .field-row.split-price {
   grid-template-columns: 1fr 0.5fr 0.5fr 1fr;
 }
 
 /* ----- 반응형 ----- */
 @media (max-width: 520px) {
-  .smartstore-card .field-row.split-profit {
+  .product-card .field-row.split-profit {
     grid-template-columns: 1fr;
   }
-  .smartstore-card .field-row.split-price {
+  .product-card .field-row.split-price {
     grid-template-columns: 1fr;
   }
-  .smartstore-card .bundle-item {
+  .product-card .bundle-item {
     flex-wrap: wrap;
   }
-  .smartstore-card .bundle-thumb {
+  .product-card .bundle-thumb {
     width: 48px;
     height: 48px;
   }
-  .smartstore-card .bundle-item-fields {
+  .product-card .bundle-item-fields {
     width: calc(100% - 64px);
   }
-  .smartstore-card .bundle-code-field,
-  .smartstore-card .bundle-total-field {
+  .product-card .bundle-code-field,
+  .product-card .bundle-total-field {
     flex: 1 1 50%;
   }
-  .smartstore-card .bundle-remove {
+  .product-card .bundle-remove {
     margin-left: auto;
   }
 }

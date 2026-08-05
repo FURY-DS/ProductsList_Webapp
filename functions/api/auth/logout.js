@@ -1,9 +1,10 @@
 /* =====================================================
    api/auth/logout.js - 로그아웃
-   POST /api/auth/logout  (Authorization: Bearer <token>) → { ok: true }
+   POST /api/auth/logout  (Bearer) → { ok: true }
    ===================================================== */
 
-import { extractToken, deleteSession, jsonResponse, handleOptions } from '../../_lib/auth.js';
+import { extractToken, deleteSession, jsonResponse } from '../../_lib/auth.js';
+import { onRequestOptions } from '../../_lib/helpers.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -16,6 +17,4 @@ export async function onRequestPost(context) {
   return jsonResponse({ ok: true });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

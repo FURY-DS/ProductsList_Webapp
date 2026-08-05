@@ -5,32 +5,26 @@
 
    - Bearer 토큰으로 인증된 사용자만 가능
    - 현재 비밀번호 검증 후 새 비밀번호로 변경
-   - 다른 기기 세션도 모두 무효화 (선택: 본인 세션은 유지)
+   - 다른 기기 세션도 모두 무효화 (본인 세션은 유지)
    ===================================================== */
 
+import { requireAuth, parseJsonBody, checkRateLimit, recordAttempt, onRequestOptions } from '../../_lib/helpers.js';
 import {
-  verifySession, extractToken,
-  validatePassword, changePassword, deleteAllSessionsForUser,
-  isRateLimited, recordAttempt,
-  jsonResponse, handleOptions
+  extractToken, validatePassword, changePassword,
+  deleteAllSessionsForUser,
+  jsonResponse
 } from '../../_lib/auth.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   // 1) 세션 확인
-  const session = await verifySession(env.DATA_KV, request);
-  if (!session) {
-    return jsonResponse({ error: '로그인이 필요합니다' }, 401);
-  }
+  const { session, response: authErr } = await requireAuth(env.DATA_KV, request, '로그인이 필요합니다');
+  if (authErr) return authErr;
 
   // 2) 입력값 파싱
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { oldPassword, newPassword } = body;
 
@@ -46,9 +40,11 @@ export async function onRequestPost(context) {
 
   // 3) Rate limit (사용자별)
   const scope = session.username;
-  if (await isRateLimited(env.DATA_KV, 'change_password', scope)) {
-    return jsonResponse({ error: '시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'change_password', scope,
+    '시도가 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
 
   // 4) 비밀번호 변경
   const result = await changePassword(env.DATA_KV, session.username, oldPassword, newPassword);
@@ -59,38 +55,9 @@ export async function onRequestPost(context) {
 
   // 5) 본인 세션 토큰은 유지하고, 다른 세션만 무효화
   const currentToken = extractToken(request);
-  await deleteOtherSessionsForUser(env.DATA_KV, session.username, currentToken);
+  await deleteAllSessionsForUser(env.DATA_KV, session.username, currentToken);
 
   return jsonResponse({ ok: true });
 }
 
-/**
- * 특정 사용자의 세션 중, currentToken을 제외한 나머지를 삭제
- */
-async function deleteOtherSessionsForUser(kv, username, currentToken) {
-  const target = username.toLowerCase();
-  let cursor = null;
-  let deleted = 0;
-  do {
-    const list = await kv.list({ prefix: 'session:', cursor });
-    for (const key of list.keys) {
-      // 현재 토큰은 건너뛰기
-      if (key.name === `session:${currentToken}`) continue;
-      try {
-        const raw = await kv.get(key.name);
-        if (!raw) continue;
-        const session = JSON.parse(raw);
-        if (session.username === target) {
-          await kv.delete(key.name);
-          deleted++;
-        }
-      } catch (e) { /* 손상된 세션 무시 */ }
-    }
-    cursor = list.list_complete ? null : list.cursor;
-  } while (cursor);
-  return deleted;
-}
-
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

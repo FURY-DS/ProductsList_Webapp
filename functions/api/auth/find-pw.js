@@ -6,24 +6,20 @@
    - 일치하지 않아도 동일한 응답 (정보 노출 방지)
    ===================================================== */
 
+import { parseJsonBody, checkRateLimit, recordAttempt, ipScope, onRequestOptions } from '../../_lib/helpers.js';
 import {
   validateName, validateUsername, validateEmail,
   findUserByNameUsernameAndEmail,
   generateVerificationCode, storeVerificationCode,
-  getClientIp, isRateLimited, recordAttempt,
-  jsonResponse, handleOptions
+  jsonResponse
 } from '../../_lib/auth.js';
 import { sendEmail, buildVerificationEmailBody } from '../../_lib/email.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { name, username, email } = body;
 
@@ -37,11 +33,13 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '올바른 이메일 형식이 아닙니다' }, 400);
   }
 
-  const ip = getClientIp(request);
+  const ip = ipScope(request);
 
-  if (await isRateLimited(env.DATA_KV, 'findpw_request', ip)) {
-    return jsonResponse({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'findpw_request', ip,
+    '요청이 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
 
   const user = await findUserByNameUsernameAndEmail(env.DATA_KV, name, username, email);
   const genericResponse = { sent: true };
@@ -73,6 +71,4 @@ export async function onRequestPost(context) {
   return jsonResponse(genericResponse);
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

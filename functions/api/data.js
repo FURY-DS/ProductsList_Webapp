@@ -1,53 +1,39 @@
 /* =====================================================
    api/data.js - 클라우드 데이터 동기화 (세션 기반)
 
-   GET  /api/data  (Authorization: Bearer <token>) → { data, ts }
-   POST /api/data  (Authorization: Bearer <token>) → { ok, ts }
+   GET  /api/data  (Bearer) → { data, ts }
+   POST /api/data  (Bearer) → { ok, ts }
 
    KV 키: data:<username> (per-user 데이터 분리)
    ===================================================== */
 
-import { verifySession, jsonResponse, handleOptions } from '../_lib/auth.js';
+import { requireAuth, parseJsonBody, rawJsonResponse, onRequestOptions } from '../_lib/helpers.js';
+import { jsonResponse } from '../_lib/auth.js';
 
 // GET: 사용자 데이터 조회
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const session = await verifySession(env.DATA_KV, request);
-  if (!session) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
-  }
+  const { session, response } = await requireAuth(env.DATA_KV, request);
+  if (response) return response;
 
-  const dataKey = `data:${session.username}`;
-  const raw = await env.DATA_KV.get(dataKey);
-
+  const raw = await env.DATA_KV.get(`data:${session.username}`);
   if (!raw) {
     return jsonResponse({ data: null, ts: 0 });
   }
 
-  return new Response(raw, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    }
-  });
+  return rawJsonResponse(raw);
 }
 
 // POST: 사용자 데이터 저장
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  const session = await verifySession(env.DATA_KV, request);
-  if (!session) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
-  }
+  const { session, response } = await requireAuth(env.DATA_KV, request);
+  if (response) return response;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: 'Invalid JSON' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   if (!body.data || typeof body.ts !== 'number') {
     return jsonResponse({ error: 'Missing fields (data, ts)' }, 400);
@@ -68,17 +54,9 @@ export async function onRequestPost(context) {
     }
   }
 
-  const payload = JSON.stringify({
-    data: body.data,
-    ts: body.ts
-  });
-
-  await env.DATA_KV.put(dataKey, payload);
+  await env.DATA_KV.put(dataKey, JSON.stringify({ data: body.data, ts: body.ts }));
 
   return jsonResponse({ ok: true, ts: body.ts });
 }
 
-// OPTIONS: CORS preflight
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

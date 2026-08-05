@@ -6,16 +6,15 @@
    인증: X-Admin-Key (마스터 키) 또는 admin 역할 Bearer 토큰
    ===================================================== */
 
-import { verifyAdmin, jsonResponse, handleOptions } from '../../_lib/auth.js';
+import { requireAdmin, rawJsonResponse, onRequestOptions } from '../../_lib/helpers.js';
+import { jsonResponse } from '../../_lib/auth.js';
 
 // GET: 사용자 데이터 조회
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  const admin = await verifyAdmin(env.DATA_KV, request, env);
-  if (!admin.ok) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
-  }
+  const { admin, response } = await requireAdmin(env.DATA_KV, request, env);
+  if (response) return response;
 
   const url = new URL(request.url);
   const username = (url.searchParams.get('username') || '').toLowerCase();
@@ -29,22 +28,15 @@ export async function onRequestGet(context) {
     return jsonResponse({ data: null, ts: 0 });
   }
 
-  return new Response(raw, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    }
-  });
+  return rawJsonResponse(raw);
 }
 
 // DELETE: 사용자 데이터 삭제 (계정은 유지)
 export async function onRequestDelete(context) {
   const { request, env } = context;
 
-  const admin = await verifyAdmin(env.DATA_KV, request, env);
-  if (!admin.ok) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
-  }
+  const { admin, response } = await requireAdmin(env.DATA_KV, request, env);
+  if (response) return response;
 
   const url = new URL(request.url);
   const username = (url.searchParams.get('username') || '').toLowerCase();
@@ -58,6 +50,4 @@ export async function onRequestDelete(context) {
   return jsonResponse({ ok: true, deleted: `data:${username}` });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

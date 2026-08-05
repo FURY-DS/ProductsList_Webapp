@@ -5,22 +5,18 @@
    모든 신규 가입자는 role: "user"
    ===================================================== */
 
+import { parseJsonBody, checkRateLimit, recordAttempt, ipScope, onRequestOptions } from '../../_lib/helpers.js';
 import {
   createUser, createSession,
   validateUsername, validatePassword, validateName, validateEmail,
-  jsonResponse, handleOptions,
-  getClientIp, isRateLimited, recordAttempt
+  jsonResponse
 } from '../../_lib/auth.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { username, password, name, email } = body;
 
@@ -40,11 +36,13 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '올바른 이메일 형식이 아닙니다' }, 400);
   }
 
-  const ip = getClientIp(request);
+  const ip = ipScope(request);
 
-  if (await isRateLimited(env.DATA_KV, 'register', ip)) {
-    return jsonResponse({ error: '가입 시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'register', ip,
+    '가입 시도가 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
   await recordAttempt(env.DATA_KV, 'register', ip);
 
   const result = await createUser(env.DATA_KV, username, password, name.trim(), email);
@@ -61,6 +59,4 @@ export async function onRequestPost(context) {
   });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

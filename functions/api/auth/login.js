@@ -3,21 +3,14 @@
    POST /api/auth/login  { username, password } → { token, username, role }
    ===================================================== */
 
-import {
-  verifyUser, createSession,
-  jsonResponse, handleOptions,
-  getRateLimitScope, isRateLimited, recordAttempt, clearRateLimit
-} from '../../_lib/auth.js';
+import { parseJsonBody, checkRateLimit, recordAttempt, onRequestOptions } from '../../_lib/helpers.js';
+import { verifyUser, createSession, clearRateLimit, getRateLimitScope, jsonResponse } from '../../_lib/auth.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const { username, password } = body;
 
@@ -27,9 +20,11 @@ export async function onRequestPost(context) {
 
   const rateLimitScope = getRateLimitScope(request, username);
 
-  if (await isRateLimited(env.DATA_KV, 'login', rateLimitScope)) {
-    return jsonResponse({ error: '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429);
-  }
+  const { limited, response: limitRes } = await checkRateLimit(
+    env.DATA_KV, 'login', rateLimitScope,
+    '로그인 시도가 너무 많습니다. 잠시 후 다시 시도해주세요'
+  );
+  if (limitRes) return limitRes;
 
   const result = await verifyUser(env.DATA_KV, username, password);
   if (result.error) {
@@ -48,6 +43,4 @@ export async function onRequestPost(context) {
   });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };

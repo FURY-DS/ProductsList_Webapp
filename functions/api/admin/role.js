@@ -6,24 +6,19 @@
    인증: X-Admin-Key (마스터 키) 또는 admin 역할 Bearer 토큰
    ===================================================== */
 
-import { verifyAdmin, jsonResponse, handleOptions } from '../../_lib/auth.js';
+import { requireAdmin, parseJsonBody, onRequestOptions } from '../../_lib/helpers.js';
+import { jsonResponse } from '../../_lib/auth.js';
 
 const VALID_ROLES = ['admin', 'user'];
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  const admin = await verifyAdmin(env.DATA_KV, request, env);
-  if (!admin.ok) {
-    return jsonResponse({ error: 'Unauthorized' }, 401);
-  }
+  const { admin, response: authErr } = await requireAdmin(env.DATA_KV, request, env);
+  if (authErr) return authErr;
 
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return jsonResponse({ error: '잘못된 요청입니다' }, 400);
-  }
+  const { body, response: parseErr } = await parseJsonBody(request);
+  if (parseErr) return parseErr;
 
   const username = (body.username || '').toLowerCase();
   const role = body.role || '';
@@ -54,6 +49,4 @@ export async function onRequestPost(context) {
   return jsonResponse({ ok: true, username, role });
 }
 
-export async function onRequestOptions() {
-  return handleOptions();
-}
+export { onRequestOptions };
