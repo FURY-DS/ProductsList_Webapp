@@ -86,13 +86,19 @@ export async function sendEmail(env, to, subject, text, html) {
   }
 
   // === 3순위: dev mode (API 키 미설정) ===
-  const codeMatch = text.match(/(\d{6})/);
-  const devCode = codeMatch ? codeMatch[1] : null;
-  console.log('[email:dev mode] GAS_WEBHOOK_URL, RESEND_API_KEY 모두 미설정 — 메일 발송 스킵');
-  console.log('[email:dev mode] to:', to);
-  console.log('[email:dev mode] subject:', subject);
-  if (devCode) console.log('[email:dev mode] dev code:', devCode);
-  return { ok: true, devMode: true, devCode };
+  // 개발 환경(DEV_MODE=true 또는 local wrangler dev)에서만 명시적으로 허용
+  if (env.DEV_MODE === 'true' || env.ENVIRONMENT === 'development') {
+    const codeMatch = text.match(/(\d{6})/);
+    const devCode = codeMatch ? codeMatch[1] : null;
+    console.log('[email:dev mode] GAS_WEBHOOK_URL, RESEND_API_KEY 모두 미설정 — 메일 발송 스킵');
+    console.log('[email:dev mode] to:', to);
+    console.log('[email:dev mode] subject:', subject);
+    if (devCode) console.log('[email:dev mode] dev code:', devCode);
+    return { ok: true, devMode: true, devCode };
+  }
+
+  // 운영 환경에서는 fallback 없이 발송 실패 에러를 반환하여 보안 유출 원천 차단
+  return { ok: false, error: '이메일 발송 서비스가 구성되지 않았습니다. 관리자에게 문의하세요.' };
 }
 
 /**

@@ -135,13 +135,26 @@ export async function verifyUser(kv, username, password) {
 
 /** 세션 생성 (UUID 토큰, 30일 TTL) */
 export async function createSession(kv, username) {
+  const normalizedUser = username.toLowerCase();
   const token = crypto.randomUUID();
   const sessionKey = `session:${token}`;
 
+  // 1) 세션 데이터 저장
   await kv.put(sessionKey, JSON.stringify({
-    username: username.toLowerCase(),
+    username: normalizedUser,
     createdAt: Date.now()
   }), { expirationTtl: SESSION_TTL });
+
+  // 2) 사용자별 활성 세션 토큰 목록 인덱스 생성 및 누적
+  const indexKey = `user_sessions:${normalizedUser}`;
+  const existing = await kv.get(indexKey);
+  let tokens = [];
+  if (existing) {
+    try { tokens = JSON.parse(existing); } catch (e) { tokens = []; }
+  }
+  tokens.push(token);
+  if (tokens.length > 50) tokens = tokens.slice(-50); // 좀비 세션 방지 제한
+  await kv.put(indexKey, JSON.stringify(tokens), { expirationTtl: SESSION_TTL });
 
   return token;
 }
@@ -185,6 +198,24 @@ export function extractToken(request) {
 /** 세션 삭제 */
 export async function deleteSession(kv, token) {
   if (token) {
+    // 세션 삭제 시 인덱스 장부에서도 해당 토큰 제거
+    const raw = await kv.get(`session:${token}`);
+    if (raw) {
+      try {
+        const session = JSON.parse(raw);
+        const indexKey = `user_sessions:${session.username}`;
+        const existing = await kv.get(indexKey);
+        if (existing) {
+          let tokens = JSON.parse(existing);
+          tokens = tokens.filter(t => t !== token);
+          if (tokens.length > 0) {
+            await kv.put(indexKey, JSON.stringify(tokens), { expirationTtl: SESSION_TTL });
+          } else {
+            await kv.delete(indexKey);
+          }
+        }
+      } catch (e) { /* ignore */ }
+    }
     await kv.delete(`session:${token}`);
   }
 }
@@ -369,7 +400,18 @@ export async function verifyAndConsumeCode(kv, purpose, scope, code) {
   }
 
   if (entry.code !== String(code).trim()) {
-    return { error: '인증번호가 일치하지 않습니다' };
+    // 오답 시 실패 횟수(failCount)를 누적 기록
+    entry.failCount = (entry.failCount || 0) + 1;
+    if (entry.failCount >= 5) {
+      await kv.delete(key); // 5회 초과 시 강제 무효화
+      return { error: '인증번호 확인 시도 횟수(5회)를 초과하여 인증번호가 파기되었습니다. 다시 요청해주세요.' };
+    }
+    // 기존 만료 시간(5분) 내 유효기간 유지 계산
+    const elapsedSec = Math.floor((Date.now() - (entry.createdAt || Date.now())) / 1000);
+    const remainingTtl = Math.max(10, 300 - elapsedSec);
+    await kv.put(key, JSON.stringify(entry), { expirationTtl: remainingTtl });
+
+    return { error: `인증번호가 일치하지 않습니다. (남은 시도: ${5 - entry.failCount}회)` };
   }
 
   // 일회용 — 검증 성공 시 즉시 삭제
@@ -473,6 +515,45 @@ export async function resetPassword(kv, username, newPassword) {
  */
 export async function deleteAllSessionsForUser(kv, username, exceptToken = null) {
   const target = username.toLowerCase();
+  const indexKey = `user_sessions:${target}`;
+
+  // 사용자 세션 인덱스 조회
+  const rawIndex = await kv.get(indexKey);
+  if (!rawIndex) {
+    // 폴백(Fallback): 인덱스 생성 전 구버전 활성 세션 무효화를 위해 레거시 스캔 실행
+    return await legacyDeleteAllSessionsForUser(kv, target, exceptToken);
+  }
+
+  let tokens = [];
+  try {
+    tokens = JSON.parse(rawIndex);
+  } catch (e) {
+    return await legacyDeleteAllSessionsForUser(kv, target, exceptToken);
+  }
+
+  let deleted = 0;
+  const remainingTokens = [];
+
+  for (const token of tokens) {
+    if (exceptToken && token === exceptToken) {
+      remainingTokens.push(token);
+      continue;
+    }
+    await kv.delete(`session:${token}`);
+    deleted++;
+  }
+
+  if (remainingTokens.length > 0) {
+    await kv.put(indexKey, JSON.stringify(remainingTokens), { expirationTtl: SESSION_TTL });
+  } else {
+    await kv.delete(indexKey);
+  }
+  return deleted;
+}
+
+// 하위 호환성을 유지하기 위한 기존 레거시 스캔 방식 백업용 함수
+async function legacyDeleteAllSessionsForUser(kv, username, exceptToken = null) {
+  const target = username.toLowerCase();
   const skipKey = exceptToken ? `session:${exceptToken}` : null;
   let cursor = null;
   let deleted = 0;
@@ -488,7 +569,7 @@ export async function deleteAllSessionsForUser(kv, username, exceptToken = null)
           await kv.delete(key.name);
           deleted++;
         }
-      } catch (e) { /* 손상된 세션 무시 */ }
+      } catch (e) { /* 손상 무시 */ }
     }
     cursor = list.list_complete ? null : list.cursor;
   } while (cursor);
