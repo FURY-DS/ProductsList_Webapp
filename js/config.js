@@ -41,7 +41,7 @@ const CONFIG = {
     { page: 'products',     label: '마켓노트',   url: 'index.html',        active: true,  ready: true },
     {
       page: 'marketplace',
-      label: '마켓플레이스',
+      label: 'KR 한국마켓',
       children: [
         { page: 'nshipping',    label: 'N배송',        url: 'nshipping.html',    ready: true },
         { page: 'rocketgrowth', label: '로켓그로스',   url: 'rocketgrowth.html', ready: true },
