@@ -39,7 +39,7 @@ function initSearch() {
 function cardSearchText(card) {
   const total = computeTotal(card);
   return [
-    card.name, card.option, card.rocket, card.nshipping,
+    card.name, card.option, card.origin, card.rocket, card.nshipping,
     card.product, card.ny, card.link, card.link2,
     card.cost, card.rate, card.percent, total, total.toFixed(2)
   ].join(' ').toLowerCase();

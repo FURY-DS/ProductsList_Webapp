@@ -273,8 +273,8 @@ function downloadCsvTemplate() {
 
   // 예시 데이터 2행
   const examples = [
-    ['가방', '블랙', '15', '215', '0.16', 'https://example.com/1', 'https://example.com/2', 'R001', 'N001', 'P001', 'NY001'],
-    ['신발', '화이트 270', '30', '215', '0.18', '', '', 'R002', 'N002', 'P002', 'NY002']
+    ['가방', '블랙', '중국', '15', '215', '0.16', 'https://example.com/1', 'https://example.com/2', 'R001', 'N001', 'P001', 'NY001'],
+    ['신발', '화이트 270', '베트남', '30', '215', '0.18', '', '', 'R002', 'N002', 'P002', 'NY002']
   ];
 
   const rows = [headers, ...examples];

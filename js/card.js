@@ -111,9 +111,19 @@ function renderCard(card, idx) {
     ? `<span class="card-badge" title="${escapeAttr(CONFIG.FIELDS[badgeKey].label)}">${badgeVal}</span>`
     : '';
 
+  const originKey = CONFIG.CARD_HEADER_ORIGIN_FIELD;
+  const originHtml = originKey
+    ? `<input type="text" class="card-origin-input" name="${originKey}"
+        list="origin-suggestions" value="${escapeAttr(card[originKey] || '')}"
+        placeholder="${escapeAttr(CONFIG.FIELDS[originKey].placeholder)}"
+        title="${escapeAttr(CONFIG.FIELDS[originKey].label)}"
+        ${card.isEditing ? '' : 'readonly'} />`
+    : '';
+
   header.innerHTML = `
     <div class="card-index-wrap">
       <span class="card-index">#${String(idx + 1).padStart(2, '0')}</span>
+      ${originHtml}
       ${badgeHtml}
     </div>
     <div class="card-tools">${toggleBtn}${actionBtn}</div>

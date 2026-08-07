@@ -15,6 +15,7 @@ function newCard() {
     image: '',
     name: '',
     option: '',
+    origin: '',
     rocket: '',
     nshipping: '',
     product: '',

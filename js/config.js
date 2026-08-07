@@ -16,6 +16,11 @@ const CONFIG = {
   // 카드 헤더 (#01 옆)에 표시할 필드 키
   CARD_HEADER_BADGE_FIELD: 'ny',
 
+  // 카드 헤더 (#01 옆)에 입력창으로 표시할 필드 키 (원산지)
+  CARD_HEADER_ORIGIN_FIELD: 'origin',
+  // 원산지 자동완성 후보 (자유 입력도 가능)
+  ORIGIN_SUGGESTIONS: ['중국', '일본', '태국', '베트남'],
+
   // 이미지 업로드 제한 (바이트)
   IMAGE_MAX_SIZE: 5 * 1024 * 1024, // 5MB
 
@@ -63,6 +68,7 @@ const CONFIG = {
   FIELDS: {
     name:      { label: '상품명',          type: 'text',   placeholder: '예: 가방 / 신발' },
     option:    { label: '옵션명',          type: 'text',   placeholder: '예: 블랙 / L' },
+    origin:    { label: '원산지',          type: 'text',   placeholder: '예: 중국' },
     cost:      { label: '원가',            type: 'number', placeholder: '예: 15' },
     rate:      { label: '환율',            type: 'number', placeholder: '예: 215' },
     percent:   { label: '퍼센트',          type: 'number', placeholder: '예: 0.16', extra: 'step="any"' },
@@ -95,6 +101,7 @@ const CONFIG = {
   CSV_COLUMNS: [
     { header: '상품명',         key: 'name' },
     { header: '옵션명',         key: 'option' },
+    { header: '원산지',         key: 'origin' },
     { header: '원가',           key: 'cost' },
     { header: '환율',           key: 'rate' },
     { header: '퍼센트',         key: 'percent' },

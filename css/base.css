@@ -412,6 +412,32 @@ html, body {
   flex-shrink: 0;
 }
 
+.card-origin-input {
+  width: 64px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: #fff7e6;
+  border: 1px solid #f0d9a6;
+  border-radius: 20px;
+  padding: 4px 10px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.card-origin-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+}
+.card-origin-input[readonly] {
+  background: #f2f4f8;
+  border-color: var(--border);
+  cursor: default;
+}
+.card-origin-input::placeholder {
+  color: #b8a172;
+}
+
 .card-badge {
   font-size: 12px;
   font-weight: 600;
