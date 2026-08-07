@@ -108,7 +108,7 @@ const alwaysCtx = {
   updateSearchCount: updateALWAYSSearchCount,
   updateToggleAllButton: updateALWAYSToggleAllButton,
   loadProductlistData: loadProductlistDataALWAYS,
-  computeProductlistTotal: computeProductlistTotalALWAYS,
+  computeProductlistTotal: computeProductlistTotalGeneric,
   newBundleItem: newBundleItem,
   findBundleItem: findBundleItem,
   addBundleItem: addBundleItem,
