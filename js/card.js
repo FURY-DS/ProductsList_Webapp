@@ -120,10 +120,21 @@ function renderCard(card, idx) {
         ${card.isEditing ? '' : 'readonly'} />`
     : '';
 
+  const statusKey = CONFIG.CARD_HEADER_STATUS_FIELD;
+  const statusVal = statusKey && card[statusKey] ? String(card[statusKey]) : '';
+  const statusOptions = CONFIG.STATUS_OPTIONS || [];
+  const statusHtml = statusKey
+    ? `<select class="card-status-select" name="${statusKey}" title="${escapeAttr(CONFIG.FIELDS[statusKey].label)}">
+        <option value="">${escapeAttr(CONFIG.FIELDS[statusKey].placeholder)}</option>
+        ${statusOptions.map(opt => `<option value="${escapeAttr(opt)}" ${opt === statusVal ? 'selected' : ''}>${escapeAttr(opt)}</option>`).join('')}
+      </select>`
+    : '';
+
   header.innerHTML = `
     <div class="card-index-wrap">
       <span class="card-index">#${String(idx + 1).padStart(2, '0')}</span>
       ${originHtml}
+      ${statusHtml}
       ${badgeHtml}
     </div>
     <div class="card-tools">${toggleBtn}${actionBtn}</div>
@@ -325,6 +336,16 @@ function bindCardEvents(wrap, card) {
         }
       }
     }
+  });
+
+  // 진행 상태는 수정 모드가 아니어도 바로 변경 가능
+  wrap.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.name !== CONFIG.CARD_HEADER_STATUS_FIELD) return;
+    const c = findCard(card.id);
+    if (!c) return;
+    c[t.name] = t.value;
+    reportSaveResult(save(), CONFIG.MESSAGES);
   });
 
   // 버튼 클릭

@@ -438,6 +438,25 @@ html, body {
   color: #b8a172;
 }
 
+.card-status-select {
+  width: 96px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: #eefaf4;
+  border: 1px solid #bde7d2;
+  border-radius: 20px;
+  padding: 4px 10px;
+  flex-shrink: 0;
+  text-align: center;
+  cursor: pointer;
+}
+.card-status-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+}
+
 .card-badge {
   font-size: 12px;
   font-weight: 600;

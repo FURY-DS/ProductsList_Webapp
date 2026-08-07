@@ -16,6 +16,7 @@ function newCard() {
     name: '',
     option: '',
     origin: '',
+    status: '',
     rocket: '',
     nshipping: '',
     product: '',
