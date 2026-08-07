@@ -13,8 +13,7 @@ const ALL_PAGES = [
   { id: 'ownerclan',    key: 'ownerclan_v1',    name: '오너클랜' },
   { id: 'domagguk',     key: 'domagguk_v1',     name: '도매꾹' },
   { id: 'always',       key: 'always_v1',       name: '올웨이즈' },
-  { id: 'tossshopping', key: 'tossshopping_v1', name: '토스쇼핑' },
-  { id: 'settlement',   key: 'settlement_v1',   name: '오픈마켓정산' }
+  { id: 'tossshopping', key: 'tossshopping_v1', name: '토스쇼핑' }
 ];
 
 /** 액션 버튼 초기화 (DOM 로드 후 호출) */
@@ -33,7 +32,7 @@ function initActions() {
   document.getElementById('btn-percent-bulk').addEventListener('click', openPctBulkModal);
 }
 
-/** 전체 데이터 내보내기 (마켓노트 + 마켓플레이스 + 오픈마켓정산) */
+/** 전체 데이터 내보내기 (마켓노트 + 마켓플레이스) */
 function exportAllData() {
   try {
     const pages = {};
