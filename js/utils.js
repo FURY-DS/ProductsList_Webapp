@@ -20,9 +20,9 @@ function getStorageKey() {
   return CONFIG.STORAGE_KEY + '_' + getCurrentStorageUsername();
 }
 
-/** 현재 로그인한 사용자의 클라우드 동기화 타임스탬프 키 반환 */
-function getSyncKey() {
-  return 'cloud_last_sync_' + getCurrentStorageUsername();
+/** 현재 로그인한 사용자의 클라우드 동기화 타임스탬프 키 반환 (페이지별) */
+function getSyncKey(pageKey) {
+  return 'cloud_last_sync_' + (pageKey || 'main') + '_' + getCurrentStorageUsername();
 }
 
 /**

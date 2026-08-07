@@ -53,7 +53,7 @@ async function startApp() {
   updateUserInfo();
 
   // 클라우드 동기화
-  CloudSync.init();
+  CloudSync.init(CONFIG.STORAGE_KEY);
   CloudSync.startAutoSync(10000);
 
   // 탭이 다시 활성화될 때 즉시 pull

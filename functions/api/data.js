@@ -10,14 +10,17 @@
 import { requireAuth, parseJsonBody, rawJsonResponse, onRequestOptions } from '../_lib/helpers.js';
 import { jsonResponse } from '../_lib/auth.js';
 
-// GET: 사용자 데이터 조회
+// GET: 사용자 데이터 조회 (페이지별 키 분리)
 export async function onRequestGet(context) {
   const { request, env } = context;
 
   const { session, response } = await requireAuth(env.DATA_KV, request);
   if (response) return response;
 
-  const raw = await env.DATA_KV.get(`data:${session.username}`);
+  const url = new URL(request.url);
+  const pageKey = url.searchParams.get('key') || 'main';
+
+  const raw = await env.DATA_KV.get(`data:${session.username}:${pageKey}`);
   if (!raw) {
     return jsonResponse({ data: null, ts: 0 });
   }
@@ -25,7 +28,7 @@ export async function onRequestGet(context) {
   return rawJsonResponse(raw);
 }
 
-// POST: 사용자 데이터 저장
+// POST: 사용자 데이터 저장 (페이지별 키 분리)
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -39,7 +42,8 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: 'Missing fields (data, ts)' }, 400);
   }
 
-  const dataKey = `data:${session.username}`;
+  const pageKey = body.key || 'main';
+  const dataKey = `data:${session.username}:${pageKey}`;
 
   // last-write-wins: 기존 데이터의 타임스탬프 확인
   const existing = await env.DATA_KV.get(dataKey);
@@ -54,9 +58,9 @@ export async function onRequestPost(context) {
     }
   }
 
-  await env.DATA_KV.put(dataKey, JSON.stringify({ data: body.data, ts: body.ts }));
+  await env.DATA_KV.put(dataKey, JSON.stringify({ data: body.data, ts: body.ts, key: pageKey }));
 
-  return jsonResponse({ ok: true, ts: body.ts });
+  return jsonResponse({ ok: true, ts: body.ts, key: pageKey });
 }
 
 export { onRequestOptions };

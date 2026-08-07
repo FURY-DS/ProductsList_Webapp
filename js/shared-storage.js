@@ -24,6 +24,11 @@ function savePageData(config, state) {
     } catch (backupError) {
       console.warn('Backup save failed', backupError);
     }
+    // 클라우드 동기화 (비동기, 실패 무시)
+    if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
+      CloudSync.pageKey = config.STORAGE_KEY;
+      CloudSync.push(state.cards);
+    }
     return { ok: true };
   } catch (e) {
     if (!isStorageQuotaError(e) || !config.IMAGE_REMOVE_ON_SAVE_FAIL) {
@@ -43,6 +48,11 @@ function savePageData(config, state) {
     }
     // 메모리 상태도 이미지 없이 동기화 (다음 저장 시도 방지)
     state.cards = cleaned;
+    // 클라우드 동기화 (비동기, 실패 무시)
+    if (typeof CloudSync !== 'undefined' && CloudSync.enabled) {
+      CloudSync.pageKey = config.STORAGE_KEY;
+      CloudSync.push(state.cards);
+    }
     return { ok: true, imagesRemoved: true };
   } catch (e2) {
     return { ok: false, msg: config.MESSAGES.SAVE_FAIL_QUOTA };
@@ -130,5 +140,133 @@ function loadProductlistDataForPage(config) {
   } catch (e) {
     console.warn('마켓노트 데이터 읽기 실패', e);
     return [];
+  }
+}
+
+/**
+ * 서브페이지용 클라우드 풀 - 클라우드에서 최신 데이터를 가져와 state.cards 교체 + 재렌더.
+ * main 페이지의 cloudPullAndRender와 동일한 로직이지만 데이터 마이그레이션이 새 카드 생성 함수를 받음.
+ * @param {Object} config - 페이지 CONFIG
+ * @param {Object} state  - 페이지 state ({ cards: [] })
+ * @param {Function} newCardFn - 새 카드 기본값 생성 함수
+ * @param {Function} renderFn - 렌더링 함수 (예: renderNshipping)
+ */
+async function cloudPullAndRenderPage(config, state, newCardFn, renderFn) {
+  if (!CloudSync.enabled) return;
+
+  // 페이지 키를 해당 페이지의 STORAGE_KEY로 설정
+  CloudSync.pageKey = config.STORAGE_KEY;
+
+  const cloudData = await CloudSync.pull();
+  if (!cloudData) return;
+
+  // 클라우드 데이터가 비어있으면 (계정 삭제 후 재가입 등) localStorage도 정리
+  if (!cloudData.data || !Array.isArray(cloudData.data)) {
+    const storageKey = getUserScopedKey(config.STORAGE_KEY);
+    const hadLocal = !!localStorage.getItem(storageKey);
+    if (hadLocal) {
+      console.log('[CloudSync:' + config.STORAGE_KEY + '] 서버에 데이터 없음 → localStorage 정리');
+      state.cards = [];
+      try {
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(storageKey + '_backup');
+      } catch (e) { /* ignore */ }
+      CloudSync.lastSyncTs = 0;
+      try { localStorage.setItem(getSyncKey(config.STORAGE_KEY), '0'); } catch (e) { /* ignore */ }
+      renderFn();
+      if (typeof showToast === 'function') {
+        const toastFlag = 'clearStaleToastShown_' + (Auth.username || '');
+        if (!sessionStorage.getItem(toastFlag)) {
+          sessionStorage.setItem(toastFlag, '1');
+          showToast('☁️ 서버에 데이터가 없어 초기화했어요');
+        }
+      }
+    }
+    return;
+  }
+
+  // 클라우드가 더 최신이면 교체
+  if (cloudData.ts > CloudSync.lastSyncTs) {
+    console.log('[CloudSync:' + config.STORAGE_KEY + '] 클라우드에서 최신 데이터 로드');
+    CloudSync.lastSyncTs = cloudData.ts;
+    localStorage.setItem(getSyncKey(config.STORAGE_KEY), cloudData.ts.toString());
+
+    // 데이터 마이그레이션 (loadPageData와 동일)
+    state.cards = cloudData.data.filter(c => c && typeof c === 'object').map(c => {
+      const defaults = newCardFn();
+      return {
+        ...defaults,
+        ...c,
+        id: c.id || defaults.id,
+        isEditing: typeof c.isEditing === 'boolean' ? c.isEditing : false,
+        isCollapsed: typeof c.isCollapsed === 'boolean' ? c.isCollapsed : false,
+        image: c.image || ''
+      };
+    });
+
+    // localStorage에도 저장
+    try {
+      const storageKey = getUserScopedKey(config.STORAGE_KEY);
+      localStorage.setItem(storageKey, JSON.stringify(state.cards));
+    } catch (e) { /* ignore */ }
+
+    renderFn();
+    if (typeof showToast === 'function') {
+      showToast('☁️ 클라우드에서 최신 데이터를 불러왔어요');
+    }
+  }
+}
+
+/**
+ * 서브페이지용 자동 동기화 시작 (10초 폴링).
+ * @param {Object} config - 페이지 CONFIG
+ * @param {Object} state  - 페이지 state ({ cards: [] })
+ * @param {Function} newCardFn - 새 카드 기본값 생성 함수
+ * @param {Function} renderFn - 렌더링 함수
+ * @param {number} [intervalMs=10000] 폴링 간격
+ */
+function startPageAutoSync(config, state, newCardFn, renderFn, intervalMs = 10000) {
+  CloudSync.stopAutoSync();
+  if (!CloudSync.enabled) return;
+  CloudSync.pageKey = config.STORAGE_KEY;
+
+  CloudSync._pollTimer = setInterval(async () => {
+    if (!CloudSync.enabled || CloudSync.syncing) return;
+
+    // 사용자가 편집 중이면 건너뜀 (덮어쓰기 방지)
+    if (state.cards && state.cards.some(c => c.isEditing)) return;
+
+    await cloudPullAndRenderPage(config, state, newCardFn, renderFn);
+  }, intervalMs);
+
+  console.log('[CloudSync:' + config.STORAGE_KEY + '] 자동 동기화 시작 (' + (intervalMs / 1000) + '초 간격)');
+}
+
+/**
+ * 서브페이지용 수동 클라우드 동기화 (버튼).
+ * @param {Object} config - 페이지 CONFIG
+ * @param {Object} state  - 페이지 state
+ * @param {Function} newCardFn - 새 카드 기본값 생성 함수
+ * @param {Function} renderFn - 렌더링 함수
+ */
+async function manualCloudSyncPage(config, state, newCardFn, renderFn) {
+  if (!CloudSync.enabled) {
+    if (typeof showToast === 'function') showToast('로그인이 필요합니다');
+    return;
+  }
+
+  if (typeof showToast === 'function') showToast('☁️ 동기화 중...');
+
+  // 1. 클라우드에서 최신 확인
+  await cloudPullAndRenderPage(config, state, newCardFn, renderFn);
+
+  // 2. 현재 데이터를 클라우드에 push
+  CloudSync.pageKey = config.STORAGE_KEY;
+  const ok = await CloudSync.push(state.cards);
+
+  if (ok) {
+    if (typeof showToast === 'function') showToast('☁️ 동기화 완료!');
+  } else {
+    if (typeof showToast === 'function') showToast('❌ 동기화 실패');
   }
 }

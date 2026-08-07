@@ -16,13 +16,17 @@ const CloudSync = {
   pendingPushData: null,
   _pollTimer: null,
 
-  /** 초기화 - 인증 상태 확인 */
-  init() {
-    this.lastSyncTs = parseInt(localStorage.getItem(getSyncKey()) || '0', 10) || 0;
+  /** 현재 동기화 중인 페이지 키 (페이지별 KV 네임스페이스 분리) */
+  pageKey: 'main',
+
+  /** 초기화 - 인증 상태 확인 + 페이지 키 설정 */
+  init(pageKey) {
+    this.lastSyncTs = parseInt(localStorage.getItem(getSyncKey(pageKey)) || '0', 10) || 0;
     this.enabled = Auth.isAuthenticated();
+    this.pageKey = pageKey || 'main';
 
     if (this.enabled) {
-      console.log('[CloudSync] 활성화됨 (사용자:', Auth.username, ')');
+      console.log(`[CloudSync:${this.pageKey}] 활성화됨 (사용자:`, Auth.username, ')');
     }
   },
 
@@ -41,7 +45,7 @@ const CloudSync = {
   async pull() {
     if (!this.enabled || !Auth.token) return null;
     try {
-      const res = await fetch('/api/data', { headers: Auth.getAuthHeader() });
+      const res = await fetch(`/api/data?key=${encodeURIComponent(this.pageKey)}`, { headers: Auth.getAuthHeader() });
       if (res.status === 401) {
         await this._handleUnauthorized();
         return null;
@@ -72,18 +76,18 @@ const CloudSync = {
 
     try {
       const ts = Date.now();
-      const res = await fetch('/api/data', {
+      const res = await fetch(`/api/data?key=${encodeURIComponent(this.pageKey)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...Auth.getAuthHeader()
         },
-        body: JSON.stringify({ data, ts })
+        body: JSON.stringify({ data, ts, key: this.pageKey })
       });
 
       if (res.ok) {
         this.lastSyncTs = ts;
-        localStorage.setItem(getSyncKey(), ts.toString());
+        localStorage.setItem(getSyncKey(this.pageKey), ts.toString());
         return true;
       }
 
@@ -177,14 +181,14 @@ const CloudSync = {
  *        배열로 여러 키를 전달하면 한 번의 API 호출로 모두 정리 (예: 페이지 자체 키 + productlist_v1)
  * @returns {Promise<boolean>} 정리했으면 true
  */
-async function clearStalePageDataIfServerEmpty(baseKey) {
+async function clearStalePageDataIfServerEmpty(baseKey, pageKey) {
   // Auth 객체 사용 (이 시점에 init 완료). 토큰이 없으면 정리할 필요 없음.
   if (!Auth.isAuthenticated() || !Auth.username) return false;
   const username = Auth.username;
 
   try {
-    // 1) 메인 데이터 확인
-    const dataRes = await fetch('/api/data', { headers: Auth.getAuthHeader() });
+    // 1) 해당 페이지 데이터 확인 (메인 페이지면 'main', 서브페이지면 config.STORAGE_KEY)
+    const dataRes = await fetch(`/api/data?key=${encodeURIComponent(pageKey || 'main')}`, { headers: Auth.getAuthHeader() });
     if (!dataRes.ok) return false;
     // /api/data GET 응답 형식: { data: null|Array, ts: 0|Number } (ok 필드 없음)
     const dataResult = await dataRes.json();

@@ -20,9 +20,14 @@ async function initElevenst() {
   bindElevenstPageLifecycle();
 
   // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 페이지 데이터 + 마켓노트 데이터 정리
-  await clearStalePageDataIfServerEmpty([ELEVENST_CONFIG.STORAGE_KEY, ELEVENST_CONFIG.PRODUCTLIST_STORAGE_KEY]);
+  await clearStalePageDataIfServerEmpty([ELEVENST_CONFIG.STORAGE_KEY, ELEVENST_CONFIG.PRODUCTLIST_STORAGE_KEY], ELEVENST_CONFIG.STORAGE_KEY);
 
   loadElevenst();
+
+  // === cloud-sync-init ===
+  CloudSync.init(ELEVENST_CONFIG.STORAGE_KEY);
+  await cloudPullAndRenderPage(ELEVENST_CONFIG, elevenstState || state, newElevenstCard, renderElevenst);
+  startPageAutoSync(ELEVENST_CONFIG, elevenstState || state, newElevenstCard, renderElevenst, 10000);
 
   // 마켓노트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveElevenstCards();
@@ -49,6 +54,12 @@ function bindElevenstPageLifecycle() {
       renderElevenst();
     }
   });
+
+  // 수동 클라우드 동기화 버튼
+  const btnCloudSync = document.getElementById('btn-cloud-sync');
+  if (btnCloudSync) {
+    btnCloudSync.addEventListener('click', () => manualCloudSyncPage(ELEVENST_CONFIG, elevenstState || state, newElevenstCard, renderElevenst));
+  }
 
   // 페이지를 벗어나기 전에 혹시 모를 미저장 변경사항 저장
   window.addEventListener('beforeunload', () => {

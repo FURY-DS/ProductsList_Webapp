@@ -20,9 +20,14 @@ async function initSmartstore() {
   bindSmartstorePageLifecycle();
 
   // 계정이 신규/삭제된 상태면 (서버 메인 데이터 비어있음) localStorage의 페이지 데이터 + 마켓노트 데이터 정리
-  await clearStalePageDataIfServerEmpty([SMARTSTORE_CONFIG.STORAGE_KEY, SMARTSTORE_CONFIG.PRODUCTLIST_STORAGE_KEY]);
+  await clearStalePageDataIfServerEmpty([SMARTSTORE_CONFIG.STORAGE_KEY, SMARTSTORE_CONFIG.PRODUCTLIST_STORAGE_KEY], SMARTSTORE_CONFIG.STORAGE_KEY);
 
   loadSmartstore();
+
+  // === cloud-sync-init ===
+  CloudSync.init(SMARTSTORE_CONFIG.STORAGE_KEY);
+  await cloudPullAndRenderPage(SMARTSTORE_CONFIG, smartstoreState || state, newSmartstoreCard, renderSmartstore);
+  startPageAutoSync(SMARTSTORE_CONFIG, smartstoreState || state, newSmartstoreCard, renderSmartstore, 10000);
 
   // 마켓노트 최신 데이터로 최종원가 등 자동 연동 필드 재계산
   resolveSmartstoreCards();
@@ -49,6 +54,12 @@ function bindSmartstorePageLifecycle() {
       renderSmartstore();
     }
   });
+
+  // 수동 클라우드 동기화 버튼
+  const btnCloudSync = document.getElementById('btn-cloud-sync');
+  if (btnCloudSync) {
+    btnCloudSync.addEventListener('click', () => manualCloudSyncPage(SMARTSTORE_CONFIG, smartstoreState || state, newSmartstoreCard, renderSmartstore));
+  }
 
   // 페이지를 벗어나기 전에 혹시 모를 미저장 변경사항 저장
   window.addEventListener('beforeunload', () => {
