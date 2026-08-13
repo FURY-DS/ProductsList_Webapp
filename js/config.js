@@ -64,7 +64,8 @@ const CONFIG = {
         { page: 'tossshopping', label: '토스쇼핑',     url: 'tossshopping.html', ready: true }
       ]
     },
-    { page: 'jp-marketplace', label: 'JP 일본마켓', url: '#', ready: false }
+    { page: 'jp-marketplace', label: 'JP 일본마켓', url: '#', ready: false },
+    { page: 'us-marketplace', label: 'US 미국마켓', url: '#', ready: false }
   ],
 
   // 필드 정의 - 카드에 표시되는 입력 필드
