@@ -173,7 +173,7 @@
     </nav>
   </div>
   <div class="title">마켓노트</div>
-  <div class="search-bar" id="search-bar">
+    <div class="topbar-tools" id="topbar-tools">
     <button class="btn btn-toggle-all" id="btn-toggle-all" data-action="collapse" title="모든 카드 상세 정보 숨기기">전체 숨기기</button>
     <button
       class="btn btn-rate-bulk"
@@ -187,10 +187,6 @@
       title="모든 카드의 퍼센트를 한 번에 수정"
       style="background-color:#6366f1 !important; color:#ffffff !important; border:1px solid #4338ca !important; padding:4px 8px !important; margin:0 2px !important; border-radius:6px !important; font-weight:600 !important; font-size:11px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 1px 3px rgba(99,102,241,0.3) !important;"
     >📊 퍼센트 일괄수정</button>
-    <span class="icon">🔍</span>
-    <input type="text" id="search-input" autocomplete="off" />
-    <button class="clear" id="search-clear" title="검색어 지우기">×</button>
-    <span class="count" id="search-count"></span>
     <div class="all-json-dropdown-wrapper" id="all-json-dropdown-wrapper">
       <button id="btn-all-json" class="btn btn-all-json" title="전체 JSON 메뉴" type="button">전체JSON</button>
       <div class="all-json-dropdown" id="all-json-dropdown">
@@ -199,6 +195,12 @@
       </div>
     </div>
     <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="수동 동기화">☁️</button>
+  </div>
+  <div class="search-box" id="search-box">
+    <span class="icon">🔍</span>
+    <input type="text" id="search-input" autocomplete="off" placeholder="상품명, 옵션, 코드, 링크, 가격 등 전체" />
+    <button class="clear" id="search-clear" title="검색어 지우기">×</button>
+    <span class="count" id="search-count"></span>
   </div>
   <div class="actions">
     <div class="json-dropdown-wrapper" id="json-dropdown-wrapper">
