@@ -196,8 +196,13 @@
     <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="수동 동기화">☁️</button>
   </div>
   <div class="actions">
-    <button id="btn-export" title="데이터 내보내기">내보내기</button>
-    <button id="btn-import" title="데이터 가져오기">가져오기</button>
+    <div class="json-dropdown-wrapper" id="json-dropdown-wrapper">
+      <button id="btn-json" class="btn btn-json" title="JSON 메뉴" type="button">JSON</button>
+      <div class="json-dropdown" id="json-dropdown">
+        <button type="button" id="btn-export" title="데이터 내보내기">내보내기</button>
+        <button type="button" id="btn-import" title="데이터 가져오기">가져오기</button>
+      </div>
+    </div>
     <div class="excel-dropdown-wrapper" id="excel-dropdown-wrapper">
       <button id="btn-excel" class="btn btn-excel" title="Excel 메뉴" type="button">Excel</button>
       <div class="excel-dropdown" id="excel-dropdown">

@@ -18,8 +18,16 @@ const ALL_PAGES = [
 
 /** 액션 버튼 초기화 (DOM 로드 후 호출) */
 function initActions() {
-  document.getElementById('btn-export').addEventListener('click', exportData);
-  document.getElementById('btn-import').addEventListener('click', importData);
+  document.getElementById('btn-export').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleJsonDropdown(false);
+    exportData();
+  });
+  document.getElementById('btn-import').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleJsonDropdown(false);
+    importData();
+  });
   document.getElementById('import-input').addEventListener('change', handleImportFile);
   document.getElementById('btn-export-all').addEventListener('click', exportAllData);
   document.getElementById('btn-import-all').addEventListener('click', importAllData);
@@ -36,6 +44,7 @@ function initActions() {
   });
   document.getElementById('csv-import-input').addEventListener('change', handleCsvImportFile);
   initExcelDropdown();
+  initJsonDropdown();
   document.getElementById('btn-clear').addEventListener('click', clearAll);
   document.getElementById('btn-rate-bulk').addEventListener('click', openRateBulkModal);
   document.getElementById('btn-percent-bulk').addEventListener('click', openPctBulkModal);
@@ -63,6 +72,36 @@ function initExcelDropdown() {
 /** Excel 드롭다운 토글 (true/false 지정 또는 토글) */
 function toggleExcelDropdown(show) {
   const dropdown = document.getElementById('excel-dropdown');
+  if (!dropdown) return;
+  if (typeof show === 'boolean') {
+    dropdown.classList.toggle('show', show);
+  } else {
+    dropdown.classList.toggle('show');
+  }
+}
+
+/** JSON 드롭다운 초기화 */
+function initJsonDropdown() {
+  const btn = document.getElementById('btn-json');
+  const wrapper = document.getElementById('json-dropdown-wrapper');
+  if (!btn || !wrapper) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleJsonDropdown();
+  });
+
+  // 외부 클릭 시 닫기
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#json-dropdown-wrapper')) {
+      toggleJsonDropdown(false);
+    }
+  });
+}
+
+/** JSON 드롭다운 토글 (true/false 지정 또는 토글) */
+function toggleJsonDropdown(show) {
+  const dropdown = document.getElementById('json-dropdown');
   if (!dropdown) return;
   if (typeof show === 'boolean') {
     dropdown.classList.toggle('show', show);
