@@ -120,7 +120,7 @@ const CloudSync = {
 
   /** 동기화 상태 텍스트 */
   getStatusText() {
-    if (!this.enabled) return '동기화 끄짐';
+    if (!this.enabled) return '동기화';
     if (!this.lastSyncTs) return '동기화 전';
     const date = new Date(this.lastSyncTs);
     const now = new Date();
