@@ -106,18 +106,21 @@ html, body {
 }
 .topbar .search-box .clear:hover { background: #f0f1f5; color: var(--text); }
 .topbar .topbar-tools .btn-toggle-all {
-  background: var(--primary);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
-.topbar .topbar-tools .btn-toggle-all:hover { background: #5b4bc4; }
+.topbar .topbar-tools .btn-toggle-all:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.45);
+}
 
 
 .topbar .actions {
@@ -253,12 +256,13 @@ html, body {
   position: relative;
 }
 .topbar button.btn-all-json {
-  background: var(--primary);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 .topbar button.btn-all-json:hover {
-  background: #5b4bc4;
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 .all-json-dropdown {
   position: absolute;
@@ -482,21 +486,6 @@ html, body {
   line-height: 1;
 }
 .search-bar .clear:hover { background: #f0f1f5; color: var(--text); }
-
-.search-bar .btn-toggle-all {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  flex-shrink: 0;
-  margin-right: 8px;
-}
-.search-bar .btn-toggle-all:hover { background: #5b4bc4; }
 
 .container {
   padding: 20px;
