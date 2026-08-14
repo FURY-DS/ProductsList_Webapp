@@ -214,11 +214,11 @@ html, body {
   position: relative;
 }
 .topbar button.btn-json {
-  background: rgba(108, 92, 231, 0.25);
-  border-color: rgba(108, 92, 231, 0.4);
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.3);
 }
 .topbar button.btn-json:hover {
-  background: rgba(108, 92, 231, 0.4);
+  background: rgba(255,255,255,0.3);
 }
 .json-dropdown {
   position: absolute;
