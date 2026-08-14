@@ -21,8 +21,11 @@
     </nav>
   </div>
   <div class="title">올웨이즈</div>
-  <div class="search-bar" id="search-bar">
+  <div class="topbar-tools">
     <button class="btn btn-toggle-all" id="btn-toggle-all" data-action="collapse" title="모든 카드 상세 정보 숨기기">전체 숨기기</button>
+    <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="동기화">☁️</button>
+  </div>
+  <div class="search-bar" id="search-bar">
     <span class="icon">🔍</span>
     <input type="text" id="search-input" autocomplete="off" />
     <button class="clear" id="search-clear" title="검색어 지우기">×</button>
@@ -37,7 +40,6 @@
     <button id="btn-export" title="데이터 내보내기">내보내기</button>
     <button id="btn-import" title="데이터 가져오기">가져오기</button>
     <button id="btn-clear" title="전체 삭제">전체삭제</button>
-    <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="수동 동기화">☁️</button>
   </div>
   <input type="file" id="import-input" accept="application/json" style="display:none" />
 </header>
