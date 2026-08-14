@@ -29,8 +29,16 @@ function initActions() {
     importData();
   });
   document.getElementById('import-input').addEventListener('change', handleImportFile);
-  document.getElementById('btn-export-all').addEventListener('click', exportAllData);
-  document.getElementById('btn-import-all').addEventListener('click', importAllData);
+  document.getElementById('btn-export-all').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleAllJsonDropdown(false);
+    exportAllData();
+  });
+  document.getElementById('btn-import-all').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleAllJsonDropdown(false);
+    importAllData();
+  });
   document.getElementById('import-all-input').addEventListener('change', handleImportAllFile);
   document.getElementById('btn-csv-template').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -45,6 +53,7 @@ function initActions() {
   document.getElementById('csv-import-input').addEventListener('change', handleCsvImportFile);
   initExcelDropdown();
   initJsonDropdown();
+  initAllJsonDropdown();
   document.getElementById('btn-clear').addEventListener('click', clearAll);
   document.getElementById('btn-rate-bulk').addEventListener('click', openRateBulkModal);
   document.getElementById('btn-percent-bulk').addEventListener('click', openPctBulkModal);
@@ -102,6 +111,36 @@ function initJsonDropdown() {
 /** JSON 드롭다운 토글 (true/false 지정 또는 토글) */
 function toggleJsonDropdown(show) {
   const dropdown = document.getElementById('json-dropdown');
+  if (!dropdown) return;
+  if (typeof show === 'boolean') {
+    dropdown.classList.toggle('show', show);
+  } else {
+    dropdown.classList.toggle('show');
+  }
+}
+
+/** 전체 JSON 드롭다운 초기화 */
+function initAllJsonDropdown() {
+  const btn = document.getElementById('btn-all-json');
+  const wrapper = document.getElementById('all-json-dropdown-wrapper');
+  if (!btn || !wrapper) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleAllJsonDropdown();
+  });
+
+  // 외부 클릭 시 닫기
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#all-json-dropdown-wrapper')) {
+      toggleAllJsonDropdown(false);
+    }
+  });
+}
+
+/** 전체 JSON 드롭다운 토글 (true/false 지정 또는 토글) */
+function toggleAllJsonDropdown(show) {
+  const dropdown = document.getElementById('all-json-dropdown');
   if (!dropdown) return;
   if (typeof show === 'boolean') {
     dropdown.classList.toggle('show', show);
