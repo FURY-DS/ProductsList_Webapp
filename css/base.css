@@ -159,6 +159,56 @@ html, body {
   background: rgba(0, 184, 148, 0.4);
 }
 
+/* ===== Excel dropdown ===== */
+.excel-dropdown-wrapper {
+  position: relative;
+}
+.topbar button.btn-excel {
+  background: rgba(0, 184, 148, 0.25);
+  border-color: rgba(0, 184, 148, 0.4);
+}
+.topbar button.btn-excel:hover {
+  background: rgba(0, 184, 148, 0.4);
+}
+.excel-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 60;
+}
+.excel-dropdown.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.excel-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  background: #fff !important;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--text) !important;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.excel-dropdown button:last-child { border-bottom: none; }
+.excel-dropdown button:hover { background: #f5f6fa !important; }
+
 /* ===== Menu dropdown ===== */
 .menu-wrapper { position: relative; }
 .btn-menu {

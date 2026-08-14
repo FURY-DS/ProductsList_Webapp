@@ -24,12 +24,51 @@ function initActions() {
   document.getElementById('btn-export-all').addEventListener('click', exportAllData);
   document.getElementById('btn-import-all').addEventListener('click', importAllData);
   document.getElementById('import-all-input').addEventListener('change', handleImportAllFile);
-  document.getElementById('btn-csv-template').addEventListener('click', downloadCsvTemplate);
-  document.getElementById('btn-csv-import').addEventListener('click', importCsvData);
+  document.getElementById('btn-csv-template').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleExcelDropdown(false);
+    downloadCsvTemplate();
+  });
+  document.getElementById('btn-csv-import').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleExcelDropdown(false);
+    importCsvData();
+  });
   document.getElementById('csv-import-input').addEventListener('change', handleCsvImportFile);
+  initExcelDropdown();
   document.getElementById('btn-clear').addEventListener('click', clearAll);
   document.getElementById('btn-rate-bulk').addEventListener('click', openRateBulkModal);
   document.getElementById('btn-percent-bulk').addEventListener('click', openPctBulkModal);
+}
+
+/** Excel 드롭다운 초기화 */
+function initExcelDropdown() {
+  const btn = document.getElementById('btn-excel');
+  const wrapper = document.getElementById('excel-dropdown-wrapper');
+  if (!btn || !wrapper) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleExcelDropdown();
+  });
+
+  // 외부 클릭 시 닫기
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#excel-dropdown-wrapper')) {
+      toggleExcelDropdown(false);
+    }
+  });
+}
+
+/** Excel 드롭다운 토글 (true/false 지정 또는 토글) */
+function toggleExcelDropdown(show) {
+  const dropdown = document.getElementById('excel-dropdown');
+  if (!dropdown) return;
+  if (typeof show === 'boolean') {
+    dropdown.classList.toggle('show', show);
+  } else {
+    dropdown.classList.toggle('show');
+  }
 }
 
 /** 전체 데이터 내보내기 (마켓노트 + 마켓플레이스) */
