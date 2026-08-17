@@ -67,6 +67,9 @@ function initExcelDropdown() {
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
+    // 다른 드랍다운들은 닫기
+    toggleJsonDropdown(false);
+    toggleAllJsonDropdown(false);
     toggleExcelDropdown();
   });
 
@@ -97,6 +100,9 @@ function initJsonDropdown() {
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
+    // 다른 드랍다운들은 닫기
+    toggleAllJsonDropdown(false);
+    toggleExcelDropdown(false);
     toggleJsonDropdown();
   });
 
@@ -127,6 +133,9 @@ function initAllJsonDropdown() {
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
+    // 다른 드랍다운들은 닫기
+    toggleJsonDropdown(false);
+    toggleExcelDropdown(false);
     toggleAllJsonDropdown();
   });
 
