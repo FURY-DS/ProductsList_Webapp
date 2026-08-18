@@ -4,6 +4,13 @@
 
 let boardEl = null;
 
+/**
+ * 체크된 카드 ID 추적 (메모리 내에서만 유지)
+ * - render() 재호출(검색, 숨기기, 펼치기, 편집 등) 시에도 체크 상태 보존
+ * - 페이지 이동(메뉴 클릭으로 다른 HTML 로드) 시 자동 초기화
+ */
+const checkedCardIds = new Set();
+
 /** 보드 요소 초기화 (DOM 로드 후 호출) */
 function initBoard() {
   boardEl = document.getElementById('board');
@@ -170,6 +177,19 @@ function renderCard(card, idx) {
 
   // ----- 이벤트 바인딩 -----
   bindCardEvents(wrap, card);
+
+  // ----- 체크박스 상태 복원 + 이벤트 -----
+  const checkbox = wrap.querySelector('.card-select');
+  if (checkbox) {
+    checkbox.checked = checkedCardIds.has(card.id);
+    checkbox.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        checkedCardIds.add(card.id);
+      } else {
+        checkedCardIds.delete(card.id);
+      }
+    });
+  }
 
   return wrap;
 }

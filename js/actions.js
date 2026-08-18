@@ -603,6 +603,7 @@ function clearAll() {
     confirmText: '삭제',
     onConfirm: () => {
       state.cards = [];
+      checkedCardIds.clear();
       const result = save();
       render();
       reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.ALL_DELETED);
@@ -621,6 +622,7 @@ function confirmDelete(cardId) {
     confirmText: '삭제',
     onConfirm: () => {
       state.cards = state.cards.filter(c => c.id !== cardId);
+      checkedCardIds.delete(cardId);
       const result = save();
       render();
       reportSaveResult(result, CONFIG.MESSAGES, CONFIG.MESSAGES.DELETED);
