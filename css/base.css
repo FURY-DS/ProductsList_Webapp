@@ -644,8 +644,8 @@ html, body {
   align-items: baseline;
   gap: 8px;
   padding: 6px 14px 12px;
-  margin-bottom: 18px;
-  background: #ffffff;
+  margin-bottom: 14px;
+  /* background: #ffffff; */
   font-size: 12px;
 }
 .card-ny-label {
