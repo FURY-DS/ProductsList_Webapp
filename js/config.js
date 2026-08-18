@@ -13,8 +13,8 @@ const CONFIG = {
   // 레이아웃
   COLUMNS: 4,
 
-  // 카드 헤더 (#01 옆)에 표시할 필드 키
-  CARD_HEADER_BADGE_FIELD: 'ny',
+  // 카드 헤더 (#01 옆)에 표시할 필드 키 (빈 값이면 뱃지 표시 안 함)
+  CARD_HEADER_BADGE_FIELD: '',
 
   // 카드 헤더 (#01 옆)에 입력창으로 표시할 필드 키 (원산지)
   CARD_HEADER_ORIGIN_FIELD: 'origin',
