@@ -209,12 +209,12 @@ const XLSX_WRITER = (() => {
   }
 
   /* ---------- sheet XML ---------- */
-  // 셀 높이 twips 변환: 1pt = 20 twips, 96dpi에서 1px = 0.75pt = 15 twips
-  // 이미지 셀 행은 이미지 높이(px)만큼 자동 확장 (이미지+위아래 8px 패딩)
-  function pxToRowTwips(px) {
-    return Math.round(px * 0.75 * 20 + 120);
+  // 셀 높이 단위는 pt (xdr과 달리 worksheet의 ht 속성은 포인트 단위!)
+  // 96dpi에서 1px = 0.75pt. 이미지 셀 행은 이미지 높이(px) + 위아래 패딩 6pt
+  function pxToRowPoints(px) {
+    return Math.round(px * 0.75 + 6);
   }
-  const DEFAULT_ROW_TWIPS = 15 * 20; // 15pt 기본
+  const DEFAULT_ROW_PT = 15; // 15pt 기본 (Excel 표준 행 높이)
 
   function sheetXml(sheet, drawing, imageRowMap) {
     const rows = sheet.rows || [];
@@ -223,7 +223,7 @@ const XLSX_WRITER = (() => {
       + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
 
     // 기본 행 높이 (이미지 없는 행에 적용)
-    xml += `<sheetFormatPr defaultRowHeight="${DEFAULT_ROW_TWIPS}" customHeight="1"/>`;
+    xml += `<sheetFormatPr defaultRowHeight="${DEFAULT_ROW_PT}"/>`;
 
     if (Array.isArray(sheet.colWidths) && sheet.colWidths.length) {
       xml += '<cols>'
@@ -237,7 +237,7 @@ const XLSX_WRITER = (() => {
       const ht = imageRowMap && imageRowMap[r];
       const rowAttr = ht
         ? ` r="${r + 1}" ht="${ht}" customHeight="1"`
-        : ` r="${r + 1}" ht="${DEFAULT_ROW_TWIPS}" customHeight="1"`;
+        : ` r="${r + 1}"`;
       xml += `<row${rowAttr}>`;
       row.forEach((cell, c) => {
         if (isImageCell(cell)) return; // 이미지 셀은 drawing으로 처리
@@ -300,7 +300,7 @@ const XLSX_WRITER = (() => {
           const w = cell.w || 90;
           const h = cell.h || 90;
           // 같은 행에 이미지가 여러 개 있어도 가장 큰 h 기준으로 행 높이 결정
-          const wantHt = pxToRowTwips(h);
+          const wantHt = pxToRowPoints(h);
           if (!imageRowMap[rIdx] || imageRowMap[rIdx] < wantHt) {
             imageRowMap[rIdx] = wantHt;
           }
