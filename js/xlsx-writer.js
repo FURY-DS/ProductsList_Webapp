@@ -4,6 +4,8 @@
    - ZIP 무압축(store) + CRC32 + 최소 OOXML 구조
    - 사용: XLSX_WRITER.buildXlsx([{ name, rows, colWidths, boldHeader }])
      → Blob (application/vnd...spreadsheetml.sheet)
+   - 셀 값: 문자열/숫자 또는 { t:'image', data:'data:image/png;base64,...' }
+     (이미지 셀은 실제 이미지로 시트에 임베드됨)
    ===================================================== */
 
 const XLSX_WRITER = (() => {
@@ -25,6 +27,23 @@ const XLSX_WRITER = (() => {
       c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
     }
     return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  /* ---------- base64 → Uint8Array ---------- */
+  function base64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  /* ---------- data URL 파싱 ---------- */
+  function parseDataUrl(url) {
+    const m = /^data:image\/([a-zA-Z0-9+]+);base64,(.*)$/.exec(url || '');
+    if (!m) return null;
+    let ext = m[1].toLowerCase();
+    if (ext === 'jpeg') ext = 'jpg';
+    return { ext, bytes: base64ToBytes(m[2]) };
   }
 
   /* ---------- ZIP (무압축 store 방식) ---------- */
@@ -109,10 +128,86 @@ const XLSX_WRITER = (() => {
     return s;
   }
 
-  function sheetXml(sheet) {
+  /* ---------- 셀 XML 생성 ---------- */
+  function isImageCell(cell) {
+    return cell && typeof cell === 'object' && cell.t === 'image' && typeof cell.data === 'string';
+  }
+
+  function buildCellXml(ref, cell, style) {
+    if (isImageCell(cell)) {
+      // 이미지가 있는 셀은 값 없이 비워둠 (이미지는 drawing으로 별도 배치)
+      return '';
+    }
+    if (cell === null || cell === undefined || cell === '') return '';
+    if (typeof cell === 'number' && isFinite(cell)) {
+      return `<c r="${ref}"${style}><v>${cell}</v></c>`;
+    }
+    return `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${esc(cell)}</t></is></c>`;
+  }
+
+  /* ---------- 이미지 처리 ---------- */
+  // 한 셀의 컬럼 너비(문자단위) 합 → 시작 X EMU
+  // Excel 컬럼너비 1단위 ≈ 7px @ 96dpi = 66,675 EMU
+  function colOffset(colIdx, colWidths) {
+    if (!Array.isArray(colWidths)) return colIdx * 9525; // fallback
+    let px = 0;
+    for (let i = 0; i < colIdx && i < colWidths.length; i++) {
+      px += (colWidths[i] || 8) * 7;
+    }
+    return px * 9525;
+  }
+  // 행 → 시작 Y EMU (15pt 기본 행 높이 = 190,500 EMU)
+  function rowOffset(rowIdx) {
+    return rowIdx * 190500;
+  }
+
+  function buildDrawingXml(anchors) {
+    // anchors: [{ col, row, w, h, relId, picId }]
+    const parts = [];
+    anchors.forEach(a => {
+      const cx = (a.w || 90) * 9525;
+      const cy = (a.h || 90) * 9525;
+      parts.push(
+        '<xdr:oneCellAnchor editAs="oneCell">'
+        + `<xdr:from><xdr:col>${a.col}</xdr:col><xdr:colOff>50000</xdr:colOff>`
+        + `<xdr:row>${a.row}</xdr:row><xdr:rowOff>20000</xdr:rowOff></xdr:from>`
+        + `<xdr:ext cx="${cx}" cy="${cy}"/>`
+        + `<xdr:pic>`
+        + `<xdr:nvPicPr><xdr:cNvPr id="${a.picId}" name="Picture ${a.picId}"/>`
+        + `<xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>`
+        + `<xdr:blipFill><a:blip r:embed="${a.relId}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>`
+        + `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>`
+        + `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>`
+        + `<xdr:clientData/>`
+        + `</xdr:pic>`
+        + `</xdr:oneCellAnchor>`
+      );
+    });
+    return XML_HEAD
+      + '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"'
+      + ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"'
+      + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + parts.join('')
+      + '</xdr:wsDr>';
+  }
+
+  function buildDrawingRels(rels) {
+    // rels: [{ relId, target }]
+    const parts = rels.map(r =>
+      `<Relationship Id="${r.relId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="${esc(r.target)}"/>`
+    );
+    return XML_HEAD
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + parts.join('')
+      + '</Relationships>';
+  }
+
+  /* ---------- sheet XML ---------- */
+  function sheetXml(sheet, drawing) {
     const rows = sheet.rows || [];
-    let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-      + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+    let xml = XML_HEAD
+      + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+      + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
 
     if (Array.isArray(sheet.colWidths) && sheet.colWidths.length) {
       xml += '<cols>'
@@ -125,18 +220,19 @@ const XLSX_WRITER = (() => {
     rows.forEach((row, r) => {
       xml += `<row r="${r + 1}">`;
       row.forEach((cell, c) => {
-        if (cell === null || cell === undefined || cell === '') return;
-        const ref = colName(c) + (r + 1);
+        if (isImageCell(cell)) return; // 이미지 셀은 drawing으로 처리
         const style = (r === 0 && sheet.boldHeader) ? ' s="1"' : '';
-        if (typeof cell === 'number' && isFinite(cell)) {
-          xml += `<c r="${ref}"${style}><v>${cell}</v></c>`;
-        } else {
-          xml += `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${esc(cell)}</t></is></c>`;
-        }
+        xml += buildCellXml(colName(c) + (r + 1), cell, style);
       });
       xml += '</row>';
     });
-    xml += '</sheetData></worksheet>';
+    xml += '</sheetData>';
+
+    if (drawing) {
+      xml += `<drawing r:id="${drawing.relId}"/>`;
+    }
+
+    xml += '</worksheet>';
     return xml;
   }
 
@@ -146,6 +242,7 @@ const XLSX_WRITER = (() => {
   /**
    * .xlsx Blob 생성
    * @param {Array} sheets - [{ name, rows(2차원 배열), colWidths(선택), boldHeader(선택) }]
+   *   셀 값: 문자열, 숫자, 또는 { t:'image', data:'data:image/png;base64,...', w?, h? }
    * @returns {Blob}
    */
   function buildXlsx(sheets) {
@@ -158,20 +255,70 @@ const XLSX_WRITER = (() => {
         .replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0, 31)
     }));
 
-    // [Content_Types].xml
+    /* ---- 1) 시트별로 이미지 수집 → 전역 media 등록 ---- */
+    const mediaExts = new Set(); // [Content_Types].xml의 Default 확장자용
+    const mediaFiles = []; // { name, bytes }
+    const sheetImages = []; // 시트별 anchor/rel 정보
+
+    safeSheets.forEach((sheet, sIdx) => {
+      const rows = sheet.rows || [];
+      const anchors = [];
+      const rels = [];
+
+      rows.forEach((row, rIdx) => {
+        row.forEach((cell, cIdx) => {
+          if (!isImageCell(cell)) return;
+          const parsed = parseDataUrl(cell.data);
+          if (!parsed) return; // 잘못된 data URL → 무시
+          const ext = parsed.ext;
+          const mediaIdx = mediaFiles.length + 1;
+          const mediaName = `xl/media/image${mediaIdx}.${ext}`;
+          mediaFiles.push({ name: mediaName, data: parsed.bytes });
+          mediaExts.add(ext);
+          const relId = `rIdImg${mediaIdx}`;
+          anchors.push({
+            col: cIdx,
+            row: rIdx,
+            w: cell.w || 90,
+            h: cell.h || 90,
+            relId,
+            picId: mediaIdx + 1
+          });
+          rels.push({ relId, target: `../media/image${mediaIdx}.${ext}` });
+        });
+      });
+
+      if (anchors.length > 0) {
+        sheetImages.push({
+          sheetIdx: sIdx,
+          drawingXml: buildDrawingXml(anchors),
+          drawingRels: buildDrawingRels(rels)
+        });
+      }
+    });
+
+    /* ---- 2) [Content_Types].xml ---- */
     let ct = XML_HEAD
       + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
       + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
-      + '<Default Extension="xml" ContentType="application/xml"/>'
-      + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      + '<Default Extension="xml" ContentType="application/xml"/>';
+    mediaExts.forEach(ext => {
+      let mime = 'image/' + ext;
+      if (ext === 'jpg') mime = 'image/jpeg';
+      ct += `<Default Extension="${ext}" ContentType="${mime}"/>`;
+    });
+    ct += '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
       + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>';
     safeSheets.forEach((_, i) => {
       ct += `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
     });
+    sheetImages.forEach(si => {
+      ct += `<Override PartName="/xl/drawings/drawing${si.sheetIdx + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`;
+    });
     ct += '</Types>';
     files.push({ name: '[Content_Types].xml', data: enc.encode(ct) });
 
-    // _rels/.rels
+    /* ---- 3) _rels/.rels ---- */
     files.push({
       name: '_rels/.rels',
       data: enc.encode(XML_HEAD
@@ -180,7 +327,7 @@ const XLSX_WRITER = (() => {
         + '</Relationships>')
     });
 
-    // xl/workbook.xml + xl/_rels/workbook.xml.rels
+    /* ---- 4) xl/workbook.xml + xl/_rels/workbook.xml.rels ---- */
     let wb = XML_HEAD
       + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
       + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
@@ -196,7 +343,7 @@ const XLSX_WRITER = (() => {
     files.push({ name: 'xl/workbook.xml', data: enc.encode(wb) });
     files.push({ name: 'xl/_rels/workbook.xml.rels', data: enc.encode(rels) });
 
-    // xl/styles.xml (기본 + 굵은 글씨)
+    /* ---- 5) xl/styles.xml ---- */
     files.push({
       name: 'xl/styles.xml',
       data: enc.encode(XML_HEAD
@@ -219,9 +366,49 @@ const XLSX_WRITER = (() => {
         + '</styleSheet>')
     });
 
-    // worksheets
-    safeSheets.forEach((s, i) => {
-      files.push({ name: `xl/worksheets/sheet${i + 1}.xml`, data: enc.encode(sheetXml(s)) });
+    /* ---- 6) drawings + sheet rels ---- */
+    // 시트 → drawing 관계 매핑
+    const drawingForSheet = {}; // sheetIdx(0-based) -> { relId, drawingXml, drawingRels }
+    sheetImages.forEach(si => {
+      const relId = `rIdDraw${si.sheetIdx + 1}`;
+      drawingForSheet[si.sheetIdx] = {
+        relId,
+        drawingXml: si.drawingXml,
+        drawingRels: si.drawingRels
+      };
+    });
+
+    /* ---- 7) worksheets + sheet rels ---- */
+    safeSheets.forEach((sheet, i) => {
+      const drawing = drawingForSheet[i];
+      files.push({
+        name: `xl/worksheets/sheet${i + 1}.xml`,
+        data: enc.encode(sheetXml(sheet, drawing ? { relId: drawing.relId } : null))
+      });
+
+      // sheet rels: drawing이 있으면 추가
+      if (drawing) {
+        files.push({
+          name: `xl/worksheets/_rels/sheet${i + 1}.xml.rels`,
+          data: enc.encode(XML_HEAD
+            + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            + `<Relationship Id="${drawing.relId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${i + 1}.xml"/>`
+            + '</Relationships>')
+        });
+        files.push({
+          name: `xl/drawings/drawing${i + 1}.xml`,
+          data: enc.encode(drawing.drawingXml)
+        });
+        files.push({
+          name: `xl/drawings/_rels/drawing${i + 1}.xml.rels`,
+          data: enc.encode(drawing.drawingRels)
+        });
+      }
+    });
+
+    /* ---- 8) media (이미지 파일들) ---- */
+    mediaFiles.forEach(m => {
+      files.push({ name: m.name, data: m.data });
     });
 
     return makeZip(files);

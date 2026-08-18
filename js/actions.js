@@ -446,7 +446,17 @@ function downloadInboundExcel() {
 
   const rows = [INBOUND_BOX_HEADERS];
   cards.forEach(c => {
-    rows.push(['', '', '', c.name || '', '', '', c.ny || '', '', '']);
+    rows.push([
+      '',                // 박스수량
+      '',                // 박스당 입수량
+      '',                // 브랜드
+      c.name || '',      // 상품명
+      c.option || '',    // 옵션명
+      '',                // 수량
+      c.ny || '',        // 상품코드
+      c.image ? { t: 'image', data: c.image } : '',  // 상품사진 (이미지)
+      ''                 // 비고
+    ]);
   });
 
   const blob = XLSX_WRITER.buildXlsx([{
