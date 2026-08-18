@@ -649,6 +649,12 @@ html, body {
   border-color: var(--primary);
   background: #fff;
 }
+.card-status-select option {
+  text-align: center;
+  background: #fff;
+  color: var(--text);
+  padding: 6px 4px;
+}
 
 .card-badge {
   font-size: 12px;
