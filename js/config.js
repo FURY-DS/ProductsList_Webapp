@@ -96,8 +96,7 @@ const CONFIG = {
     { type: 'row', className: 'three', fields: ['cost', 'rate', 'percent'], total: true },
     { type: 'row', className: 'one',   fields: ['link'] },
     { type: 'row', className: 'one',   fields: ['link2'] },
-    { type: 'row', className: 'three', fields: ['rocket', 'nshipping', 'product'] },
-    { type: 'row', className: 'one',   fields: ['ny'] }
+    { type: 'row', className: 'four',  fields: ['rocket', 'nshipping', 'product', 'ny'] }
   ],
 
   // 총합 계산에 사용되는 필드
