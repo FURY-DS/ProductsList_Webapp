@@ -998,6 +998,11 @@ html, body {
   .card-row { grid-template-columns: 100px 1fr; }
   .photo-box { width: 100px; height: 100px; }
   .field-row.four { grid-template-columns: 1fr 1fr; }
+  /* 카드 헤더가 좁아질 때 상태 select가 숨기기 버튼과 겹치지 않게 두 줄로 감기 */
+  .card-header { flex-wrap: wrap; row-gap: 8px; column-gap: 6px; }
+  .card-index-wrap { flex-wrap: wrap; row-gap: 6px; min-width: 0; }
+  .card-origin-input { width: 100px; font-size: 11px; padding: 3px 8px; }
+  .card-status-btn { width: 60px; padding: 3px 4px; font-size: 11px; }
 }
 @media (max-width: 520px) {
   .container { padding: 12px; }
@@ -1011,6 +1016,10 @@ html, body {
   .field-row, .field-row.three, .field-row.four { grid-template-columns: 1fr; }
   .topbar { padding: 10px 14px; }
   .topbar .title { font-size: 15px; }
+  /* 매우 좁은 화면: 카드 도구(숨기기/저장)를 다음 줄로 떨어뜨려서 상태 select와 절대 겹치지 않게 */
+  .card-header { flex-direction: column; align-items: stretch; }
+  .card-index-wrap { flex: 1 1 100%; }
+  .card-tools { flex: 1 1 100%; display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px; }
 }
 
 /* Scrollbar styling */
