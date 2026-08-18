@@ -327,7 +327,7 @@ function makeField(name, value, readonly) {
 
 /** 해당 필드에 통화 기호가 필요한지 */
 function needsCurrency(name) {
-  return name === 'cost' || name === 'rate';
+  return name === 'rate';
 }
 
 /** 필드에 맞는 통화 기호 반환 */
