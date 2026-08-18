@@ -218,6 +218,13 @@ html, body {
 .topbar button.btn-excel:hover {
   background: rgba(0, 184, 148, 0.4);
 }
+.topbar button.btn-inbound {
+  background: rgba(250, 130, 40, 0.25);
+  border-color: rgba(250, 130, 40, 0.4);
+}
+.topbar button.btn-inbound:hover {
+  background: rgba(250, 130, 40, 0.4);
+}
 .excel-dropdown {
   position: absolute;
   top: calc(100% + 8px);

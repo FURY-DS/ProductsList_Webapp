@@ -51,6 +51,7 @@ function initActions() {
     importCsvData();
   });
   document.getElementById('csv-import-input').addEventListener('change', handleCsvImportFile);
+  document.getElementById('btn-inbound-data').addEventListener('click', downloadInboundExcel);
   initExcelDropdown();
   initJsonDropdown();
   initAllJsonDropdown();
@@ -422,6 +423,48 @@ function downloadCsvTemplate() {
   a.click();
   URL.revokeObjectURL(url);
   showToast(CONFIG.MESSAGES.CSV_TEMPLATE_DONE);
+}
+
+/* =====================================================
+   입고데이터 엑셀(xlsx) 다운로드
+   - 체크박스로 선택한 카드만 '박스입고' 폼 형태로 출력
+   - 카드 상품명 → '상품명' 열, 판매자상품코드(ny) → '상품코드' 열
+   ===================================================== */
+
+/** 박스입고 폼 헤더 (입고리스트 엑셀 양식 기준) */
+const INBOUND_BOX_HEADERS = ['박스수량', '박스당 입수량', '브랜드', '상품명', '옵션명', '수량', '상품코드', '상품사진', '비고'];
+
+/** 체크한 카드들을 박스입고 폼 xlsx로 내보내기 */
+function downloadInboundExcel() {
+  // 카드 번호순(#01, #02 ...)으로 체크된 카드 추출
+  const cards = (state.cards || []).filter(c => checkedCardIds.has(c.id));
+
+  if (cards.length === 0) {
+    showToast('체크한 제품 카드가 없습니다. 카드의 체크박스를 먼저 선택해주세요.');
+    return;
+  }
+
+  const rows = [INBOUND_BOX_HEADERS];
+  cards.forEach(c => {
+    rows.push(['', '', '', c.name || '', '', '', c.ny || '', '', '']);
+  });
+
+  const blob = XLSX_WRITER.buildXlsx([{
+    name: '박스입고',
+    rows,
+    boldHeader: true,
+    colWidths: [10, 14, 10, 28, 12, 8, 18, 10, 22]
+  }]);
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `입고데이터_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`입고데이터 ${cards.length}건을 다운로드했습니다.`);
 }
 
 /** 엑셀 가져오기 파일 선택 다이얼로그 열기 */

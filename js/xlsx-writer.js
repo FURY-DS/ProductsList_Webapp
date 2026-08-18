@@ -1,0 +1,231 @@
+/* =====================================================
+   xlsx-writer.js - 의존성 없는 최소 .xlsx 생성기
+   - 외부 라이브러리/CDN 없이 순수 JS로 동작 (file:// 환경 지원)
+   - ZIP 무압축(store) + CRC32 + 최소 OOXML 구조
+   - 사용: XLSX_WRITER.buildXlsx([{ name, rows, colWidths, boldHeader }])
+     → Blob (application/vnd...spreadsheetml.sheet)
+   ===================================================== */
+
+const XLSX_WRITER = (() => {
+
+  /* ---------- CRC32 ---------- */
+  const CRC_TABLE = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) {
+      c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  /* ---------- ZIP (무압축 store 방식) ---------- */
+  function makeZip(files) {
+    const chunks = [];
+    const central = [];
+    let offset = 0;
+
+    for (const f of files) {
+      const nameBytes = new TextEncoder().encode(f.name);
+      const crc = crc32(f.data);
+
+      // Local File Header (30 bytes + name)
+      const local = new Uint8Array(30 + nameBytes.length);
+      const dv = new DataView(local.buffer);
+      dv.setUint32(0, 0x04034b50, true);   // signature
+      dv.setUint16(4, 20, true);           // version needed
+      dv.setUint16(6, 0, true);            // flags
+      dv.setUint16(8, 0, true);            // method: store
+      dv.setUint16(10, 0, true);           // mod time
+      dv.setUint16(12, 0x21, true);        // mod date (고정값, 무의미)
+      dv.setUint32(14, crc, true);         // crc32
+      dv.setUint32(18, f.data.length, true);   // compressed size
+      dv.setUint32(22, f.data.length, true);   // uncompressed size
+      dv.setUint16(26, nameBytes.length, true);
+      dv.setUint16(28, 0, true);           // extra len
+      local.set(nameBytes, 30);
+
+      chunks.push(local, f.data);
+
+      // Central Directory Header (46 bytes + name)
+      const cd = new Uint8Array(46 + nameBytes.length);
+      const cv = new DataView(cd.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);           // version made by
+      cv.setUint16(6, 20, true);           // version needed
+      cv.setUint16(8, 0, true);            // flags
+      cv.setUint16(10, 0, true);           // method: store
+      cv.setUint16(12, 0, true);           // mod time
+      cv.setUint16(14, 0x21, true);        // mod date
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, f.data.length, true);
+      cv.setUint32(24, f.data.length, true);
+      cv.setUint16(28, nameBytes.length, true);
+      cv.setUint32(42, offset, true);      // local header offset
+      cd.set(nameBytes, 46);
+      central.push(cd);
+
+      offset += local.length + f.data.length;
+    }
+
+    const centralSize = central.reduce((s, c) => s + c.length, 0);
+    const eocd = new Uint8Array(22);
+    const ev = new DataView(eocd.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(8, files.length, true);
+    ev.setUint16(10, files.length, true);
+    ev.setUint32(12, centralSize, true);
+    ev.setUint32(16, offset, true);
+
+    return new Blob([...chunks, ...central, eocd], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+  }
+
+  /* ---------- XML 헬퍼 ---------- */
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /** 0-based 열 인덱스 → A1 표기 열 이름 (0→A, 25→Z, 26→AA) */
+  function colName(i) {
+    let s = '';
+    i += 1;
+    while (i > 0) {
+      const m = (i - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      i = Math.floor((i - 1) / 26);
+    }
+    return s;
+  }
+
+  function sheetXml(sheet) {
+    const rows = sheet.rows || [];
+    let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+
+    if (Array.isArray(sheet.colWidths) && sheet.colWidths.length) {
+      xml += '<cols>'
+        + sheet.colWidths.map((w, i) =>
+            `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')
+        + '</cols>';
+    }
+
+    xml += '<sheetData>';
+    rows.forEach((row, r) => {
+      xml += `<row r="${r + 1}">`;
+      row.forEach((cell, c) => {
+        if (cell === null || cell === undefined || cell === '') return;
+        const ref = colName(c) + (r + 1);
+        const style = (r === 0 && sheet.boldHeader) ? ' s="1"' : '';
+        if (typeof cell === 'number' && isFinite(cell)) {
+          xml += `<c r="${ref}"${style}><v>${cell}</v></c>`;
+        } else {
+          xml += `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${esc(cell)}</t></is></c>`;
+        }
+      });
+      xml += '</row>';
+    });
+    xml += '</sheetData></worksheet>';
+    return xml;
+  }
+
+  const XML_HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+  /* ---------- 공개 API ---------- */
+  /**
+   * .xlsx Blob 생성
+   * @param {Array} sheets - [{ name, rows(2차원 배열), colWidths(선택), boldHeader(선택) }]
+   * @returns {Blob}
+   */
+  function buildXlsx(sheets) {
+    const enc = new TextEncoder();
+    const files = [];
+
+    const safeSheets = (sheets || []).map((s, i) => ({
+      ...s,
+      name: String(s.name || ('Sheet' + (i + 1)))
+        .replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0, 31)
+    }));
+
+    // [Content_Types].xml
+    let ct = XML_HEAD
+      + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+      + '<Default Extension="xml" ContentType="application/xml"/>'
+      + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+      + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>';
+    safeSheets.forEach((_, i) => {
+      ct += `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
+    });
+    ct += '</Types>';
+    files.push({ name: '[Content_Types].xml', data: enc.encode(ct) });
+
+    // _rels/.rels
+    files.push({
+      name: '_rels/.rels',
+      data: enc.encode(XML_HEAD
+        + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+        + '</Relationships>')
+    });
+
+    // xl/workbook.xml + xl/_rels/workbook.xml.rels
+    let wb = XML_HEAD
+      + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+      + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      + '<sheets>';
+    let rels = XML_HEAD
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+    safeSheets.forEach((s, i) => {
+      wb += `<sheet name="${esc(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`;
+      rels += `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`;
+    });
+    wb += '</sheets></workbook>';
+    rels += `<Relationship Id="rId${safeSheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+    files.push({ name: 'xl/workbook.xml', data: enc.encode(wb) });
+    files.push({ name: 'xl/_rels/workbook.xml.rels', data: enc.encode(rels) });
+
+    // xl/styles.xml (기본 + 굵은 글씨)
+    files.push({
+      name: 'xl/styles.xml',
+      data: enc.encode(XML_HEAD
+        + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+        + '<fonts count="2">'
+        + '<font><sz val="11"/><name val="맑은 고딕"/></font>'
+        + '<font><b/><sz val="11"/><name val="맑은 고딕"/></font>'
+        + '</fonts>'
+        + '<fills count="2">'
+        + '<fill><patternFill patternType="none"/></fill>'
+        + '<fill><patternFill patternType="gray125"/></fill>'
+        + '</fills>'
+        + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+        + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+        + '<cellXfs count="2">'
+        + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+        + '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+        + '</cellXfs>'
+        + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
+        + '</styleSheet>')
+    });
+
+    // worksheets
+    safeSheets.forEach((s, i) => {
+      files.push({ name: `xl/worksheets/sheet${i + 1}.xml`, data: enc.encode(sheetXml(s)) });
+    });
+
+    return makeZip(files);
+  }
+
+  return { buildXlsx };
+})();
