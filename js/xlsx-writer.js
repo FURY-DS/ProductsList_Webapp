@@ -163,23 +163,29 @@ const XLSX_WRITER = (() => {
 
   function buildDrawingXml(anchors) {
     // anchors: [{ col, row, w, h, relId, picId }]
+    // [주의] <xdr:clientData/> 는 <xdr:oneCellAnchor>의 직속 자식(즉 <xdr:pic>의 형제)이어야 함.
+    //        <xdr:pic> 안에 들어가면 Excel이 "그리기" 부분 복구 메시지를 띄움.
     const parts = [];
     anchors.forEach(a => {
       const cx = (a.w || 90) * 9525;
       const cy = (a.h || 90) * 9525;
       parts.push(
-        '<xdr:oneCellAnchor editAs="oneCell">'
-        + `<xdr:from><xdr:col>${a.col}</xdr:col><xdr:colOff>50000</xdr:colOff>`
-        + `<xdr:row>${a.row}</xdr:row><xdr:rowOff>20000</xdr:rowOff></xdr:from>`
+        '<xdr:oneCellAnchor>'
+        + `<xdr:from><xdr:col>${a.col}</xdr:col><xdr:colOff>0</xdr:colOff>`
+        + `<xdr:row>${a.row}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`
         + `<xdr:ext cx="${cx}" cy="${cy}"/>`
         + `<xdr:pic>`
-        + `<xdr:nvPicPr><xdr:cNvPr id="${a.picId}" name="Picture ${a.picId}"/>`
-        + `<xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>`
-        + `<xdr:blipFill><a:blip r:embed="${a.relId}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>`
-        + `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>`
-        + `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr>`
-        + `<xdr:clientData/>`
+        + `<xdr:nvPicPr>`
+        + `<xdr:cNvPr id="${a.picId}" name="Picture ${a.picId}" descr=""/>`
+        + `<xdr:cNvPicPr/>`
+        + `</xdr:nvPicPr>`
+        + `<xdr:blipFill>`
+        + `<a:blip cstate="print" r:embed="${a.relId}"/>`
+        + `<a:stretch><a:fillRect/></a:stretch>`
+        + `</xdr:blipFill>`
+        + `<xdr:spPr><a:prstGeom prst="rect"/></xdr:spPr>`
         + `</xdr:pic>`
+        + `<xdr:clientData/>`
         + `</xdr:oneCellAnchor>`
       );
     });
@@ -203,11 +209,21 @@ const XLSX_WRITER = (() => {
   }
 
   /* ---------- sheet XML ---------- */
-  function sheetXml(sheet, drawing) {
+  // 셀 높이 twips 변환: 1pt = 20 twips, 96dpi에서 1px = 0.75pt = 15 twips
+  // 이미지 셀 행은 이미지 높이(px)만큼 자동 확장 (이미지+위아래 8px 패딩)
+  function pxToRowTwips(px) {
+    return Math.round(px * 0.75 * 20 + 120);
+  }
+  const DEFAULT_ROW_TWIPS = 15 * 20; // 15pt 기본
+
+  function sheetXml(sheet, drawing, imageRowMap) {
     const rows = sheet.rows || [];
     let xml = XML_HEAD
       + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
       + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
+
+    // 기본 행 높이 (이미지 없는 행에 적용)
+    xml += `<sheetFormatPr defaultRowHeight="${DEFAULT_ROW_TWIPS}" customHeight="1"/>`;
 
     if (Array.isArray(sheet.colWidths) && sheet.colWidths.length) {
       xml += '<cols>'
@@ -218,7 +234,11 @@ const XLSX_WRITER = (() => {
 
     xml += '<sheetData>';
     rows.forEach((row, r) => {
-      xml += `<row r="${r + 1}">`;
+      const ht = imageRowMap && imageRowMap[r];
+      const rowAttr = ht
+        ? ` r="${r + 1}" ht="${ht}" customHeight="1"`
+        : ` r="${r + 1}" ht="${DEFAULT_ROW_TWIPS}" customHeight="1"`;
+      xml += `<row${rowAttr}>`;
       row.forEach((cell, c) => {
         if (isImageCell(cell)) return; // 이미지 셀은 drawing으로 처리
         const style = (r === 0 && sheet.boldHeader) ? ' s="1"' : '';
@@ -258,12 +278,13 @@ const XLSX_WRITER = (() => {
     /* ---- 1) 시트별로 이미지 수집 → 전역 media 등록 ---- */
     const mediaExts = new Set(); // [Content_Types].xml의 Default 확장자용
     const mediaFiles = []; // { name, bytes }
-    const sheetImages = []; // 시트별 anchor/rel 정보
+    const sheetImages = []; // 시트별 anchor/rel/행높이 정보
 
     safeSheets.forEach((sheet, sIdx) => {
       const rows = sheet.rows || [];
       const anchors = [];
       const rels = [];
+      const imageRowMap = {}; // rIdx -> twips(이미지 행 높이)
 
       rows.forEach((row, rIdx) => {
         row.forEach((cell, cIdx) => {
@@ -275,14 +296,21 @@ const XLSX_WRITER = (() => {
           const mediaName = `xl/media/image${mediaIdx}.${ext}`;
           mediaFiles.push({ name: mediaName, data: parsed.bytes });
           mediaExts.add(ext);
-          const relId = `rIdImg${mediaIdx}`;
+          const relId = `rId${mediaIdx}`; // openpyxl 호환 (rIdImgN → rIdN)
+          const w = cell.w || 90;
+          const h = cell.h || 90;
+          // 같은 행에 이미지가 여러 개 있어도 가장 큰 h 기준으로 행 높이 결정
+          const wantHt = pxToRowTwips(h);
+          if (!imageRowMap[rIdx] || imageRowMap[rIdx] < wantHt) {
+            imageRowMap[rIdx] = wantHt;
+          }
           anchors.push({
             col: cIdx,
             row: rIdx,
-            w: cell.w || 90,
-            h: cell.h || 90,
+            w,
+            h,
             relId,
-            picId: mediaIdx + 1
+            picId: mediaIdx   // 1부터 시작 (openpyxl 표준)
           });
           rels.push({ relId, target: `../media/image${mediaIdx}.${ext}` });
         });
@@ -292,7 +320,8 @@ const XLSX_WRITER = (() => {
         sheetImages.push({
           sheetIdx: sIdx,
           drawingXml: buildDrawingXml(anchors),
-          drawingRels: buildDrawingRels(rels)
+          drawingRels: buildDrawingRels(rels),
+          imageRowMap
         });
       }
     });
@@ -368,22 +397,24 @@ const XLSX_WRITER = (() => {
 
     /* ---- 6) drawings + sheet rels ---- */
     // 시트 → drawing 관계 매핑
-    const drawingForSheet = {}; // sheetIdx(0-based) -> { relId, drawingXml, drawingRels }
+    const drawingForSheet = {}; // sheetIdx(0-based) -> { relId, drawingXml, drawingRels, imageRowMap }
     sheetImages.forEach(si => {
       const relId = `rIdDraw${si.sheetIdx + 1}`;
       drawingForSheet[si.sheetIdx] = {
         relId,
         drawingXml: si.drawingXml,
-        drawingRels: si.drawingRels
+        drawingRels: si.drawingRels,
+        imageRowMap: si.imageRowMap || {}
       };
     });
 
     /* ---- 7) worksheets + sheet rels ---- */
     safeSheets.forEach((sheet, i) => {
       const drawing = drawingForSheet[i];
+      const imageRowMap = drawing ? drawing.imageRowMap : {};
       files.push({
         name: `xl/worksheets/sheet${i + 1}.xml`,
-        data: enc.encode(sheetXml(sheet, drawing ? { relId: drawing.relId } : null))
+        data: enc.encode(sheetXml(sheet, drawing ? { relId: drawing.relId } : null, imageRowMap))
       });
 
       // sheet rels: drawing이 있으면 추가

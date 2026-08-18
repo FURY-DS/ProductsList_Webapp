@@ -19,3 +19,6 @@ node_modules/
 # Data exports (local only)
 data/
 .wrangler/
+
+# Local xlsx test sandbox
+_test_xlsx/
