@@ -644,6 +644,7 @@ html, body {
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
+  margin-bottom: 14px;
   border-bottom: 1px dashed #e3e7ee;
   background: #fafbff;
   font-size: 12px;
