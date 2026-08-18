@@ -632,7 +632,7 @@ html, body {
 }
 
 .card-status-select {
-  width: 96px;
+  width: 64px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
