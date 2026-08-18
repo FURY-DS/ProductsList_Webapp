@@ -641,11 +641,10 @@ html, body {
 /* 판매자상품코드 자동 표시줄 (헤더 바로 아래) */
 .card-ny-bar {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
-  padding: 6px 14px 10px;
+  padding: 6px 14px 12px;
   margin-bottom: 18px;
-  border-bottom: 1px dashed #e3e7ee;
   background: #fafbff;
   font-size: 12px;
 }
