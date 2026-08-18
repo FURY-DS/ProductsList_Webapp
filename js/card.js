@@ -130,11 +130,19 @@ function renderCard(card, idx) {
   const statusKey = CONFIG.CARD_HEADER_STATUS_FIELD;
   const statusVal = statusKey && card[statusKey] ? String(card[statusKey]) : '';
   const statusOptions = CONFIG.STATUS_OPTIONS || [];
+  const statusPlaceholder = statusKey ? CONFIG.FIELDS[statusKey].placeholder : '';
+  const statusDisplay = statusVal || statusPlaceholder;
   const statusHtml = statusKey
-    ? `<select class="card-status-select" name="${statusKey}" title="${escapeAttr(CONFIG.FIELDS[statusKey].label)}">
-        <option value="">${escapeAttr(CONFIG.FIELDS[statusKey].placeholder)}</option>
-        ${statusOptions.map(opt => `<option value="${escapeAttr(opt)}" ${opt === statusVal ? 'selected' : ''}>${escapeAttr(opt)}</option>`).join('')}
-      </select>`
+    ? `<div class="card-status-dd" data-card-id="${card.id}">
+        <button type="button" class="card-status-btn" title="${escapeAttr(CONFIG.FIELDS[statusKey].label)}">
+          <span class="card-status-text">${escapeAttr(statusDisplay)}</span>
+          <span class="card-status-arrow">▾</span>
+        </button>
+        <ul class="card-status-menu">
+          <li class="card-status-opt ${statusVal === '' ? 'active' : ''}" data-value="">${escapeAttr(statusPlaceholder)}</li>
+          ${statusOptions.map(opt => `<li class="card-status-opt ${opt === statusVal ? 'active' : ''}" data-value="${escapeAttr(opt)}">${escapeAttr(opt)}</li>`).join('')}
+        </ul>
+      </div>`
     : '';
 
   header.innerHTML = `
@@ -359,15 +367,9 @@ function bindCardEvents(wrap, card) {
     }
   });
 
-  // 진행 상태는 수정 모드가 아니어도 바로 변경 가능
-  wrap.addEventListener('change', (e) => {
-    const t = e.target;
-    if (t.name !== CONFIG.CARD_HEADER_STATUS_FIELD) return;
-    const c = findCard(card.id);
-    if (!c) return;
-    c[t.name] = t.value;
-    reportSaveResult(save(), CONFIG.MESSAGES);
-  });
+  // 진행 상태 커스텀 드랍다운 바인딩
+  const statusDd = wrap.querySelector('.card-status-dd');
+  if (statusDd) bindStatusDropdown(statusDd, card);
 
   // 버튼 클릭
   wrap.addEventListener('click', (e) => {
@@ -387,6 +389,43 @@ function bindCardEvents(wrap, card) {
       toggleCollapse(card.id);
     }
   });
+}
+
+/** 진행상태 커스텀 드랍다운 바인딩 (네이티브 select는 OS 렌더링이라 가운데 정렬 불가) */
+let statusDdOutsideBound = false;
+function bindStatusDropdown(dd, card) {
+  const btn = dd.querySelector('.card-status-btn');
+  const menu = dd.querySelector('.card-status-menu');
+  if (!btn || !menu) return;
+
+  // 다른 카드 드랍다운이 열려있으면 닫기 (외부 클릭 시 닫기는 전역 핸들러로 처리)
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.card-status-menu.open').forEach(m => {
+      if (m !== menu) m.classList.remove('open');
+    });
+    menu.classList.toggle('open');
+  });
+
+  menu.querySelectorAll('.card-status-opt').forEach(li => {
+    li.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const newVal = li.dataset.value;
+      const c = findCard(card.id);
+      if (!c) return;
+      c[CONFIG.CARD_HEADER_STATUS_FIELD] = newVal;
+      reportSaveResult(save(), CONFIG.MESSAGES);
+      render();
+    });
+  });
+
+  // 외부 클릭 시 모든 드랍다운 닫기 (페이지 로드 시 1회만 등록)
+  if (!statusDdOutsideBound) {
+    statusDdOutsideBound = true;
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.card-status-menu.open').forEach(m => m.classList.remove('open'));
+    });
+  }
 }
 
 /** 카드 저장 (편집 잠금) */
