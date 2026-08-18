@@ -587,6 +587,14 @@ html, body {
   min-width: 0;
 }
 
+.card-select {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
+}
+
 .card-index {
   font-size: 12px;
   font-weight: 700;
@@ -1200,7 +1208,7 @@ html, body {
 /* 관리자 패널 링크 */
 .admin-link {
   background: rgba(22, 22, 22, 0.25);
-  color: #c7d2fe;
+  color: #ffffff;
   border: 1px solid rgba(99, 102, 241, 0.5);
   padding: 6px 12px;
   border-radius: 8px;

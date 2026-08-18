@@ -132,6 +132,7 @@ function renderCard(card, idx) {
 
   header.innerHTML = `
     <div class="card-index-wrap">
+      <input type="checkbox" class="card-select" data-card-id="${card.id}" title="이 카드 선택" />
       <span class="card-index">#${String(idx + 1).padStart(2, '0')}</span>
       ${originHtml}
       ${statusHtml}
