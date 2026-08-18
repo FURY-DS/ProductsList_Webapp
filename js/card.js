@@ -157,6 +157,18 @@ function renderCard(card, idx) {
   `;
   wrap.appendChild(header);
 
+  // ----- 판매자상품코드 자동 표시줄 (헤더 바로 아래, 카드 외부 가시 영역) -----
+  const nyKey = 'ny';
+  const nyVal = card[nyKey] ? escapeAttr(String(card[nyKey])) : '';
+  const nyBar = document.createElement('div');
+  nyBar.className = 'card-ny-bar';
+  nyBar.dataset.field = nyKey;
+  nyBar.innerHTML = `
+    <span class="card-ny-label">${escapeAttr(CONFIG.FIELDS[nyKey].label || '판매자상품코드')}</span>
+    <span class="card-ny-value ${nyVal ? '' : 'is-empty'}">${nyVal || '—'}</span>
+  `;
+  wrap.appendChild(nyBar);
+
   // ----- 본문: CONFIG.CARD_LAYOUT 기반 렌더링 -----
   // 접힌 상태면 사진 + 상품명/옵션명만 표시
   if (card.isCollapsed) {
@@ -341,6 +353,18 @@ function bindCardEvents(wrap, card) {
     if (CONFIG.TOTAL_FIELDS.includes(t.name)) {
       const totalEl = wrap.querySelector('.field-row.three .field:last-child input');
       if (totalEl) totalEl.value = formatNumber(computeTotal(c));
+    }
+
+    // 판매자상품코드 실시간 표시줄 갱신
+    if (t.name === 'ny') {
+      const nyBar = wrap.querySelector('.card-ny-bar');
+      if (nyBar) {
+        const valEl = nyBar.querySelector('.card-ny-value');
+        if (valEl) {
+          valEl.textContent = t.value || '—';
+          valEl.classList.toggle('is-empty', !t.value);
+        }
+      }
     }
 
     // 헤더 배지 실시간 갱신

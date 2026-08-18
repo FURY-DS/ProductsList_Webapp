@@ -638,6 +638,32 @@ html, body {
   color: #b8a172;
 }
 
+/* 판매자상품코드 자동 표시줄 (헤더 바로 아래) */
+.card-ny-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-bottom: 1px dashed #e3e7ee;
+  background: #fafbff;
+  font-size: 12px;
+}
+.card-ny-label {
+  color: #6b7280;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.card-ny-value {
+  color: var(--text);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  word-break: break-all;
+}
+.card-ny-value.is-empty {
+  color: #c2c9d4;
+  font-weight: 500;
+}
+
 .card-status-dd {
   position: relative;
   flex-shrink: 0;
