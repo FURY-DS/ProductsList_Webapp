@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=40" />
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=40" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=40" />
-<link rel="stylesheet" href="css/base.css?v=46" />
+<link rel="stylesheet" href="css/base.css?v=45" />
 <link rel="stylesheet" href="css/card-features.css?v=40" />
 <link rel="stylesheet" href="css/auth.css?v=40" />
 </head>
@@ -220,7 +220,6 @@
     </div>
     <button id="btn-inbound-data" class="btn btn-inbound" title="체크한 제품의 입고데이터 엑셀 다운로드" type="button">입고데이터</button>
     <button id="btn-clear" title="전체 삭제">전체삭제</button>
-    <button id="btn-label-settings" class="btn btn-label-settings" title="필드 라벨 설정" type="button">⚙ 라벨설정</button>
   </div>
   <div class="user-area" id="user-area">
     <a href="admin.html" id="admin-link" class="admin-link" style="display:none;" title="관리자 패널">🔧 관리</a>
@@ -354,23 +353,6 @@
     <div class="modal-actions">
       <button class="btn btn-cancel" id="percent-bulk-cancel">취소</button>
       <button class="btn btn-confirm" id="percent-bulk-apply">적용</button>
-    </div>
-  </div>
-</div>
-
-<!-- 필드 라벨 설정 모달 -->
-<div class="modal-backdrop" id="label-modal">
-  <div class="modal modal-label-settings">
-    <div class="label-modal-header">
-      <h3>⚙ 필드 라벨 설정</h3>
-      <button type="button" class="label-modal-close" id="label-modal-close" title="닫기">✕</button>
-    </div>
-    <p class="modal-desc">각 필드에 표시되는 라벨을 직접 수정할 수 있어요. 빈 칸으로 두면 기본값이 사용됩니다.</p>
-    <div class="label-modal-list" id="label-modal-list"></div>
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="label-modal-reset" title="모든 라벨을 기본값으로 되돌림">초기화</button>
-      <button class="btn btn-cancel" id="label-modal-cancel">취소</button>
-      <button class="btn btn-confirm" id="label-modal-save">저장</button>
     </div>
   </div>
 </div>
@@ -526,8 +508,7 @@
 <script src="js/search.js?v=41"></script>
 <script src="js/xlsx-writer.js?v=43"></script>
 <script src="js/actions.js?v=42"></script>
-<script src="js/field-labels.js?v=40"></script>
-<script src="js/card.js?v=42"></script>
+<script src="js/card.js?v=41"></script>
 <script src="js/menu.js?v=40"></script>
 <script src="js/rate-bulk.js?v=40"></script>
 <script src="js/percent-bulk.js?v=40"></script>
