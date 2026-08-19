@@ -115,7 +115,7 @@ function renderCard(card, idx) {
   const badgeKey = CONFIG.CARD_HEADER_BADGE_FIELD;
   const badgeVal = badgeKey && card[badgeKey] ? escapeAttr(String(card[badgeKey])) : '';
   const badgeHtml = badgeVal
-    ? `<span class="card-badge" title="${escapeAttr(CONFIG.FIELDS[badgeKey].label)}">${badgeVal}</span>`
+    ? `<span class="card-badge" title="${escapeAttr(getFieldLabel(badgeKey))}">${badgeVal}</span>`
     : '';
 
   const originKey = CONFIG.CARD_HEADER_ORIGIN_FIELD;
@@ -123,7 +123,7 @@ function renderCard(card, idx) {
     ? `<input type="text" class="card-origin-input" name="${originKey}"
         list="origin-suggestions" value="${escapeAttr(card[originKey] || '')}"
         placeholder="${escapeAttr(CONFIG.FIELDS[originKey].placeholder)}"
-        title="${escapeAttr(CONFIG.FIELDS[originKey].label)}"
+        title="${escapeAttr(getFieldLabel(originKey))}"
         ${card.isEditing ? '' : 'readonly'} />`
     : '';
 
@@ -134,7 +134,7 @@ function renderCard(card, idx) {
   const statusDisplay = statusVal || statusPlaceholder;
   const statusHtml = statusKey
     ? `<div class="card-status-dd" data-card-id="${card.id}">
-        <button type="button" class="card-status-btn" title="${escapeAttr(CONFIG.FIELDS[statusKey].label)}">
+        <button type="button" class="card-status-btn" title="${escapeAttr(getFieldLabel(statusKey))}">
           <span class="card-status-text">${escapeAttr(statusDisplay)}</span>
           <span class="card-status-arrow">▾</span>
         </button>
@@ -164,7 +164,7 @@ function renderCard(card, idx) {
   nyBar.className = 'card-ny-bar';
   nyBar.dataset.field = nyKey;
   nyBar.innerHTML = `
-    <span class="card-ny-label">${escapeAttr(CONFIG.FIELDS[nyKey].label || '판매자상품코드')}</span>
+    <span class="card-ny-label">${escapeAttr(getFieldLabel(nyKey) || '판매자상품코드')}</span>
     <span class="card-ny-value ${nyVal ? '' : 'is-empty'}">${nyVal || '—'}</span>
   `;
   wrap.appendChild(nyBar);
@@ -307,9 +307,10 @@ function makeField(name, value, readonly) {
   const safeVal = value == null ? '' : value;
   const roAttr = readonly ? 'readonly' : '';
   const extra = def.extra || '';
-  const label = def.label.includes('(')
-    ? def.label
-    : (needsCurrency(name) ? `${def.label} (${getCurrencySymbol(name)})` : def.label);
+  const fieldLabel = getFieldLabel(name);
+  const label = fieldLabel.includes('(')
+    ? fieldLabel
+    : (needsCurrency(name) ? `${fieldLabel} (${getCurrencySymbol(name)})` : fieldLabel);
 
   // 읽기 전용 숫자 필드는 콤마 + 소수점 2자리 포맷 적용
   const isReadonlyNumber = readonly && def.type === 'number';
@@ -376,7 +377,7 @@ function bindCardEvents(wrap, card) {
         if (wrapEl) {
           badgeEl = document.createElement('span');
           badgeEl.className = 'card-badge';
-          badgeEl.title = escapeAttr(CONFIG.FIELDS[badgeKey].label);
+          badgeEl.title = escapeAttr(getFieldLabel(badgeKey));
           wrapEl.appendChild(badgeEl);
         }
       }
