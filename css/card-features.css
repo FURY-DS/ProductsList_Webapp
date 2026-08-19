@@ -13,7 +13,7 @@
 
 /* ----- Header 내 판매자상품코드 입력 ----- */
 .product-card .card-header .seller-code-field {
-  flex: 1;
+  flex: 0 0 50%;
   min-width: 0;
   margin-left: 8px;
 }
