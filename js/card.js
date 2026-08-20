@@ -19,6 +19,18 @@ function initBoard() {
 }
 
 /**
+ * 실제 화면 너비에 따른 컬럼 수를 CSS에서 읽어옴.
+ * CSS 미디어 쿼리가 모바일에서 2열로 줄이면 JS도 같은 수만큼 열을 생성해야
+ * 카드 순서가 자연스럽게 왼쪽→오른쪽, 위→아래로 배치됨.
+ */
+function getEffectiveColumns() {
+  if (!boardEl) return CONFIG.COLUMNS;
+  const cssColumns = parseInt(getComputedStyle(boardEl).getPropertyValue('--columns'), 10);
+  if (!cssColumns || cssColumns < 1) return CONFIG.COLUMNS;
+  return Math.min(CONFIG.COLUMNS, cssColumns);
+}
+
+/**
  * 총합 계산: 원가 x 환율 x 퍼센트
  * @param {Object} card
  * @returns {number}
@@ -62,12 +74,14 @@ function render() {
   }
 
   // 컬럼 수만큼 div 생성 후 균등 분배
+  // CSS 미디어 쿼리 기준 실제 컬럼 수를 사용해 모바일 2열에서도 순서가 자연스럽게 유지됨
+  const colCount = getEffectiveColumns();
   const cols = [];
-  for (let i = 0; i < CONFIG.COLUMNS; i++) {
+  for (let i = 0; i < colCount; i++) {
     cols.push(document.createElement('div'));
   }
   filtered.forEach((entry, idx) => {
-    cols[idx % CONFIG.COLUMNS].appendChild(renderCard(entry.card, entry.originalIdx));
+    cols[idx % colCount].appendChild(renderCard(entry.card, entry.originalIdx));
   });
   cols.forEach(c => boardEl.appendChild(c));
 }

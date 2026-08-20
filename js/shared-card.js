@@ -126,6 +126,18 @@ function initPageBoard(ctx) {
   document.documentElement.style.setProperty('--columns', ctx.config.COLUMNS);
 }
 
+/**
+ * 실제 화면 너비에 따른 컬럼 수를 CSS에서 읽어옴.
+ * CSS 미디어 쿼리가 모바일에서 2열로 줄이면 JS도 같은 수만큼 열을 생성해야
+ * 카드 순서가 자연스럽게 왼쪽→오른쪽, 위→아래로 배치됨.
+ */
+function getPageEffectiveColumns(ctx) {
+  if (!ctx.boardEl) return ctx.config.COLUMNS;
+  const cssColumns = parseInt(getComputedStyle(ctx.boardEl).getPropertyValue('--columns'), 10);
+  if (!cssColumns || cssColumns < 1) return ctx.config.COLUMNS;
+  return Math.min(ctx.config.COLUMNS, cssColumns);
+}
+
 /** 전체 렌더링 */
 function renderCardsPage(ctx) {
   ctx.boardEl.innerHTML = '';
@@ -147,12 +159,14 @@ function renderCardsPage(ctx) {
     return;
   }
 
+  // CSS 미디어 쿼리 기준 실제 컬럼 수를 사용해 모바일 2열에서도 순서가 자연스럽게 유지됨
+  const colCount = getPageEffectiveColumns(ctx);
   const cols = [];
-  for (let i = 0; i < ctx.config.COLUMNS; i++) {
+  for (let i = 0; i < colCount; i++) {
     cols.push(document.createElement('div'));
   }
   filtered.forEach((entry, idx) => {
-    cols[idx % ctx.config.COLUMNS].appendChild(renderPageCard(ctx, entry.card, entry.originalIdx));
+    cols[idx % colCount].appendChild(renderPageCard(ctx, entry.card, entry.originalIdx));
   });
   cols.forEach(c => ctx.boardEl.appendChild(c));
 }

@@ -25,7 +25,7 @@
 
 ## 기술 구조
 - SRP 모듈 분리: 각 페이지마다 config/state/storage/search/card/actions/app 7개 JS 모듈
-- 공유 CSS: css/smartstore.css (상품리스트만 css/style.css 별도)
+- 공유 CSS: css/base.css + css/card-features.css (상품리스트도 동일)
 - 크로스 페이지 연동: 상품리스트 코드 변경 시 다른 페이지 최종원가 자동 재계산 (storage 이벤트)
 - 내보내기/가져오기: 페이지 검증 + 호환 그룹(smartstore/coupang/esm/elevenst/ownerclan/domagguk/always/tossshopping 8개 상호 호환)
 - 이미지: base64 localStorage 저장, canvas 리사이즈(800px, JPEG 0.8), 용량 초과 시 이미지 제거 저장
@@ -35,7 +35,7 @@
     reportSaveResult(result, CONFIG.MESSAGES, 성공메시지?)로 결과를 전달해야 함**
     (성공메시지 생략 시 성공은 조용히, 실패만 알림). 새 페이지 추가 시 이 규칙 유지할 것
 
-## 현재 버전: v55 (2026-07-29)
+## 현재 버전: v56 (2026-08-20)
 - v1~v9: 상품리스트 단일 페이지 개발 (레이아웃, 검색, 메뉴, 컬럼 수)
 - v10~v16: 모듈 분리, 카드 배지, 검색창 개선
 - v17~v24: 스마트스토어 페이지 + 데이터 유실 방어 + 용량 최적화
@@ -63,3 +63,4 @@
 - v54: 상품리스트 검색창 너비 2배 확대 (max-width 420px→840px, min-width 280px→360px)
 - 클로드코드 검토(v54): 오너클랜 MEMORY.md 기록 오류 정정, 복제 구조 10×7=70파일 리스크 확인, 숨은 결합(CSS공유/필드키 재사용/로켓그로스 marketFee 부호 반대), 죽은 클래스/명명 불일치
 - v55: 점진적 정리 — config.js 필드 의미/부호/수식 주석 10개, 죽은 클래스 삭제(coupang-card), 헤더 주석 정정(4개), 명명 패턴 문서화(함수명 변경은 위험하므로 보존)
+- v56: 모바일 반응형 개선 — 640px 이하 제품카드 2열 배치, 카드 낶이/폰트/필드 축소, CSS `--columns` 변수 기반으로 JS 열 수 동기화

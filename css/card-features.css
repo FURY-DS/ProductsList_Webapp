@@ -255,13 +255,40 @@
 }
 
 /* ----- 반응형 ----- */
-@media (max-width: 520px) {
+@media (max-width: 640px) {
+  .product-card .card-header .seller-code-field {
+    flex: 1 1 100%;
+    margin-left: 0;
+    margin-top: 6px;
+  }
+  .product-card .card-header .seller-code-field input {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
   .product-card .field-row.split-profit {
     grid-template-columns: 1fr;
   }
   .product-card .field-row.split-price {
     grid-template-columns: 1fr;
   }
+  .bulk-fee-bar {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .bulk-fee-bar label {
+    font-size: 11px;
+  }
+  .bulk-fee-bar input {
+    width: 56px;
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+  .bulk-fee-bar button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 520px) {
   .product-card .bundle-item {
     flex-wrap: wrap;
   }
