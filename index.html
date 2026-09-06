@@ -1,498 +1,513 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
+<html lang="ko" data-page-node-id="ZQ2ZC2sznBDTqWMZyW7B3B">
+<head data-page-node-id="mxQhY9oW5M2GOIPa2a64fN">
+<meta charset="UTF-8" data-page-node-id="0v7MUq6cu8WHig6S7IopkI" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="wFxr1AGkyZmHjtTdDDCerX" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" data-page-node-id="K35sEYmCVxrzssW1EXlL3O" />
+<meta http-equiv="Pragma" content="no-cache" data-page-node-id="aBznbCrJpTBxaoHFnDPARS" />
+<meta http-equiv="Expires" content="0" data-page-node-id="PNsrYHymvL1FYHz4edykXU" />
 <title>마켓노트</title>
-<link rel="icon" type="image/x-icon" href="favicon.ico?v=40" />
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=40" />
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=40" />
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=40" />
-<link rel="stylesheet" href="css/base.css?v=46" />
-<link rel="stylesheet" href="css/card-features.css?v=42" />
-<link rel="stylesheet" href="css/auth.css?v=40" />
+<link rel="icon" type="image/x-icon" href="favicon.ico?v=40" data-page-node-id="HVSgft44np93BhsjlEuhKN" />
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=40" data-page-node-id="X2STdLiyThz84iKu2xQ686" />
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=40" data-page-node-id="UD98W6nXIUmDHCYrpfHZq1" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=40" data-page-node-id="KNtpu1cUJDw8F4L6KJoWU2" />
+<link rel="stylesheet" href="css/base.css?v=46" data-page-node-id="VOoeeX6qVHClaG1wG2rrwB" />
+<link rel="stylesheet" href="css/card-features.css?v=42" data-page-node-id="aYxDRztzOf4hUrnRj9F6yv" />
+<link rel="stylesheet" href="css/auth.css?v=41" data-page-node-id="F60zfZG0WJIiHyWgzpHn1S" />
 </head>
-<body class="app-hidden">
+<body class="app-hidden" data-page-node-id="wASRtpXfzaFArHBFrLer7W">
 
 <!-- 인증 오버레이 (로그인/회원가입) -->
-<div id="auth-overlay" class="auth-overlay">
-  <div class="auth-card" id="auth-card">
-    <div class="auth-logo">📒마켓노트📒</div>
-    <div class="auth-tabs">
-      <button type="button" class="auth-tab active" data-mode="login">로그인</button>
-      <button type="button" class="auth-tab" data-mode="register">회원가입</button>
+<div id="auth-overlay" class="auth-overlay" data-page-node-id="uELeiLLh8MXaTkXsU7C2LA">
+  <div class="auth-brand" data-page-node-id="zn7bZaOkLlW8PMajAX7YRn"><span class="auth-brand-icon" data-page-node-id="51LHaB7fLVB7vzEBFawtat">📒</span>마켓노트</div>
+  <div class="auth-card" id="auth-card" data-page-node-id="gxMF6V9dUw3M6U2S2saeT7">
+    <!-- 좌측 비주얼 패널 (장식용) -->
+    <div class="auth-visual" aria-hidden="true" data-page-node-id="E1bxxCbDmavFVw4wpEjjPK">
+      <div class="auth-visual-ring" data-page-node-id="ou2CkFvDovDApEeWAif8JI"></div>
+      <div class="auth-visual-copy" data-page-node-id="bhCFEZymQ1H9QUeJtFjF7z">
+        <p class="auth-visual-kicker" data-page-node-id="pd7D9HO2hI85C8E81molA3">마켓노트와 함께</p>
+        <p class="auth-visual-title" data-page-node-id="83adwMwb56FJXMpXcYX55v">소중한 판매 데이터를<br  data-page-node-id="UJqaBTvyE2rA1ZBFPkXYYo"/>한 곳에서 관리하세요</p>
+        <p class="auth-visual-sub" data-page-node-id="g6ZUbNSDGYrZzXlpu83Svv">원가·환율·수익 자동 계산과 클라우드 동기화를 지원합니다</p>
+      </div>
+    </div>
+    <!-- 우측 폼 패널 -->
+    <div class="auth-panel" data-page-node-id="50f0AzEnZEt8mqcSuTHvjE">
+    <div class="auth-tabs" data-page-node-id="GKaOYteUFgSDVYka3MZRH7">
+      <button type="button" class="auth-tab active" data-mode="login" data-page-node-id="RwwdNWSkacmPYvDsC8XgSB">로그인</button>
+      <button type="button" class="auth-tab" data-mode="register" data-page-node-id="WNDvsFiWEDKQldzUE8hZT2">회원가입</button>
     </div>
 
     <!-- 회원가입 3단계 스텝퍼 -->
-    <div class="auth-stepper hidden" id="auth-stepper">
-      <div class="stepper-item" data-step="1">
-        <div class="stepper-circle">1</div>
-        <div class="stepper-label">약관동의</div>
+    <div class="auth-stepper hidden" id="auth-stepper" data-page-node-id="HIl0YwB2v03NHJzP1FdfLv">
+      <div class="stepper-item" data-step="1" data-page-node-id="sHPEq4aLD30ZR683IVM7jW">
+        <div class="stepper-circle" data-page-node-id="XTxDhg63ltoPEXjVDoBkGO">1</div>
+        <div class="stepper-label" data-page-node-id="DkvEsKbcwGxwsiApQZSEXE">약관동의</div>
       </div>
-      <div class="stepper-arrow">›</div>
-      <div class="stepper-item" data-step="2">
-        <div class="stepper-circle">2</div>
-        <div class="stepper-label">회원정보</div>
+      <div class="stepper-arrow" data-page-node-id="AZ1OYLVHCEUVZBP0cinPYp">›</div>
+      <div class="stepper-item" data-step="2" data-page-node-id="BH7Uog0kCkoTzlKLATU5Xd">
+        <div class="stepper-circle" data-page-node-id="zVlEbLDw9dRCgG5usfQlRo">2</div>
+        <div class="stepper-label" data-page-node-id="AKqEZfzm2lzmpRiRNi1PDY">회원정보</div>
       </div>
-      <div class="stepper-arrow">›</div>
-      <div class="stepper-item" data-step="3">
-        <div class="stepper-circle">3</div>
-        <div class="stepper-label">가입완료</div>
+      <div class="stepper-arrow" data-page-node-id="8EsMe9FMduJh7ctJxztd33">›</div>
+      <div class="stepper-item" data-step="3" data-page-node-id="BfZ29DIfT6F5t1NcX8ltGl">
+        <div class="stepper-circle" data-page-node-id="QYYRqiuXaifokYKDs6JThH">3</div>
+        <div class="stepper-label" data-page-node-id="YxA7KTmNnTgM5IMCkKb3ng">가입완료</div>
       </div>
     </div>
 
-    <form id="auth-form">
+    <form id="auth-form" data-page-node-id="HlK2KW58d6GftA50Wn53E6">
       <!-- ====== Login: 로그인 폼 (로그인 모드 전용) ====== -->
-      <div class="auth-step" id="auth-login-step">
-        <div class="auth-field">
-          <label for="auth-username">아이디</label>
-          <input type="text" id="auth-username" placeholder="아이디" autocomplete="username" />
+      <div class="auth-step" id="auth-login-step" data-page-node-id="LaGU94vTlxhtIjzkh3Vow0">
+        <p class="auth-headline" data-page-node-id="SFbckLiPROmeX06kO5LOt2">• 아이디 / 비밀번호를 입력해 주세요.</p>
+        <div class="auth-field" data-page-node-id="O4iEctbll7sSZ65jExcuol">
+          <label for="auth-username" data-page-node-id="zXH0U2YQka4y1R1qBw3weY">아이디</label>
+          <input type="text" id="auth-username" placeholder="아이디" autocomplete="username" data-page-node-id="DMY2I7rZkE2IwOPjm1ig0e" />
         </div>
-        <div class="auth-field">
-          <label for="auth-password">비밀번호</label>
-          <input type="password" id="auth-password" placeholder="비밀번호" autocomplete="current-password" />
+        <div class="auth-field" data-page-node-id="DUvS279ysIsj4Dihju5C8I">
+          <label for="auth-password" data-page-node-id="4B9lWsJBGSERGVkWV6QQTX">비밀번호</label>
+          <input type="password" id="auth-password" placeholder="비밀번호" autocomplete="current-password" data-page-node-id="lNyB1AoIrA7gRZ47pafWJS" />
         </div>
-        <div class="auth-options" id="auth-options">
-          <label class="auth-checkbox">
-            <input type="checkbox" id="auth-save-pw" />
-            <span>비밀번호 저장</span>
-          </label>
-          <label class="auth-checkbox">
-            <input type="checkbox" id="auth-auto-login" />
-            <span>자동로그인</span>
-          </label>
+        <p class="auth-error" id="auth-error" data-page-node-id="n67pKSDZjSN2QP44tmNxam"></p>
+        <button type="submit" class="btn-auth-submit" id="auth-submit" data-page-node-id="RvoDQaY6mm9a4tbFpMmPEo">로그인</button>
+        <div class="auth-options-row" data-page-node-id="AF6wE9LayDzqCoOwxxNhlW">
+          <div class="auth-options" id="auth-options" data-page-node-id="oE6xecE8pg0B5OogbFYYWv">
+            <label class="auth-checkbox" data-page-node-id="xf64QY2JRxHCyDWutAuffh">
+              <input type="checkbox" id="auth-save-pw" data-page-node-id="mdXaqwiO3MkFLGKh9S2apx" />
+              <span data-page-node-id="XuyrPv2QFs8SZ1Y1HhaQBR">비밀번호 저장</span>
+            </label>
+            <label class="auth-checkbox" data-page-node-id="TgvPmYbkj9gUcBW3EZB5Zo">
+              <input type="checkbox" id="auth-auto-login" data-page-node-id="GMW3jgNXtuQ9Qro1QVWpQJ" />
+              <span data-page-node-id="TBDgYXKSBc3j4SRnVohkqN">자동로그인</span>
+            </label>
+          </div>
+          <div class="auth-links" id="auth-links" data-page-node-id="11Q9UMmUXLP1LsExMPaDPD">
+            <button type="button" class="auth-link" id="link-find-id" data-page-node-id="xdaEeQyMeuqCL9io9k6U6n">아이디 찾기</button>
+            <span class="auth-link-sep" data-page-node-id="cCdIxhebFCDUGaf2vga45Z">|</span>
+            <button type="button" class="auth-link" id="link-find-pw" data-page-node-id="Q3g8WjMQlMqxHks0bTf0Kh">비밀번호 찾기</button>
+          </div>
         </div>
-        <p class="auth-error" id="auth-error"></p>
-        <button type="submit" class="btn-auth-submit" id="auth-submit">로그인</button>
+        <button type="button" class="btn-signup" id="auth-goto-register" data-page-node-id="RsGR0wZc4C8tWfHS83U3pB">회원가입</button>
+        <p class="auth-hint" data-page-node-id="1cqrtSJvnk1ZA65D4MfATu">첫 방문이면 회원가입을 먼저 해주세요.<br  data-page-node-id="22p1aBmGhHfY23PD6OZN3i"/>각 사용자의 데이터가 독립적으로 관리됩니다.</p>
       </div>
 
       <!-- ====== Step 1: 약관 동의 (회원가입 모드 전용) ====== -->
-      <div class="auth-step hidden" id="auth-step-1">
+      <div class="auth-step hidden" id="auth-step-1" data-page-node-id="GWr6E1BsHLPCIYl7Cctpre">
         <!-- 전체 동의 -->
-        <label class="terms-row terms-all">
-          <input type="checkbox" id="terms-agree-all" />
-          <span class="terms-title"><strong>전체 동의</strong></span>
+        <label class="terms-row terms-all" data-page-node-id="xLUCU7cRsrLEg1Uhpj9woN">
+          <input type="checkbox" id="terms-agree-all" data-page-node-id="JNfl2hZmmwNifGfXlZ82lJ" />
+          <span class="terms-title" data-page-node-id="JzQFz9SaIxKdyQJmpoY9Gy"><strong data-page-node-id="FFGeK1af9zOTwjsOwklQ7v">전체 동의</strong></span>
         </label>
-        <p class="terms-hint">이용약관 동의(필수), 개인정보수집 및 이용 동의(필수), 마케팅 정보 수신 이용 동의(선택)</p>
+        <p class="terms-hint" data-page-node-id="hBJyTt2AmphXm7trUl2u9Y">이용약관 동의(필수), 개인정보수집 및 이용 동의(필수), 마케팅 정보 수신 이용 동의(선택)</p>
 
-        <div class="terms-divider"></div>
+        <div class="terms-divider" data-page-node-id="tTWVzJNSkBXGt7ZEpCQVcg"></div>
 
         <!-- [필수] 서비스 이용약관 -->
-        <div class="terms-block">
-          <label class="terms-row">
-            <input type="checkbox" class="terms-cb" id="terms-service" data-required="1" />
-            <span class="terms-title">[필수] <strong>서비스 이용약관</strong></span>
+        <div class="terms-block" data-page-node-id="LODxXx6zALJAFdBCrOc40k">
+          <label class="terms-row" data-page-node-id="b9I3VYFtVTYstkVi7L7LbB">
+            <input type="checkbox" class="terms-cb" id="terms-service" data-required="1" data-page-node-id="vxQiNjkjWcokXR0XO3GSFF" />
+            <span class="terms-title" data-page-node-id="p8nvNQpipl6GGOZX2y0XKS">[필수] <strong data-page-node-id="IAoMBdKW4UyR4bXOGBSFZB">서비스 이용약관</strong></span>
           </label>
-          <div class="terms-box" id="terms-box-service"></div>
+          <div class="terms-box" id="terms-box-service" data-page-node-id="5utgjiCR1CrVpe2ADmyLuy"></div>
         </div>
 
         <!-- [필수] 개인정보 수집 및 이용 동의 -->
-        <div class="terms-block">
-          <label class="terms-row">
-            <input type="checkbox" class="terms-cb" id="terms-privacy" data-required="1" />
-            <span class="terms-title">[필수] <strong>개인정보 수집 및 이용 동의</strong></span>
+        <div class="terms-block" data-page-node-id="blTpcDinGdeQuhBgk6zrBW">
+          <label class="terms-row" data-page-node-id="a7IBnK40ZzjIh0KCMlJ1GI">
+            <input type="checkbox" class="terms-cb" id="terms-privacy" data-required="1" data-page-node-id="3wjeLEMgmcKGRpQs4GlDdz" />
+            <span class="terms-title" data-page-node-id="iv31YjPvgYRrJpjqwccT9b">[필수] <strong data-page-node-id="aTe3xkZDO3JEGfrvSME4Bg">개인정보 수집 및 이용 동의</strong></span>
           </label>
-          <div class="terms-box" id="terms-box-privacy"></div>
+          <div class="terms-box" id="terms-box-privacy" data-page-node-id="KdPpAwZOJjH1ql6qF47nOm"></div>
         </div>
 
         <!-- [선택] 마케팅 정보 수신 이용 동의 -->
-        <div class="terms-block">
-          <label class="terms-row">
-            <input type="checkbox" class="terms-cb" id="terms-marketing" />
-            <span class="terms-title">[선택] <strong>마케팅 정보 수신 이용 동의</strong></span>
+        <div class="terms-block" data-page-node-id="orxzoIBdPtSNiVBQstz13X">
+          <label class="terms-row" data-page-node-id="O0ORtNSHsmrKqwKQjjKgn3">
+            <input type="checkbox" class="terms-cb" id="terms-marketing" data-page-node-id="6905cnq0Oj9r8BGRauoA2k" />
+            <span class="terms-title" data-page-node-id="gfNpSdIzevSRn2Yb6VWJu4">[선택] <strong data-page-node-id="11GxaKVFnyooAepgLTzHhR">마케팅 정보 수신 이용 동의</strong></span>
           </label>
-          <div class="terms-box" id="terms-box-marketing"></div>
+          <div class="terms-box" id="terms-box-marketing" data-page-node-id="IJ4RAF6ZJNdCK1FeJelyc8"></div>
         </div>
 
-        <p class="auth-error" id="auth-error"></p>
-        <div class="step-actions">
-          <button type="button" class="btn btn-cancel" id="auth-cancel-step1">취소</button>
-          <button type="button" class="btn btn-confirm" id="auth-next-step" disabled>다음</button>
+        <p class="auth-error" id="auth-error" data-page-node-id="evcARIos9715CmUqwCYUQ8"></p>
+        <div class="step-actions" data-page-node-id="DssL7ycEJ0VcHQePDiMzEU">
+          <button type="button" class="btn btn-cancel" id="auth-cancel-step1" data-page-node-id="tNDJM5IhHilYZ3QDA9M1qh">취소</button>
+          <button type="button" class="btn btn-confirm" id="auth-next-step" disabled data-page-node-id="VvEpWJ6rdhBmctVEo76eu8">다음</button>
         </div>
       </div>
 
       <!-- ====== Step 2: 회원 정보 입력 ====== -->
-      <div class="auth-step hidden" id="auth-step-2">
-        <div class="auth-field" id="reg-name-field">
-          <label for="reg-name">이름</label>
-          <input type="text" id="reg-name" placeholder="실명 입력" autocomplete="name" maxlength="20" />
+      <div class="auth-step hidden" id="auth-step-2" data-page-node-id="oqfNgBCdOQVAHsBiMeIP0S">
+        <div class="auth-field" id="reg-name-field" data-page-node-id="bdOZY3iewGhUQhrlI8XDRs">
+          <label for="reg-name" data-page-node-id="jsyHBI2hUV1A6DdX2uPvE1">이름</label>
+          <input type="text" id="reg-name" placeholder="실명 입력" autocomplete="name" maxlength="20" data-page-node-id="ZcXegejQ0Aec2Mbv1g4Efy" />
         </div>
-        <div class="auth-field">
-          <label for="reg-username">아이디</label>
-          <input type="text" id="reg-username" placeholder="3~20자 영문/숫자" autocomplete="username" />
+        <div class="auth-field" data-page-node-id="I4iI9CIXRsLr3pbK09TkYZ">
+          <label for="reg-username" data-page-node-id="Y5ed1pGxWhHmDuE93G9BPf">아이디</label>
+          <input type="text" id="reg-username" placeholder="3~20자 영문/숫자" autocomplete="username" data-page-node-id="RDEQz2gyeBpCz7Wddy6gNL" />
         </div>
-        <div class="auth-field">
-          <label for="reg-password">비밀번호</label>
-          <input type="password" id="reg-password" placeholder="6자 이상" autocomplete="new-password" />
+        <div class="auth-field" data-page-node-id="lDbpjBJ6SNpdToivIv87pz">
+          <label for="reg-password" data-page-node-id="6cuIEFdZZeit8qKwegiA0q">비밀번호</label>
+          <input type="password" id="reg-password" placeholder="6자 이상" autocomplete="new-password" data-page-node-id="rZl2d1LKVPJW5reArq6pBu" />
         </div>
-        <div class="auth-field" id="reg-confirm-field">
-          <label for="reg-password-confirm">비밀번호 확인</label>
-          <input type="password" id="reg-password-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+        <div class="auth-field" id="reg-confirm-field" data-page-node-id="O63PT6ASPlfGmHFqBVY9BO">
+          <label for="reg-password-confirm" data-page-node-id="bq2CCDWrJ74KUk8A6V39Bs">비밀번호 확인</label>
+          <input type="password" id="reg-password-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" data-page-node-id="bl3g8js023F1Be84LLlYEM" />
         </div>
-        <div class="auth-field" id="reg-email-field">
-          <label for="reg-email">이메일</label>
-          <input type="email" id="reg-email" placeholder="example@email.com" autocomplete="email" />
+        <div class="auth-field" id="reg-email-field" data-page-node-id="gP1tmgw2wDiwgea5ZfD6Zt">
+          <label for="reg-email" data-page-node-id="ZRxXuJPr69bpu4DziSkcn2">이메일</label>
+          <input type="email" id="reg-email" placeholder="example@email.com" autocomplete="email" data-page-node-id="OEryQj8mEmr88hgSxrOLfQ" />
         </div>
-        <p class="auth-error" id="reg-error"></p>
-        <div class="step-actions">
-          <button type="button" class="btn btn-cancel" id="auth-prev-step">이전</button>
-          <button type="submit" class="btn-auth-submit" id="reg-submit">회원가입</button>
+        <p class="auth-error" id="reg-error" data-page-node-id="d3nUHVbnGm7FkKnB8eaEgK"></p>
+        <div class="step-actions" data-page-node-id="ZKZuYFqHx36eOLVi1CGxHd">
+          <button type="button" class="btn btn-cancel" id="auth-prev-step" data-page-node-id="bhFGtHZ9z0ERnp2Wge1IEY">이전</button>
+          <button type="submit" class="btn-auth-submit" id="reg-submit" data-page-node-id="PWe5214pZQfAeDARrcNjJj">회원가입</button>
         </div>
       </div>
 
       <!-- ====== Step 3: 가입 완료 ====== -->
-      <div class="auth-step hidden" id="auth-step-3">
-        <div class="register-done">
-          <div class="register-done-icon">✅</div>
-          <p class="register-done-title">회원가입이 완료되었습니다</p>
-          <p class="register-done-meta" id="register-done-username"></p>
+      <div class="auth-step hidden" id="auth-step-3" data-page-node-id="gNJVOYMjc5ckthA2bIj2eD">
+        <div class="register-done" data-page-node-id="TsuoG4iGbIE7qB54ypK1q1">
+          <div class="register-done-icon" data-page-node-id="5eP0DakC5xylG3Wk1FZyoc">✅</div>
+          <p class="register-done-title" data-page-node-id="RzJWYthqnJFba3Rjqgq9r0">회원가입이 완료되었습니다</p>
+          <p class="register-done-meta" id="register-done-username" data-page-node-id="5hi0nqRFr0CrAdBrq4cHW8"></p>
         </div>
-        <div class="step-actions">
-          <button type="button" class="btn btn-confirm" id="auth-done">로그인하러 가기</button>
+        <div class="step-actions" data-page-node-id="cNQxJO9HmtQnzbTSu6uiDz">
+          <button type="button" class="btn btn-confirm" id="auth-done" data-page-node-id="KasUAl3O2DmlHaqj0AbTSq">로그인하러 가기</button>
         </div>
       </div>
     </form>
-
-    <div class="auth-links" id="auth-links">
-      <button type="button" class="auth-link" id="link-find-id">아이디 찾기</button>
-      <span class="auth-link-sep">|</span>
-      <button type="button" class="auth-link" id="link-find-pw">비밀번호 찾기</button>
     </div>
-    <p class="auth-hint">첫 방문이면 회원가입을 먼저 해주세요.<br />각 사용자의 데이터가 독립적으로 관리됩니다.</p>
   </div>
 </div>
 
-<header class="topbar">
-  <div class="menu-wrapper">
-    <button type="button" id="btn-menu" class="btn-menu" title="메뉴 열기">메뉴</button>
-    <nav class="dropdown" id="menu-dropdown" aria-label="주 메뉴">
+<header class="topbar" data-page-node-id="V4DDAPKO7SJTPGVHKu5ZWP">
+  <div class="menu-wrapper" data-page-node-id="2P1zB7gzLDubPdFmk7jBbY">
+    <button type="button" id="btn-menu" class="btn-menu" title="메뉴 열기" data-page-node-id="rllPDYMZdxpiyGmToZNEM9">메뉴</button>
+    <nav class="dropdown" id="menu-dropdown" aria-label="주 메뉴" data-page-node-id="jocrXWYCmEFPOTk3zRPhcT">
       <!-- 메뉴 항목은 js/menu.js에서 동적 생성 -->
     </nav>
   </div>
-  <div class="title">마켓노트</div>
-    <div class="topbar-tools" id="topbar-tools">
-    <button class="btn btn-toggle-all" id="btn-toggle-all" data-action="collapse" title="모든 카드 상세 정보 숨기기">전체 숨기기</button>
+  <div class="title" data-page-node-id="FZeo5mFzXa8K8fXFBl5Dpe">마켓노트</div>
+    <div class="topbar-tools" id="topbar-tools" data-page-node-id="vJAIIaXZuXp2xw8jC7oT3b">
+    <button class="btn btn-toggle-all" id="btn-toggle-all" data-action="collapse" title="모든 카드 상세 정보 숨기기" data-page-node-id="dkeEsZ1ur35zqQfDCm5gZ1">전체 숨기기</button>
     <button
       class="btn btn-rate-bulk"
       id="btn-rate-bulk"
       title="모든 카드의 환율을 한 번에 수정"
-      style="background-color:#0d9488 !important; color:#ffffff !important; border:1px solid #064e3b !important; padding:4px 8px !important; margin:0 2px !important; border-radius:6px !important; font-weight:600 !important; font-size:11px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 1px 3px rgba(13,148,136,0.3) !important;"
+      style="background-color:#0d9488 !important; color:#ffffff !important; border:1px solid #064e3b !important; padding:4px 8px !important; margin:0 2px !important; border-radius:6px !important; font-weight:600 !important; font-size:11px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 1px 3px rgba(13,148,136,0.3) !important;" data-page-node-id="H2IMnR3zulFCpNJSxDS4je"
     >💱 환율 일괄수정</button>
     <button
       class="btn btn-percent-bulk"
       id="btn-percent-bulk"
       title="모든 카드의 퍼센트를 한 번에 수정"
-      style="background-color:#6366f1 !important; color:#ffffff !important; border:1px solid #4338ca !important; padding:4px 8px !important; margin:0 2px !important; border-radius:6px !important; font-weight:600 !important; font-size:11px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 1px 3px rgba(99,102,241,0.3) !important;"
+      style="background-color:#6366f1 !important; color:#ffffff !important; border:1px solid #4338ca !important; padding:4px 8px !important; margin:0 2px !important; border-radius:6px !important; font-weight:600 !important; font-size:11px !important; display:inline-block !important; visibility:visible !important; opacity:1 !important; cursor:pointer !important; box-shadow:0 1px 3px rgba(99,102,241,0.3) !important;" data-page-node-id="bS8O0Ga5mR4V9kpjjGAO0B"
     >📊 퍼센트 일괄수정</button>
 
-    <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="동기화">☁️</button>
+    <button class="btn btn-cloud-sync" id="btn-cloud-sync" title="동기화" data-page-node-id="BwICuDjnQ4MCrrAg8BGfsL">☁️</button>
   </div>
-  <div class="search-box" id="search-box">
-    <span class="icon">🔍</span>
-    <input type="text" id="search-input" autocomplete="off" placeholder="상품명, 옵션, 코드, 링크, 가격 등 전체" />
-    <button class="clear" id="search-clear" title="검색어 지우기">×</button>
-    <span class="count" id="search-count"></span>
+  <div class="search-box" id="search-box" data-page-node-id="uNAu5iH4n3Bnjct9elNeQL">
+    <span class="icon" data-page-node-id="1FPhEINobRUjECKQguZy5d">🔍</span>
+    <input type="text" id="search-input" autocomplete="off" placeholder="상품명, 옵션, 코드, 링크, 가격 등 전체" data-page-node-id="PzgBqkmatotMjQrLJ3r1wE" />
+    <button class="clear" id="search-clear" title="검색어 지우기" data-page-node-id="yBKhZUVq8sqnMWgBjH6wBK">×</button>
+    <span class="count" id="search-count" data-page-node-id="YQFWuaSU1URmurGbJBIL7d"></span>
   </div>
-  <div class="actions">
-    <div class="all-json-dropdown-wrapper" id="all-json-dropdown-wrapper">
-      <button id="btn-all-json" class="btn btn-all-json" title="전체 JSON 메뉴" type="button">전체JSON</button>
-      <div class="all-json-dropdown" id="all-json-dropdown">
-        <button type="button" id="btn-export-all" title="전체 데이터 내보내기">전체내보내기</button>
-        <button type="button" id="btn-import-all" title="전체 데이터 가져오기">전체가져오기</button>
+  <div class="actions" data-page-node-id="ZLuwE8pEMxtNQUqmludtY6">
+    <div class="all-json-dropdown-wrapper" id="all-json-dropdown-wrapper" data-page-node-id="1QKmIAwxc0UvwGVoj2u2Cu">
+      <button id="btn-all-json" class="btn btn-all-json" title="전체 JSON 메뉴" type="button" data-page-node-id="RGzDzVJDTSNWhMvPCHFuTX">전체JSON</button>
+      <div class="all-json-dropdown" id="all-json-dropdown" data-page-node-id="dBMtesx9f0GYoj3UVsn3NB">
+        <button type="button" id="btn-export-all" title="전체 데이터 내보내기" data-page-node-id="c9dsA1AGX4g9gFB5D8wxwG">전체내보내기</button>
+        <button type="button" id="btn-import-all" title="전체 데이터 가져오기" data-page-node-id="19EX7fQaKdB00uQ1n8tHQJ">전체가져오기</button>
       </div>
     </div>
-    <div class="json-dropdown-wrapper" id="json-dropdown-wrapper">
-      <button id="btn-json" class="btn btn-json" title="JSON 메뉴" type="button">JSON</button>
-      <div class="json-dropdown" id="json-dropdown">
-        <button type="button" id="btn-export" title="데이터 내보내기">내보내기</button>
-        <button type="button" id="btn-import" title="데이터 가져오기">가져오기</button>
+    <div class="json-dropdown-wrapper" id="json-dropdown-wrapper" data-page-node-id="S5peNl7qi3K7GfgeevQy0v">
+      <button id="btn-json" class="btn btn-json" title="JSON 메뉴" type="button" data-page-node-id="CSKWFkwcJxJiZHZuTnixn5">JSON</button>
+      <div class="json-dropdown" id="json-dropdown" data-page-node-id="bimJEJ3ofseBMeNnSYxlUG">
+        <button type="button" id="btn-export" title="데이터 내보내기" data-page-node-id="lAGDhnxWIGICtH8YEBUfYi">내보내기</button>
+        <button type="button" id="btn-import" title="데이터 가져오기" data-page-node-id="LtDmBim1HtEp9TB0sn01tZ">가져오기</button>
       </div>
     </div>
-    <div class="excel-dropdown-wrapper" id="excel-dropdown-wrapper">
-      <button id="btn-excel" class="btn btn-excel" title="Excel 메뉴" type="button">Excel</button>
-      <div class="excel-dropdown" id="excel-dropdown">
-        <button type="button" id="btn-csv-template" title="엑셀 템플릿 다운로드">엑셀 템플릿</button>
-        <button type="button" id="btn-csv-import" title="엑셀 파일 가져오기">엑셀 가져오기</button>
+    <div class="excel-dropdown-wrapper" id="excel-dropdown-wrapper" data-page-node-id="AEwLJOBVoqJA2hBIriuKgM">
+      <button id="btn-excel" class="btn btn-excel" title="Excel 메뉴" type="button" data-page-node-id="usXBRDuf1JqLdl3M30K0qK">Excel</button>
+      <div class="excel-dropdown" id="excel-dropdown" data-page-node-id="tCYQOpMk64wyS232wn7KTy">
+        <button type="button" id="btn-csv-template" title="엑셀 템플릿 다운로드" data-page-node-id="DzdmheqR90XHGRpRyxyLB0">엑셀 템플릿</button>
+        <button type="button" id="btn-csv-import" title="엑셀 파일 가져오기" data-page-node-id="TAcJmojTBXzJRsp24Ocqda">엑셀 가져오기</button>
       </div>
     </div>
-    <button id="btn-inbound-data" class="btn btn-inbound" title="체크한 제품의 입고데이터 엑셀 다운로드" type="button">입고데이터</button>
-    <button id="btn-clear" title="전체 삭제">전체삭제</button>
+    <button id="btn-inbound-data" class="btn btn-inbound" title="체크한 제품의 입고데이터 엑셀 다운로드" type="button" data-page-node-id="RhwsbAnEIGOFU9CRYeMn9W">입고데이터</button>
+    <button id="btn-clear" title="전체 삭제" data-page-node-id="cuwGpcOnS9PRtaGO5spe1T">전체삭제</button>
   </div>
-  <div class="user-area" id="user-area">
-    <a href="admin.html" id="admin-link" class="admin-link" style="display:none;" title="관리자 패널">🔧 관리</a>
-    <button type="button" class="user-badge user-badge-btn" id="user-badge" title="비밀번호 변경"></button>
-    <button class="btn-logout" id="btn-logout" title="로그아웃">로그아웃</button>
+  <div class="user-area" id="user-area" data-page-node-id="rjLhDmoFX99v5WCdJzSAkK">
+    <a href="admin.html" id="admin-link" class="admin-link" style="display:none;" title="관리자 패널" data-page-node-id="wokPdQPJ4NARuIZgm38mei">🔧 관리</a>
+    <button type="button" class="user-badge user-badge-btn" id="user-badge" title="비밀번호 변경" data-page-node-id="5lGuP71d2Fm4H9WmqfC9v2"></button>
+    <button class="btn-logout" id="btn-logout" title="로그아웃" data-page-node-id="tOTdqIRnphqtK4HfwaANtW">로그아웃</button>
   </div>
-  <input type="file" id="import-input" accept="application/json" style="display:none" />
-  <input type="file" id="import-all-input" accept="application/json" style="display:none" />
-  <input type="file" id="csv-import-input" accept=".csv,text/csv" style="display:none" />
+  <input type="file" id="import-input" accept="application/json" style="display:none" data-page-node-id="a13UCy2R2qRkuGZjzpvk9o" />
+  <input type="file" id="import-all-input" accept="application/json" style="display:none" data-page-node-id="i6KVSjRrHmutQEWN7aeLiW" />
+  <input type="file" id="csv-import-input" accept=".csv,text/csv" style="display:none" data-page-node-id="Xj9l2q4DL6up9M478DQa1Q" />
 </header>
 
-<main class="container">
-  <div id="board" class="columns"></div>
+<main class="container" data-page-node-id="vcn86vFaut8OF91DrOaAaR">
+  <div id="board" class="columns" data-page-node-id="689TTN7ecxOMzj2yKnvBg1"></div>
 </main>
 
 <!-- 원산지 자동완성 후보 (카드 헤더 원산지 입력창에서 사용) -->
-<datalist id="origin-suggestions">
-  <option value="중국"></option>
-  <option value="일본"></option>
-  <option value="태국"></option>
-  <option value="베트남"></option>
+<datalist id="origin-suggestions" data-page-node-id="ArzDd3Z0U0b20XpD3yeiLk">
+  <option value="중국" data-page-node-id="BSrzEVwl6f1RBdskHDTx78"></option>
+  <option value="일본" data-page-node-id="D0XPKrb2aX6arJrnV6ls6k"></option>
+  <option value="태국" data-page-node-id="iTCflHZyzzJOCD6csEQ2OJ"></option>
+  <option value="베트남" data-page-node-id="FT1V5FUC5Aoa8wtGDYToiY"></option>
 </datalist>
 
 <!-- 확인 모달 -->
-<div class="modal-backdrop" id="modal">
-  <div class="modal">
-    <h3 id="modal-title">삭제 확인</h3>
-    <p id="modal-text"></p>
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="modal-cancel">취소</button>
-      <button class="btn btn-confirm-danger" id="modal-confirm">삭제</button>
+<div class="modal-backdrop" id="modal" data-page-node-id="5ALBSejG2JwMv8Bt7lY8sb">
+  <div class="modal" data-page-node-id="WPSso7MJIsmsTt9PFAfFr7">
+    <h3 id="modal-title" data-page-node-id="tcNdN3yl7tICt5CYfTbSVY">삭제 확인</h3>
+    <p id="modal-text" data-page-node-id="ZIYNy0gSbu43HBzQXF0LB9"></p>
+    <div class="modal-actions" data-page-node-id="MQSh8Bmg9jO4E44jm43WQF">
+      <button class="btn btn-cancel" id="modal-cancel" data-page-node-id="kmkQUSpENcFLztWWf3M2Zm">취소</button>
+      <button class="btn btn-confirm-danger" id="modal-confirm" data-page-node-id="zbZEGqJXYgQxe3AVTTzjji">삭제</button>
     </div>
   </div>
 </div>
 
 <!-- 환율 일괄 수정 모달 -->
-<div class="modal-backdrop" id="rate-bulk-modal">
-  <div class="modal modal-rate-bulk">
-    <h3 id="rate-bulk-title">환율 일괄 수정</h3>
-    <p class="modal-desc">모든 카드의 환율을 한 번에 수정할 수 있어요.</p>
+<div class="modal-backdrop" id="rate-bulk-modal" data-page-node-id="50uRxfEvo4OiYKGYn57ag1">
+  <div class="modal modal-rate-bulk" data-page-node-id="aKfCsk1EwvBfXzPMogKBeq">
+    <h3 id="rate-bulk-title" data-page-node-id="PL5VghvBraiPzSTZfeVVuV">환율 일괄 수정</h3>
+    <p class="modal-desc" data-page-node-id="UCF9d3d7lBla0HUnjl5m1e">모든 카드의 환율을 한 번에 수정할 수 있어요.</p>
 
-    <div class="rate-bulk-section">
-      <div class="rate-bulk-mode">
-        <label class="rate-bulk-radio">
-          <input type="radio" name="rate-mode" value="absolute" checked />
-          <span>모든 환율을 같은 값으로 설정</span>
+    <div class="rate-bulk-section" data-page-node-id="cAwCTEB0jkA62XiuCpiUAY">
+      <div class="rate-bulk-mode" data-page-node-id="GlVoh21hTL4ldca1JF6Xnb">
+        <label class="rate-bulk-radio" data-page-node-id="muG62EYI7YaMlRPoYkMgya">
+          <input type="radio" name="rate-mode" value="absolute" checked data-page-node-id="DGVhY1Xc0tE7o8GJFeCSDR" />
+          <span data-page-node-id="xYLWmWzNk4RoO3eav9d7o8">모든 환율을 같은 값으로 설정</span>
         </label>
-        <label class="rate-bulk-radio">
-          <input type="radio" name="rate-mode" value="multiplier" />
-          <span>모든 환율에 같은 비율(배수) 적용</span>
+        <label class="rate-bulk-radio" data-page-node-id="nCYQbq5w1knZRFEG8J5eO6">
+          <input type="radio" name="rate-mode" value="multiplier" data-page-node-id="uDgoyoxrVESmqins1pkZXx" />
+          <span data-page-node-id="mQeDNAdagdHZIvCQ2YCznj">모든 환율에 같은 비율(배수) 적용</span>
         </label>
       </div>
 
-      <div class="rate-bulk-input-wrap" id="rate-input-absolute">
-        <label>새 환율 값 (₩)</label>
-        <input type="number" id="rate-bulk-absolute" placeholder="예: 215" step="any" />
+      <div class="rate-bulk-input-wrap" id="rate-input-absolute" data-page-node-id="IhvpdHCXqYrHOfwX4GyZE9">
+        <label data-page-node-id="ngV4ZawBcLDkI3zO0EAM0a">새 환율 값 (₩)</label>
+        <input type="number" id="rate-bulk-absolute" placeholder="예: 215" step="any" data-page-node-id="0TomsHF8gL9s0Pmy497Ax4" />
       </div>
 
-      <div class="rate-bulk-input-wrap hidden" id="rate-input-multiplier">
-        <label>곱할 비율 (1.0 = 그대로, 1.05 = 5% 인상)</label>
-        <input type="number" id="rate-bulk-multiplier" placeholder="예: 1.05" step="any" />
+      <div class="rate-bulk-input-wrap hidden" id="rate-input-multiplier" data-page-node-id="PoUEVPWGINEfODpJpI9422">
+        <label data-page-node-id="EAahlURdfH7hu7QTgGdS1g">곱할 비율 (1.0 = 그대로, 1.05 = 5% 인상)</label>
+        <input type="number" id="rate-bulk-multiplier" placeholder="예: 1.05" step="any" data-page-node-id="33rVCmxaVQKU8Khy0C2EtA" />
       </div>
 
-      <div class="rate-bulk-scope">
-        <label>적용 범위</label>
-        <select id="rate-bulk-scope">
-          <option value="all">모든 카드</option>
-          <option value="filled">환율이 입력된 카드만</option>
-          <option value="empty">환율이 비어있는 카드만</option>
+      <div class="rate-bulk-scope" data-page-node-id="G1DI9P9aZnvjFF2pEYtEln">
+        <label data-page-node-id="2lTetqMUakJD86pHhuDqsz">적용 범위</label>
+        <select id="rate-bulk-scope" data-page-node-id="LsFDYreSfAevQDkBRwcpEZ">
+          <option value="all" data-page-node-id="r41cmT7HEnWh6QqGnIlV5S">모든 카드</option>
+          <option value="filled" data-page-node-id="ZZ5mFLzJVKcbZ3nJe3QBbp">환율이 입력된 카드만</option>
+          <option value="empty" data-page-node-id="ozT9EOeIovwcN5XbT9TArS">환율이 비어있는 카드만</option>
         </select>
       </div>
 
-      <div class="rate-bulk-preview" id="rate-bulk-preview">
-        <div class="preview-row"><span>변경 대상</span><strong id="preview-count">0개</strong></div>
-        <div class="preview-row"><span>변경 전 평균</span><strong id="preview-before">-</strong></div>
-        <div class="preview-row"><span>변경 후 평균</span><strong id="preview-after">-</strong></div>
+      <div class="rate-bulk-preview" id="rate-bulk-preview" data-page-node-id="zfDURGEEIKZ28NBBNBplWE">
+        <div class="preview-row" data-page-node-id="vWVpGoxf5tRXvKPvgb7oOv"><span data-page-node-id="vUQjs50QwpVF3vJ0vFLA9L">변경 대상</span><strong id="preview-count" data-page-node-id="G7LeDeweeI1hgfUCsrDgdD">0개</strong></div>
+        <div class="preview-row" data-page-node-id="sbCgAzF8PDL3xlh9glVARV"><span data-page-node-id="85r7fr6BO8bjgWqZv1YDiy">변경 전 평균</span><strong id="preview-before" data-page-node-id="ATXiCFjksHjEeMwI4WA6l9">-</strong></div>
+        <div class="preview-row" data-page-node-id="euxWSupxqV79apQSTWaCMv"><span data-page-node-id="ZGuCjbmfZsQYcECyWgYBGv">변경 후 평균</span><strong id="preview-after" data-page-node-id="k4nBdj2wWodenzvhOkpKBF">-</strong></div>
       </div>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="rate-bulk-cancel">취소</button>
-      <button class="btn btn-confirm" id="rate-bulk-apply">적용</button>
+    <div class="modal-actions" data-page-node-id="BIIpJvDxzzX1iweHMFfzDa">
+      <button class="btn btn-cancel" id="rate-bulk-cancel" data-page-node-id="ESvQ5J2yNIIgSlA11hhOno">취소</button>
+      <button class="btn btn-confirm" id="rate-bulk-apply" data-page-node-id="FUcqcJ3JuQxAQztvrOA68k">적용</button>
     </div>
   </div>
 </div>
 
 <!-- 퍼센트 일괄 수정 모달 -->
-<div class="modal-backdrop" id="percent-bulk-modal">
-  <div class="modal modal-rate-bulk">
-    <h3 id="percent-bulk-title">퍼센트 일괄 수정</h3>
-    <p class="modal-desc">모든 카드의 퍼센트를 한 번에 수정할 수 있어요.</p>
+<div class="modal-backdrop" id="percent-bulk-modal" data-page-node-id="Srljz3RQqT24BH8uhkLpD1">
+  <div class="modal modal-rate-bulk" data-page-node-id="U6saumQMPtAlX6MHl5aKDm">
+    <h3 id="percent-bulk-title" data-page-node-id="UfB87SubRsiVHFTEFDbG9g">퍼센트 일괄 수정</h3>
+    <p class="modal-desc" data-page-node-id="jy8kEC0Mj2GXrMbMoFB8fg">모든 카드의 퍼센트를 한 번에 수정할 수 있어요.</p>
 
-    <div class="rate-bulk-section">
-      <div class="rate-bulk-mode">
-        <label class="rate-bulk-radio">
-          <input type="radio" name="pct-mode" value="absolute" checked />
-          <span>모든 퍼센트를 같은 값으로 설정</span>
+    <div class="rate-bulk-section" data-page-node-id="ZCVplbv1iZ8hhxQbTdRC5x">
+      <div class="rate-bulk-mode" data-page-node-id="7yA8EhKCAAVouVrMKhLMVy">
+        <label class="rate-bulk-radio" data-page-node-id="6A145DqNZCaj849QBAbnXq">
+          <input type="radio" name="pct-mode" value="absolute" checked data-page-node-id="eli6e9vtpmoxXKn6WWCtEp" />
+          <span data-page-node-id="G5ArM3LjxEKMYavX6yEfjd">모든 퍼센트를 같은 값으로 설정</span>
         </label>
-        <label class="rate-bulk-radio">
-          <input type="radio" name="pct-mode" value="multiplier" />
-          <span>모든 퍼센트에 같은 비율(배수) 적용</span>
+        <label class="rate-bulk-radio" data-page-node-id="f4lM1KdSG2iLnLXTZvcr6Y">
+          <input type="radio" name="pct-mode" value="multiplier" data-page-node-id="KCCgHodIOLiOpClxL8CDtL" />
+          <span data-page-node-id="fSaOmebJgw8TCJQ551ndE8">모든 퍼센트에 같은 비율(배수) 적용</span>
         </label>
       </div>
 
-      <div class="rate-bulk-input-wrap" id="pct-input-absolute">
-        <label>새 퍼센트 값 (예: 0.16)</label>
-        <input type="number" id="percent-bulk-absolute" placeholder="예: 0.16" step="any" />
+      <div class="rate-bulk-input-wrap" id="pct-input-absolute" data-page-node-id="17t7HhKL2IRyJVJFL2oYpi">
+        <label data-page-node-id="QGCC2kCL2cmJOa1MzdHSTx">새 퍼센트 값 (예: 0.16)</label>
+        <input type="number" id="percent-bulk-absolute" placeholder="예: 0.16" step="any" data-page-node-id="PFY9D8v6CcaNhBMVWjHLR3" />
       </div>
 
-      <div class="rate-bulk-input-wrap hidden" id="pct-input-multiplier">
-        <label>곱할 비율 (1.0 = 그대로, 1.1 = 10% 인상)</label>
-        <input type="number" id="percent-bulk-multiplier" placeholder="예: 1.1" step="any" />
+      <div class="rate-bulk-input-wrap hidden" id="pct-input-multiplier" data-page-node-id="vWrv5nMKbz7pGD5x5lTYum">
+        <label data-page-node-id="WxEL4hraXwqP5rjbk4q9mY">곱할 비율 (1.0 = 그대로, 1.1 = 10% 인상)</label>
+        <input type="number" id="percent-bulk-multiplier" placeholder="예: 1.1" step="any" data-page-node-id="5m5iWDDIPLB3xxWOFAz4ET" />
       </div>
 
-      <div class="rate-bulk-scope">
-        <label>적용 범위</label>
-        <select id="percent-bulk-scope">
-          <option value="all">모든 카드</option>
-          <option value="filled">퍼센트가 입력된 카드만</option>
-          <option value="empty">퍼센트가 비어있는 카드만</option>
+      <div class="rate-bulk-scope" data-page-node-id="ZnjIHMriq96qsE9HWMPAba">
+        <label data-page-node-id="jKWBxUQtAsiRGFl0p2nNE6">적용 범위</label>
+        <select id="percent-bulk-scope" data-page-node-id="Fzqm931dDcQdTDDzq07Ro9">
+          <option value="all" data-page-node-id="WOTaxtEI6E8BbGJUBpGCzm">모든 카드</option>
+          <option value="filled" data-page-node-id="iDRrrsHBlNXVokNvzWfxtm">퍼센트가 입력된 카드만</option>
+          <option value="empty" data-page-node-id="m6T1bT4B8MHQLfzsmadpxK">퍼센트가 비어있는 카드만</option>
         </select>
       </div>
 
-      <div class="rate-bulk-preview" id="percent-bulk-preview">
-        <div class="preview-row"><span>변경 대상</span><strong id="pct-preview-count">0개</strong></div>
-        <div class="preview-row"><span>변경 전 평균</span><strong id="pct-preview-before">-</strong></div>
-        <div class="preview-row"><span>변경 후 평균</span><strong id="pct-preview-after">-</strong></div>
+      <div class="rate-bulk-preview" id="percent-bulk-preview" data-page-node-id="a5vhgQDi2bxftEpsU30KaL">
+        <div class="preview-row" data-page-node-id="tDho18CAQhM8FDf8ZsHzBa"><span data-page-node-id="SV7WI0wKz50mQHuutxA4yi">변경 대상</span><strong id="pct-preview-count" data-page-node-id="aM4JnGfkgsXWtDI2S0D0We">0개</strong></div>
+        <div class="preview-row" data-page-node-id="MAyyN8FjD0RnFPSViOgsFO"><span data-page-node-id="MxMVzj5xlhkvbPjHMge3T6">변경 전 평균</span><strong id="pct-preview-before" data-page-node-id="XHoesdGl7Q81H3cfvzecw7">-</strong></div>
+        <div class="preview-row" data-page-node-id="j64kgeINi31xUShP2eAYlE"><span data-page-node-id="ddF5uq5XvXgKy7Q5J3Odug">변경 후 평균</span><strong id="pct-preview-after" data-page-node-id="rxM3m2pGHC1LefXeTValO1">-</strong></div>
       </div>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="percent-bulk-cancel">취소</button>
-      <button class="btn btn-confirm" id="percent-bulk-apply">적용</button>
+    <div class="modal-actions" data-page-node-id="d550lFJBYlnd0Ek4C93Z9K">
+      <button class="btn btn-cancel" id="percent-bulk-cancel" data-page-node-id="z2XIFycl1tUKh1vgCkGRjb">취소</button>
+      <button class="btn btn-confirm" id="percent-bulk-apply" data-page-node-id="dBLpajAO918Hfx6irQV67q">적용</button>
     </div>
   </div>
 </div>
 
 <!-- 토스트 -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" data-page-node-id="YzNdCb3Vm88VYJDCfia4HU"></div>
 
 <!-- 아이디 찾기 모달 -->
-<div class="modal-backdrop" id="find-id-modal">
-  <div class="modal modal-find">
-    <h3 id="find-id-title">🔍 아이디 찾기</h3>
+<div class="modal-backdrop" id="find-id-modal" data-page-node-id="nuM4qjEJB2c6fjEv3BlFxd">
+  <div class="modal modal-find" data-page-node-id="lEPCTUIjpy4KitqJxk5Fl4">
+    <h3 id="find-id-title" data-page-node-id="CQFwLkvfKrfbGGCelrgzx1">🔍 아이디 찾기</h3>
 
     <!-- 1단계: 이름 + 이메일 입력 -->
-    <div class="find-step" id="find-id-step1">
-      <p class="modal-desc">가입 시 등록한 이름과 이메일을 입력하시면 인증번호를 보내드려요.</p>
-      <div class="auth-field">
-        <label for="find-id-name">이름</label>
-        <input type="text" id="find-id-name" placeholder="가입 시 등록한 이름" maxlength="20" />
+    <div class="find-step" id="find-id-step1" data-page-node-id="7ZIFlkBaD7bHcKwl0DGr76">
+      <p class="modal-desc" data-page-node-id="T8PTnbbF2BwQoFR8EXUPBv">가입 시 등록한 이름과 이메일을 입력하시면 인증번호를 보내드려요.</p>
+      <div class="auth-field" data-page-node-id="6auhtIGYTMzHmsU8QVU4tx">
+        <label for="find-id-name" data-page-node-id="8mzTTfJn2k4dHsHQsHPUNz">이름</label>
+        <input type="text" id="find-id-name" placeholder="가입 시 등록한 이름" maxlength="20" data-page-node-id="4PRhARHGRaGSfR4nAiN8zQ" />
       </div>
-      <div class="auth-field">
-        <label for="find-id-email">이메일</label>
-        <input type="email" id="find-id-email" placeholder="가입 시 등록한 이메일" />
+      <div class="auth-field" data-page-node-id="Gdm2eLOorWGqzsqrh07Sqx">
+        <label for="find-id-email" data-page-node-id="Kyj2IweGF8MBK0BxT2rwP9">이메일</label>
+        <input type="email" id="find-id-email" placeholder="가입 시 등록한 이메일" data-page-node-id="ERcPnPIUyGdADo5ebj8NFq" />
       </div>
-      <p class="auth-error" id="find-id-error"></p>
-      <div class="modal-actions">
-        <button class="btn btn-cancel" id="find-id-cancel">취소</button>
-        <button class="btn btn-confirm" id="find-id-send">인증번호 발송</button>
+      <p class="auth-error" id="find-id-error" data-page-node-id="b4fhmjxIpbzeUiVNAZ12uA"></p>
+      <div class="modal-actions" data-page-node-id="dAQebIVBZgogzoCtf3nI3E">
+        <button class="btn btn-cancel" id="find-id-cancel" data-page-node-id="urfEdpidBKzaJ3WEdA6AvI">취소</button>
+        <button class="btn btn-confirm" id="find-id-send" data-page-node-id="IxaKRp0X0uwUDGJfvUFJkM">인증번호 발송</button>
       </div>
     </div>
 
     <!-- 2단계: 인증번호 입력 -->
-    <div class="find-step hidden" id="find-id-step2">
-      <p class="modal-desc">이메일로 발송된 인증번호 6자리를 입력해주세요.</p>
-      <div class="dev-code-hint hidden" id="find-id-dev-hint"></div>
-      <div class="auth-field">
-        <label for="find-id-code">인증번호</label>
-        <input type="text" id="find-id-code" placeholder="6자리 숫자" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
+    <div class="find-step hidden" id="find-id-step2" data-page-node-id="3gMD3R2pO8qHTEdQP80H4V">
+      <p class="modal-desc" data-page-node-id="PmTs4A5ar2lu6gEKujX0ez">이메일로 발송된 인증번호 6자리를 입력해주세요.</p>
+      <div class="dev-code-hint hidden" id="find-id-dev-hint" data-page-node-id="Zj7GC3j59r64GswkXTm49h"></div>
+      <div class="auth-field" data-page-node-id="AxMhLnUIGBY8DDpQ8CBSZ5">
+        <label for="find-id-code" data-page-node-id="jlVKHSMfCE4EIuEjmzpUOq">인증번호</label>
+        <input type="text" id="find-id-code" placeholder="6자리 숫자" maxlength="6" inputmode="numeric" pattern="[0-9]*" data-page-node-id="NzrcttPLBg8fPgxfVhRqWA" />
       </div>
-      <p class="auth-error" id="find-id-error2"></p>
-      <div class="modal-actions">
-        <button class="btn btn-cancel" id="find-id-back">이전</button>
-        <button class="btn btn-confirm" id="find-id-verify">확인</button>
+      <p class="auth-error" id="find-id-error2" data-page-node-id="54iwfRkw3qDziaQaIMPHcj"></p>
+      <div class="modal-actions" data-page-node-id="qipsMSPU6QgjWdhf3OT5yA">
+        <button class="btn btn-cancel" id="find-id-back" data-page-node-id="OkDtpaPNxy2Mu9blSz3aiR">이전</button>
+        <button class="btn btn-confirm" id="find-id-verify" data-page-node-id="37XmDn2eeg2K1Ag8U8adM9">확인</button>
       </div>
     </div>
 
     <!-- 3단계: 결과 -->
-    <div class="find-step hidden" id="find-id-step3">
-      <p class="find-result-label">회원님의 아이디는</p>
-      <p class="find-result-value" id="find-id-result-username"></p>
-      <p class="find-result-meta" id="find-id-result-email"></p>
-      <div class="modal-actions">
-        <button class="btn btn-confirm" id="find-id-done">로그인하러 가기</button>
+    <div class="find-step hidden" id="find-id-step3" data-page-node-id="3QcpmiSdxszf4QfOPtzXyO">
+      <p class="find-result-label" data-page-node-id="Ww6HiA9xb4Fyc66SdBdDfG">회원님의 아이디는</p>
+      <p class="find-result-value" id="find-id-result-username" data-page-node-id="XxQG0UpvJXVnl65F2xZhXE"></p>
+      <p class="find-result-meta" id="find-id-result-email" data-page-node-id="yY2lbXqvex0QZRObEVLnBq"></p>
+      <div class="modal-actions" data-page-node-id="LG9ldoYWdwDaGSRYBChsa2">
+        <button class="btn btn-confirm" id="find-id-done" data-page-node-id="teETznRCSyyN28kbPhkqDx">로그인하러 가기</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 비밀번호 찾기 모달 -->
-<div class="modal-backdrop" id="find-pw-modal">
-  <div class="modal modal-find">
-    <h3 id="find-pw-title">🔐 비밀번호 찾기</h3>
+<div class="modal-backdrop" id="find-pw-modal" data-page-node-id="hwzk05Ty3Rrn1ANv6Xy7If">
+  <div class="modal modal-find" data-page-node-id="2C7vyoCJLPGFp2MoGnX9pO">
+    <h3 id="find-pw-title" data-page-node-id="DtyDlprx5bmpXlzPQOCkqe">🔐 비밀번호 찾기</h3>
 
     <!-- 1단계: 이름 + 아이디 + 이메일 -->
-    <div class="find-step" id="find-pw-step1">
-      <p class="modal-desc">가입 시 등록한 이름, 아이디, 이메일을 입력하시면 인증번호를 보내드려요.</p>
-      <div class="auth-field">
-        <label for="find-pw-name">이름</label>
-        <input type="text" id="find-pw-name" placeholder="가입 시 등록한 이름" maxlength="20" />
+    <div class="find-step" id="find-pw-step1" data-page-node-id="9NNSo1orM8mNj2F69gdqyj">
+      <p class="modal-desc" data-page-node-id="27mNbNyGEABteXsFC9buTW">가입 시 등록한 이름, 아이디, 이메일을 입력하시면 인증번호를 보내드려요.</p>
+      <div class="auth-field" data-page-node-id="aRhLYNgOL9H1rFBX1C0Rxv">
+        <label for="find-pw-name" data-page-node-id="tHPOEluxrbHEPut4tFzXOK">이름</label>
+        <input type="text" id="find-pw-name" placeholder="가입 시 등록한 이름" maxlength="20" data-page-node-id="YWm1FJt5ThXDyxFN9Ido98" />
       </div>
-      <div class="auth-field">
-        <label for="find-pw-username">아이디</label>
-        <input type="text" id="find-pw-username" placeholder="가입 시 등록한 아이디" />
+      <div class="auth-field" data-page-node-id="7JKNlkxwju62U2I0kvgBji">
+        <label for="find-pw-username" data-page-node-id="ySSLHeY7ybfGIAfCjKwuZi">아이디</label>
+        <input type="text" id="find-pw-username" placeholder="가입 시 등록한 아이디" data-page-node-id="AQlYYuZujXQKido3zii6ax" />
       </div>
-      <div class="auth-field">
-        <label for="find-pw-email">이메일</label>
-        <input type="email" id="find-pw-email" placeholder="가입 시 등록한 이메일" />
+      <div class="auth-field" data-page-node-id="YiCAwytVG2JFIenngMcKOB">
+        <label for="find-pw-email" data-page-node-id="szJAMWy80POS7qI6QUzdtg">이메일</label>
+        <input type="email" id="find-pw-email" placeholder="가입 시 등록한 이메일" data-page-node-id="fwhLFmn6zkKcduyIWxoQTe" />
       </div>
-      <p class="auth-error" id="find-pw-error"></p>
-      <div class="modal-actions">
-        <button class="btn btn-cancel" id="find-pw-cancel">취소</button>
-        <button class="btn btn-confirm" id="find-pw-send">인증번호 발송</button>
+      <p class="auth-error" id="find-pw-error" data-page-node-id="Upw2THmJra3hiZoBHHbPBU"></p>
+      <div class="modal-actions" data-page-node-id="yeoQGyCSAs6Wz6x4v1dwSd">
+        <button class="btn btn-cancel" id="find-pw-cancel" data-page-node-id="jB8p9SGF8VSKUF8IB6nqzQ">취소</button>
+        <button class="btn btn-confirm" id="find-pw-send" data-page-node-id="4GXFPXyPOgL6WfEp5aGxCo">인증번호 발송</button>
       </div>
     </div>
 
     <!-- 2단계: 인증번호 + 새 비밀번호 -->
-    <div class="find-step hidden" id="find-pw-step2">
-      <p class="modal-desc">이메일로 발송된 인증번호와 새로 사용할 비밀번호를 입력해주세요.</p>
-      <div class="dev-code-hint hidden" id="find-pw-dev-hint"></div>
-      <div class="auth-field">
-        <label for="find-pw-code">인증번호</label>
-        <input type="text" id="find-pw-code" placeholder="6자리 숫자" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
+    <div class="find-step hidden" id="find-pw-step2" data-page-node-id="nB68OslxgnVuWzdbFEHamE">
+      <p class="modal-desc" data-page-node-id="LKPl338nJv61XlOzXGEHLx">이메일로 발송된 인증번호와 새로 사용할 비밀번호를 입력해주세요.</p>
+      <div class="dev-code-hint hidden" id="find-pw-dev-hint" data-page-node-id="JAaGMNPHZ7nzK8tpzMbQ1p"></div>
+      <div class="auth-field" data-page-node-id="xSPFMshbRkxto96WWiI5Qv">
+        <label for="find-pw-code" data-page-node-id="nwL6lPmV2srRZH3JHwyC0P">인증번호</label>
+        <input type="text" id="find-pw-code" placeholder="6자리 숫자" maxlength="6" inputmode="numeric" pattern="[0-9]*" data-page-node-id="GHRdSKm3XR2804SqwNTGqr" />
       </div>
-      <div class="auth-field">
-        <label for="find-pw-new">새 비밀번호</label>
-        <input type="password" id="find-pw-new" placeholder="6자 이상" autocomplete="new-password" />
+      <div class="auth-field" data-page-node-id="M2xaJ9c30y31DOWEqhox3H">
+        <label for="find-pw-new" data-page-node-id="WHxDGbg0ErLcndc2q8yn14">새 비밀번호</label>
+        <input type="password" id="find-pw-new" placeholder="6자 이상" autocomplete="new-password" data-page-node-id="FMjgmaCd6zsZXP1UTkmlFN" />
       </div>
-      <div class="auth-field">
-        <label for="find-pw-new-confirm">새 비밀번호 확인</label>
-        <input type="password" id="find-pw-new-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+      <div class="auth-field" data-page-node-id="afqLLbdHfOVx5XFoYQ6mT1">
+        <label for="find-pw-new-confirm" data-page-node-id="k34k5HfqFTzsjls2E39CZj">새 비밀번호 확인</label>
+        <input type="password" id="find-pw-new-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" data-page-node-id="lijBkJ4GbuLiDZrjPYA4rK" />
       </div>
-      <p class="auth-error" id="find-pw-error2"></p>
-      <div class="modal-actions">
-        <button class="btn btn-cancel" id="find-pw-back">이전</button>
-        <button class="btn btn-confirm" id="find-pw-verify">비밀번호 재설정</button>
+      <p class="auth-error" id="find-pw-error2" data-page-node-id="jc61um2hkMpH8DeuL45bnW"></p>
+      <div class="modal-actions" data-page-node-id="rMNo85ipqc5lko436fEMLZ">
+        <button class="btn btn-cancel" id="find-pw-back" data-page-node-id="z4iaYLqv1LKrNWUnfGemzf">이전</button>
+        <button class="btn btn-confirm" id="find-pw-verify" data-page-node-id="OJ5QkB5hAvb5lbjlYCDMQa">비밀번호 재설정</button>
       </div>
     </div>
 
     <!-- 3단계: 완료 -->
-    <div class="find-step hidden" id="find-pw-step3">
-      <p class="find-result-icon">✅</p>
-      <p class="find-result-label">비밀번호가 재설정되었습니다.</p>
-      <p class="find-result-meta">새 비밀번호로 로그인해주세요.</p>
-      <div class="modal-actions">
-        <button class="btn btn-confirm" id="find-pw-done">로그인하러 가기</button>
+    <div class="find-step hidden" id="find-pw-step3" data-page-node-id="X2UYrlTsz9VfkWgn3YgcqO">
+      <p class="find-result-icon" data-page-node-id="JNkL7kBabvbmYAkJfwoOk8">✅</p>
+      <p class="find-result-label" data-page-node-id="eRGMC90YJyFLC9oxUGESCy">비밀번호가 재설정되었습니다.</p>
+      <p class="find-result-meta" data-page-node-id="9alia2RIDOZLNRSpe0N1Df">새 비밀번호로 로그인해주세요.</p>
+      <div class="modal-actions" data-page-node-id="be7BnhzHDDoZkDjaPRIIHb">
+        <button class="btn btn-confirm" id="find-pw-done" data-page-node-id="WCkosflNX8HXJTyZpRL1zW">로그인하러 가기</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- 비밀번호 변경 모달 (로그인 상태에서 본인 아이디 클릭) -->
-<div class="modal-backdrop" id="change-pw-modal">
-  <div class="modal modal-find">
-    <h3>🔑 비밀번호 변경</h3>
-    <p class="modal-desc">현재 비밀번호와 새 비밀번호를 입력해주세요.</p>
-    <div class="auth-field">
-      <label for="change-pw-current">현재 비밀번호</label>
-      <input type="password" id="change-pw-current" placeholder="현재 비밀번호" autocomplete="current-password" />
+<div class="modal-backdrop" id="change-pw-modal" data-page-node-id="3ikmB8bfJ0HPJAz81KRjhx">
+  <div class="modal modal-find" data-page-node-id="J2Lti6JjlYb8XOaH9MipSx">
+    <h3 data-page-node-id="yuRXqLnt5cXrjnx56HNXxl">🔑 비밀번호 변경</h3>
+    <p class="modal-desc" data-page-node-id="LwpjXOFmjea78UuUJiV6mo">현재 비밀번호와 새 비밀번호를 입력해주세요.</p>
+    <div class="auth-field" data-page-node-id="YFCDO4ErGHxQt8IQVKLLlS">
+      <label for="change-pw-current" data-page-node-id="G8m93tOBFWPZ6Vr4mPrc7q">현재 비밀번호</label>
+      <input type="password" id="change-pw-current" placeholder="현재 비밀번호" autocomplete="current-password" data-page-node-id="wLyPINssl3trBbR7CkVW9a" />
     </div>
-    <div class="auth-field">
-      <label for="change-pw-new">새 비밀번호</label>
-      <input type="password" id="change-pw-new" placeholder="6자 이상" autocomplete="new-password" />
+    <div class="auth-field" data-page-node-id="RHrAdURWDX5mjzti1ih8PL">
+      <label for="change-pw-new" data-page-node-id="FdRBnwED8ToEg3ZqtG350U">새 비밀번호</label>
+      <input type="password" id="change-pw-new" placeholder="6자 이상" autocomplete="new-password" data-page-node-id="t6eUS4jkURLRWOZEkZffkR" />
     </div>
-    <div class="auth-field">
-      <label for="change-pw-confirm">새 비밀번호 확인</label>
-      <input type="password" id="change-pw-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" />
+    <div class="auth-field" data-page-node-id="K1mPwI3EzCgTAbtp7ruP3S">
+      <label for="change-pw-confirm" data-page-node-id="Qp5yU8sJ2Zzh94qteZyneB">새 비밀번호 확인</label>
+      <input type="password" id="change-pw-confirm" placeholder="비밀번호 재입력" autocomplete="new-password" data-page-node-id="31D12B8CCg8zVgFP3V1lP0" />
     </div>
-    <p class="auth-error" id="change-pw-error"></p>
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="change-pw-cancel">취소</button>
-      <button class="btn btn-confirm" id="change-pw-submit">변경하기</button>
+    <p class="auth-error" id="change-pw-error" data-page-node-id="0t2PvhsCu80TtiASDI51q8"></p>
+    <div class="modal-actions" data-page-node-id="T0WHRI7AUu73bCtqkDWljj">
+      <button class="btn btn-cancel" id="change-pw-cancel" data-page-node-id="PtSCqAbSqhFFP2fnUX2gdD">취소</button>
+      <button class="btn btn-confirm" id="change-pw-submit" data-page-node-id="auVprcphCC5LoFmt6AfqLP">변경하기</button>
     </div>
   </div>
 </div>

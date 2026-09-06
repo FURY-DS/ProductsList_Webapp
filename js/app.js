@@ -156,6 +156,15 @@ function initAuthUI() {
     });
   });
 
+  // 하단 '회원가입' 버튼 → 회원가입 탭 클릭과 동일하게 처리 (기존 탭 로직 재사용)
+  const gotoRegisterBtn = document.getElementById('auth-goto-register');
+  if (gotoRegisterBtn) {
+    gotoRegisterBtn.addEventListener('click', () => {
+      const regTab = document.querySelector('.auth-tab[data-mode="register"]');
+      if (regTab) regTab.click();
+    });
+  }
+
   // 약관 체크박스 바인딩
   bindTermsCheckboxes();
 
