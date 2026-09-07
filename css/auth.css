@@ -45,6 +45,9 @@
 .auth-brand {
   position: relative;
   z-index: 1;
+  /* margin-top:auto + 푸터 margin-top:auto → 잔여 공간 균등 분배.
+     덕분에 로고+카드 그룹이 푸터 위 공간에서 중앙보다 살짝 위에 배치됨 */
+  margin-top: auto;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -352,6 +355,35 @@
   line-height: 1.55;
 }
 
+/* ===== 하단 회사정보 푸터 ===== */
+/* overlay padding(24px 16px)을 negative margin으로 상쇄해 화면 전체 폭으로 */
+.auth-footer {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  flex-shrink: 0;
+  margin-top: auto;
+  margin-left: -16px;
+  margin-right: -16px;
+  margin-bottom: -24px;
+  padding: 13px 20px;
+  text-align: center;
+  background: rgba(30, 33, 52, 0.78);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c9cde4;
+  font-size: 12px;
+  line-height: 1.75;
+  user-select: none;
+}
+.auth-footer-line {
+  margin: 0;
+}
+.auth-footer strong {
+  color: #ffffff;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
 /* =====================================================
    회원가입 3단계 스텝퍼
    ===================================================== */
@@ -653,6 +685,13 @@
   .auth-panel {
     padding: 22px 24px 20px;
   }
+  .auth-footer {
+    margin-left: -12px;
+    margin-right: -12px;
+    margin-bottom: -18px;
+    padding: 11px 14px;
+    font-size: 11px;
+  }
 }
 /* 매우 좁은 화면 */
 @media (max-width: 480px) {
@@ -690,6 +729,14 @@
   .btn-signup {
     padding: 12px;
     font-size: 14px;
+  }
+  .auth-footer {
+    margin-left: -10px;
+    margin-right: -10px;
+    margin-bottom: -12px;
+    padding: 9px 10px;
+    font-size: 10px;
+    line-height: 1.6;
   }
 }
 /* 데스크톱이라도 세로가 짧으면 비주얼 패널 숨김 (폼 가독성 우선) */
