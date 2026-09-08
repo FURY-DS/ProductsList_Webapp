@@ -67,17 +67,21 @@ function isMenuPageHidden(page) {
   return getHiddenMenuPages().has(page);
 }
 
-/** 숨김 페이지 목록 저장 (배열) */
+/** 숨김 페이지 목록 저장 (배열). 클라우드 동기화용 타임스탬프도 함께 갱신 */
 function setHiddenMenuPages(pageArr) {
   try {
     localStorage.setItem(getMenuSettingsKey(), JSON.stringify(pageArr));
+    localStorage.setItem(getMenuSettingsTsKey(), String(Date.now()));
   } catch (e) { /* ignore */ }
 }
 
 /**
  * 메뉴 표시 설정 클라우드 동기화 (KV: data:<user>:menu_settings)
  * - 서버가 더 최신(ts 비교) → 서버 설정을 localStorage에 반영 + 메뉴 재렌더링
- * - 로컬이 더 최신(또는 서버에 없음) → 로컬 설정을 서버에 push
+ * - 로컬이 더 최신(사용자가 저장한 경우만, ts>0) → 로컬 설정을 서버에 push
+ * - 주의: ts 없는 오래된 로컬 설정(localTs===0)은 절대 자동 push하지 않음.
+ *   (오래된 기기가 자기 옛 설정을 서버에 덮어쓰는 사고 방지. 서버가 비어 있으면
+ *   로컬 설정 그대로 사용 → 사용자가 환경설정 저장 시 그때 동기화됨)
  * - initMenu()에서 로그인 상태일 때 호출. 실패해도 조용히 무시(로컬 설정 유지).
  * @returns {Promise<boolean>} 동기화 성공 여부 (서버 반영 또는 push 완료)
  */
@@ -88,14 +92,8 @@ async function syncMenuSettings() {
     if (!res.ok) return false;
     const result = await res.json();
     const serverTs = (result && result.ts) || 0;
-    let localTs = getMenuSettingsTs();
+    const localTs = getMenuSettingsTs();
     const localRaw = localStorage.getItem(getMenuSettingsKey());
-
-    // 동기화 이력이 없는 기존 로컬 설정 → 타임스탬프 발급 (초기 업로드 트리거)
-    if (localRaw !== null && localTs === 0) {
-      localTs = Date.now();
-      try { localStorage.setItem(getMenuSettingsTsKey(), String(localTs)); } catch (e) { /* ignore */ }
-    }
 
     if (serverTs > localTs) {
       // 서버가 최신 → 로컬에 반영
@@ -106,8 +104,8 @@ async function syncMenuSettings() {
       return true;
     }
 
-    if (localRaw !== null && localTs > serverTs) {
-      // 로컬이 최신 → 서버에 push
+    if (localRaw !== null && localTs > 0 && localTs > serverTs) {
+      // 로컬이 최신(사용자 저장 이력 있음) → 서버에 push
       let hidden;
       try { hidden = JSON.parse(localRaw); } catch (e) { return false; }
       if (!Array.isArray(hidden)) return false;
@@ -119,7 +117,7 @@ async function syncMenuSettings() {
       return pushRes.ok;
     }
 
-    // 양쪽 동일 → 할 일 없음
+    // 양쪽 동일 또는 로컬에 저장 이력 없음 → 할 일 없음
     return true;
   } catch (e) {
     console.warn('[MenuSync] 실패:', e.message);
