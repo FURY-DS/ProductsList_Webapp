@@ -66,3 +66,5 @@
 - v56: 모바일 반응형 개선 — 640px 이하 제품카드 2열 배치, 카드 낶이/폰트/필드 축소, CSS `--columns` 변수 기반으로 JS 열 수 동기화
 - v57: 로그인 화면 리디자인 (Toogle 스타일) — auth 오버레이를 다크 배경 + 상단 로고 + 좌 비주얼/우 폼 2단 카드로 변경, 하단 회원가입 버튼 추가. index.html auth 블록 + auth.css 전면 재작성 + app.js 4줄(회원가입 버튼 바인딩). 기존 인증 기능 계약(ID/클래스) 전부 유지. auth.css v=41, app.js v=41. **로그인 UI는 index.html에만 존재함(다른 페이지 없음)**
 - v59: 관리자 배지 드롭다운(환경설정/비밀번호 변경) + 메뉴 환경설정 — 사용자별 쇼핑몰 표시/숨김 (menu_hidden_pages_<user>), menu.js 필터링은 시장 그룹 동적 대응(KR/JP/US), menu-settings.js 신규(index.html 전용)
+- v59b: 메뉴 설정 KV 서버 동기화 (/api/data 재사용, data:<user>:menu_settings, ts last-write-wins). v60: N배송 라벨 NY바코드비용→바코드비용. v60b: 동기화 버그 수정 — ts=0 로컬 절대 자동 push 금지(오래된 기기 문제, 커밋 7435c15)
+- v61: N배송 비용 5개 항목 전체입력 — 판매수수료 전체입력 바 옆 '비용 전체입력' 버튼 1개 → 모달에서 창고택배비/마켓택배비/바코드비용/피킹비용/태그비용 일괄 입력(입력된 항목만 적용). nshipping-actions.js v41 + card-features.css v43 (.bulk-cost-*). 브라우저 실측 검증 완료(부분 적용·재계산·저장). **테스트 시 페이지 데이터는 getUserScopedKey('nshipping_v1') 키에 저장됨 — raw 키 아님**

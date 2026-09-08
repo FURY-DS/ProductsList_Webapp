@@ -244,6 +244,104 @@
   background: #5b4bc4;
 }
 
+/* ----- 비용 전체입력 버튼 (판매수수료 전체입력 바 우측, N배송 전용) ----- */
+.bulk-fee-bar button.btn-bulk-cost {
+  background: #fff;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+.bulk-fee-bar button.btn-bulk-cost:hover {
+  background: #f1effc;
+}
+
+/* ----- 비용 전체입력 모달 (N배송 전용) ----- */
+.bulk-cost-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12010;
+  background: rgba(18, 20, 38, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.bulk-cost-modal {
+  width: 100%;
+  max-width: 340px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(10, 12, 34, 0.35);
+  padding: 22px 22px 18px;
+  box-sizing: border-box;
+}
+.bulk-cost-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #22264a;
+}
+.bulk-cost-desc {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: #6b7089;
+  line-height: 1.5;
+}
+.bulk-cost-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.bulk-cost-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+.bulk-cost-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3a3f63;
+}
+.bulk-cost-input {
+  width: 110px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 13px;
+  text-align: right;
+  font-family: inherit;
+}
+.bulk-cost-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.bulk-cost-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.bulk-cost-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bulk-cost-btn-cancel {
+  background: #e4e6ef;
+  color: #3a3f63;
+}
+.bulk-cost-btn-apply {
+  background: var(--primary);
+  color: #fff;
+}
+.bulk-cost-btn-apply:hover {
+  background: #5b4bc4;
+}
+
 /* ----- 2개이상구매 행: 최종이익 반절 + 2개이상구매 반절 ----- */
 .product-card .field-row.split-profit {
   grid-template-columns: 1fr 1fr 0.5fr 0.5fr;
@@ -274,6 +372,7 @@
   .bulk-fee-bar {
     padding: 4px 8px;
     gap: 4px;
+    flex-wrap: wrap;
   }
   .bulk-fee-bar label {
     font-size: 11px;
