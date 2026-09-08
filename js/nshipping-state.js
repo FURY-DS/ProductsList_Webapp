@@ -29,7 +29,7 @@ function newNshippingCard() {
     feeAmount: '',     // 판매수수료 최종결과값
     warehouseFee: '',  // 창고택배비
     marketFee: '',     // 마켓택배비
-    barcodeFee: '',    // NY바코드비용
+    barcodeFee: '',    // 바코드비용
     pickingFee: '',    // 피킹비용
     tagFee: '',        // 태그비용
     finalProfit: '',   // 최종이익

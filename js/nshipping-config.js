@@ -32,9 +32,9 @@ const NSHIPPING_CONFIG = {
   },
 
   // 필드 정의
-  // N배송 전용 필드: barcodeFee(NY바코드비용), pickingFee(피킹비용), tagFee(태그비용)
+  // N배송 전용 필드: barcodeFee(바코드비용), pickingFee(피킹비용), tagFee(태그비용)
   // warehouseFee=창고택배비, marketFee=마켓택배비 (+ 부호, 다른 판매 페이지와 동일)
-  // 최종이익 = 판매가 - 최종원가 - 판매수수료 - 창고택배비 + 마켓택배비 - NY바코드 - 피킹 - 태그
+  // 최종이익 = 판매가 - 최종원가 - 판매수수료 - 창고택배비 + 마켓택배비 - 바코드 - 피킹 - 태그
   // 2개이상구매 필드 없음
   FIELDS: {
     sellerCode:    { label: '판매자상품코드 입력', type: 'text',   placeholder: '예: NYP0012' },
@@ -47,7 +47,7 @@ const NSHIPPING_CONFIG = {
     feeAmount:     { label: '판매수수료 금액',    type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true },
     warehouseFee:  { label: '창고택배비',          type: 'number', placeholder: '예: 3000' },
     marketFee:     { label: '마켓택배비',          type: 'number', placeholder: '예: 3000' },
-    barcodeFee:    { label: 'NY바코드비용',        type: 'number', placeholder: '예: 500' },
+    barcodeFee:    { label: '바코드비용',          type: 'number', placeholder: '예: 500' },
     pickingFee:    { label: '피킹비용',            type: 'number', placeholder: '예: 500' },
     tagFee:        { label: '태그비용',            type: 'number', placeholder: '예: 500' },
     finalProfit:   { label: '최종이익',            type: 'text',   placeholder: '자동 계산', readonly: true, highlight: true }

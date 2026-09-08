@@ -1,7 +1,7 @@
 /* =====================================================
    nshipping-card.js - N배송 카드 (shared-card 기반)
    수식: 최종이익 = 판매가 - 최종원가 - 수수료 - 창고택배비 + 마켓택배비
-         - NY바코드비용 - 피킹비용 - 태그비용
+         - 바코드비용 - 피킹비용 - 태그비용
    multiBuyProfit 없음, 3행 레이아웃
    ===================================================== */
 
@@ -61,7 +61,7 @@ function renderNshippingCalcRows(card) {
   row2.appendChild(makePageField(nshippingCtx, 'finalProfit', card.finalProfit, true));
   container.appendChild(row2);
 
-  // 3행: NY바코드비용 | 피킹비용 | 태그비용
+  // 3행: 바코드비용 | 피킹비용 | 태그비용
   const row3 = document.createElement('div');
   row3.className = 'field-row three';
   row3.appendChild(makePageField(nshippingCtx, 'barcodeFee', card.barcodeFee, !card.isEditing));
