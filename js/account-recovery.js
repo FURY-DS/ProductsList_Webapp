@@ -410,14 +410,19 @@ const AccountRecovery = {
 };
 
 // -----------------------------------------------
-//  사용자명 배지 클릭 → 비밀번호 변경 모달
+//  사용자명 배지 클릭 → 드롭다운 (환경설정 / 비밀번호 변경)
+//  (menu-settings.js가 로드된 경우 드롭다운, 아니면 기존대로 비밀번호 변경 모달)
 // -----------------------------------------------
 function bindUserBadgeClick() {
   const badge = document.getElementById('user-badge');
   if (!badge) return;
   badge.addEventListener('click', () => {
     if (Auth.isAuthenticated()) {
-      AccountRecovery.openChangePwModal();
+      if (typeof openUserBadgeMenu === 'function') {
+        openUserBadgeMenu();
+      } else {
+        AccountRecovery.openChangePwModal();
+      }
     }
   });
 }

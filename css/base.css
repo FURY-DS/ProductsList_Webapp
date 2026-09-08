@@ -1325,3 +1325,179 @@ html, body {
   background: rgba(99, 102, 241, 0.45);
   border-color: rgba(99, 102, 241, 0.8);
 }
+
+/* =====================================================
+   사용자 배지 드롭다운 + 환경설정 모달 (menu-settings.js)
+   ===================================================== */
+
+/* ----- 배지 아래 드롭다운 (환경설정 / 비밀번호 변경) ----- */
+.user-badge-menu {
+  position: fixed;
+  z-index: 12000;
+  min-width: 168px;
+  background: #ffffff;
+  border: 1px solid #e2e4ef;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(20, 24, 60, 0.18);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: userBadgeMenuIn 0.14s ease;
+}
+@keyframes userBadgeMenuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.user-badge-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  border-radius: 7px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3c4257;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.user-badge-menu-item:hover {
+  background: #f1f2fa;
+  color: #22264a;
+}
+.user-badge-menu-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ----- 환경설정 모달 ----- */
+.menu-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12010;
+  background: rgba(18, 20, 38, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: userBadgeMenuIn 0.14s ease;
+}
+.menu-settings-modal {
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(10, 12, 34, 0.35);
+  padding: 22px 22px 18px;
+  box-sizing: border-box;
+}
+.menu-settings-title {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #22264a;
+}
+.menu-settings-desc {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8a8fa8;
+}
+.menu-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.menu-settings-section {
+  border: 1px solid #eceef6;
+  border-radius: 10px;
+  padding: 12px 14px 10px;
+}
+.menu-settings-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #3a4273;
+  margin-bottom: 6px;
+}
+.menu-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 2px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.menu-settings-row:hover {
+  background: #f6f7fc;
+}
+.menu-settings-row input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #3a4273;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.menu-settings-row-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3c4257;
+}
+.menu-settings-error {
+  min-height: 16px;
+  margin: 8px 0 2px;
+  font-size: 12px;
+  color: #e05656;
+}
+.menu-settings-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.menu-settings-btn {
+  flex: 1;
+  padding: 11px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.menu-settings-btn-cancel {
+  background: #e8eaf3;
+  color: #5c6178;
+}
+.menu-settings-btn-cancel:hover {
+  background: #d8dbe8;
+}
+.menu-settings-btn-save {
+  background: #3a4273;
+  color: #ffffff;
+}
+.menu-settings-btn-save:hover {
+  background: #2e3560;
+}
+
+/* ----- 모바일 ----- */
+@media (max-width: 480px) {
+  .user-badge-menu {
+    min-width: 150px;
+  }
+  .menu-settings-overlay {
+    padding: 14px;
+  }
+  .menu-settings-modal {
+    padding: 18px 16px 14px;
+  }
+}

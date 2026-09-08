@@ -30,6 +30,103 @@ function canAccessExclusiveUser(item) {
   return getCurrentUsername() === item.exclusiveUser;
 }
 
+// =====================================================
+//  사용자별 메뉴 표시 설정 (환경설정에서 체크한 쇼핑몰만 표시)
+//  - localStorage에 사용자명별로 숨김 페이지 목록 저장
+//  - 시장 그룹(KR/JP/US) 하위 children에만 적용 → 신규 시장 추가 시 자동 대응
+// =====================================================
+
+/** 사용자별 숨김 페이지 목록의 localStorage 키 */
+function getMenuSettingsKey() {
+  return 'menu_hidden_pages_' + (getCurrentUsername() || 'guest');
+}
+
+/** 숨김 설정 타임스탬프 키 (클라우드 동기화 충돌 판단용) */
+function getMenuSettingsTsKey() {
+  return 'menu_hidden_ts_' + (getCurrentUsername() || 'guest');
+}
+
+/** 로컬에 저장된 설정 타임스탬프 (없으면 0) */
+function getMenuSettingsTs() {
+  return parseInt(localStorage.getItem(getMenuSettingsTsKey()) || '0', 10) || 0;
+}
+
+/** 숨김 페이지 목록을 Set으로 반환 (없으면 빈 Set = 전체 표시) */
+function getHiddenMenuPages() {
+  try {
+    const raw = localStorage.getItem(getMenuSettingsKey());
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? new Set(arr) : new Set();
+  } catch (e) {
+    return new Set();
+  }
+}
+
+/** 특정 페이지가 숨김 상태인지 */
+function isMenuPageHidden(page) {
+  return getHiddenMenuPages().has(page);
+}
+
+/** 숨김 페이지 목록 저장 (배열) */
+function setHiddenMenuPages(pageArr) {
+  try {
+    localStorage.setItem(getMenuSettingsKey(), JSON.stringify(pageArr));
+  } catch (e) { /* ignore */ }
+}
+
+/**
+ * 메뉴 표시 설정 클라우드 동기화 (KV: data:<user>:menu_settings)
+ * - 서버가 더 최신(ts 비교) → 서버 설정을 localStorage에 반영 + 메뉴 재렌더링
+ * - 로컬이 더 최신(또는 서버에 없음) → 로컬 설정을 서버에 push
+ * - initMenu()에서 로그인 상태일 때 호출. 실패해도 조용히 무시(로컬 설정 유지).
+ * @returns {Promise<boolean>} 동기화 성공 여부 (서버 반영 또는 push 완료)
+ */
+async function syncMenuSettings() {
+  if (typeof Auth === 'undefined' || !Auth.isAuthenticated || !Auth.isAuthenticated() || !Auth.token) return false;
+  try {
+    const res = await fetch('/api/data?key=menu_settings', { headers: Auth.getAuthHeader() });
+    if (!res.ok) return false;
+    const result = await res.json();
+    const serverTs = (result && result.ts) || 0;
+    let localTs = getMenuSettingsTs();
+    const localRaw = localStorage.getItem(getMenuSettingsKey());
+
+    // 동기화 이력이 없는 기존 로컬 설정 → 타임스탬프 발급 (초기 업로드 트리거)
+    if (localRaw !== null && localTs === 0) {
+      localTs = Date.now();
+      try { localStorage.setItem(getMenuSettingsTsKey(), String(localTs)); } catch (e) { /* ignore */ }
+    }
+
+    if (serverTs > localTs) {
+      // 서버가 최신 → 로컬에 반영
+      const hidden = (result.data && Array.isArray(result.data.hidden)) ? result.data.hidden : [];
+      try { localStorage.setItem(getMenuSettingsKey(), JSON.stringify(hidden)); } catch (e) { return false; }
+      localStorage.setItem(getMenuSettingsTsKey(), String(serverTs));
+      if (typeof renderMenuItems === 'function') renderMenuItems();
+      return true;
+    }
+
+    if (localRaw !== null && localTs > serverTs) {
+      // 로컬이 최신 → 서버에 push
+      let hidden;
+      try { hidden = JSON.parse(localRaw); } catch (e) { return false; }
+      if (!Array.isArray(hidden)) return false;
+      const pushRes = await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...Auth.getAuthHeader() },
+        body: JSON.stringify({ data: { hidden: hidden }, ts: localTs, key: 'menu_settings' })
+      });
+      return pushRes.ok;
+    }
+
+    // 양쪽 동일 → 할 일 없음
+    return true;
+  } catch (e) {
+    console.warn('[MenuSync] 실패:', e.message);
+    return false;
+  }
+}
+
 /** 메뉴 초기화 (DOM 로드 후 호출) */
 function initMenu() {
   btnMenuEl = document.getElementById('btn-menu');
@@ -37,6 +134,9 @@ function initMenu() {
 
   // 메뉴 항목 렌더링 (사용자 변경 시 필터링을 위해 매번 재렌더링)
   renderMenuItems();
+
+  // 로그인 상태면 메뉴 설정 클라우드 동기화 (백그라운드, 실패 무시)
+  syncMenuSettings();
 
   // 이미 이벤트 리스너가 바인딩된 경우 재바인딩하지 않음
   if (_menuInitialized) return;
@@ -84,6 +184,17 @@ function renderMenuItems() {
 
     if (item.children && item.children.length > 0) {
       // 중첩 메뉴 그룹
+      // 환경설정에서 제외한(숨긴) 하위 페이지는 메뉴에서 제외
+      const hiddenPages = getHiddenMenuPages();
+      const visibleChildren = item.children.filter(child => {
+        if (child.exclusiveUser && !canAccessExclusiveUser(child)) return false;
+        if (child.adminOnly && !isCurrentUserAdmin()) return false;
+        if (hiddenPages.has(child.page)) return false;
+        return true;
+      });
+      // 표시할 하위 페이지가 없으면 그룹 자체를 숨김
+      if (visibleChildren.length === 0) return;
+
       const group = document.createElement('div');
       group.className = 'menu-group';
 
@@ -94,7 +205,7 @@ function renderMenuItems() {
       toggle.innerHTML = `<span>${item.label}</span><span class="menu-group-arrow">▸</span>`;
 
       // 현재 페이지가 그룹 하위에 있으면 그룹을 활성/펼침 표시
-      const hasActiveChild = item.children.some(child => child.url === currentPage || (currentPage === '' && child.url === 'index.html'));
+      const hasActiveChild = visibleChildren.some(child => child.url === currentPage || (currentPage === '' && child.url === 'index.html'));
       if (hasActiveChild) {
         group.classList.add('active-group');
         group.classList.add('open');
@@ -104,10 +215,7 @@ function renderMenuItems() {
       sub.className = 'menu-sub';
       if (hasActiveChild) sub.classList.add('show');
 
-      item.children.forEach(child => {
-        // 하위 항목도 exclusiveUser / adminOnly 필터링
-        if (child.exclusiveUser && !canAccessExclusiveUser(child)) return;
-        if (child.adminOnly && !isCurrentUserAdmin()) return;
+      visibleChildren.forEach(child => {
         const btn = createMenuButton(child, currentPage);
         sub.appendChild(btn);
       });
