@@ -1489,6 +1489,45 @@ html, body {
   background: #2e3560;
 }
 
+/* ----- 내 정보 모달 (menu-settings 모달 재사용 + 행 스타일만 추가) ----- */
+.my-info-box {
+  border: 1px solid #eceef6;
+  border-radius: 10px;
+  padding: 6px 14px;
+}
+.my-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+}
+.my-info-row + .my-info-row {
+  border-top: 1px solid #f2f3fa;
+}
+.my-info-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #8a8fa8;
+  flex-shrink: 0;
+}
+.my-info-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #2b2f52;
+  word-break: break-all;
+  text-align: right;
+}
+.my-info-loading {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #8a8fa8;
+  text-align: center;
+}
+.my-info-error {
+  color: #e05656;
+}
+
 /* ----- 모바일 ----- */
 @media (max-width: 480px) {
   .user-badge-menu {

@@ -50,6 +50,8 @@ function openUserBadgeMenu() {
   menu.innerHTML =
     '<button type="button" class="user-badge-menu-item" data-action="settings">' +
       '<span class="user-badge-menu-icon">⚙️</span>환경설정</button>' +
+    '<button type="button" class="user-badge-menu-item" data-action="myinfo">' +
+      '<span class="user-badge-menu-icon">👤</span>내 정보</button>' +
     '<button type="button" class="user-badge-menu-item" data-action="password">' +
       '<span class="user-badge-menu-icon">🔑</span>비밀번호 변경</button>';
   document.body.appendChild(menu);
@@ -71,6 +73,8 @@ function openUserBadgeMenu() {
     closeUserBadgeMenu();
     if (btn.dataset.action === 'settings') {
       openMenuSettingsModal();
+    } else if (btn.dataset.action === 'myinfo') {
+      openMyInfoModal();
     } else if (btn.dataset.action === 'password') {
       if (window.AccountRecovery) AccountRecovery.openChangePwModal();
     }
@@ -187,8 +191,101 @@ function openMenuSettingsModal() {
   // 열릴 때 배경 스크롤 방지는 하지 않음 (기존 모달들과 동일하게 단순 처리)
 }
 
+/**
+ * 내 정보 모달 열기.
+ * /api/auth/me (Bearer)에서 아이디·이름·이메일·역할·가입일을 받아 표시.
+ * 값은 모두 textContent로 넣는다(innerHTML 주입 없음 — XSS 방지).
+ */
+function openMyInfoModal() {
+  closeUserBadgeMenu();
+  const existing = document.querySelector('.my-info-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'menu-settings-overlay my-info-overlay';
+  overlay.innerHTML =
+    '<div class="menu-settings-modal my-info-modal">' +
+      '<h3 class="menu-settings-title">👤 내 정보</h3>' +
+      '<p class="menu-settings-desc">가입 시 등록한 정보와 가입일이에요.</p>' +
+      '<div class="menu-settings-body my-info-body">' +
+        '<p class="my-info-loading">불러오는 중…</p>' +
+      '</div>' +
+      '<div class="menu-settings-actions">' +
+        '<button type="button" class="menu-settings-btn menu-settings-btn-save" id="my-info-close">확인</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.querySelector('#my-info-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  // 데이터 로드
+  const body = overlay.querySelector('.my-info-body');
+  (async () => {
+    let data = null;
+    let errMsg = '';
+    try {
+      if (typeof apiFetch !== 'function') throw new Error('no apiFetch');
+      const res = await apiFetch('/api/auth/me', { auth: true });
+      if (res.ok && res.data && res.data.username) data = res.data;
+      else if (res.networkError) errMsg = '네트워크에 연결할 수 없어요. 연결 후 다시 시도해 주세요.';
+      else errMsg = '정보를 불러오지 못했어요. 다시 로그인해 주세요.';
+    } catch (e) {
+      errMsg = '정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.';
+    }
+
+    if (!document.body.contains(body)) return; // 모달이 이미 닫힘
+
+    if (!data) {
+      body.innerHTML = '';
+      const p = document.createElement('p');
+      p.className = 'my-info-loading my-info-error';
+      p.textContent = errMsg || '정보를 불러오지 못했어요.';
+      body.appendChild(p);
+      return;
+    }
+
+    // 가입일 포맷 (createdAt: ms timestamp)
+    let joined = '-';
+    if (data.createdAt) {
+      const d = new Date(data.createdAt);
+      if (!isNaN(d.getTime())) {
+        joined = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) +
+          ' ' + d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+    }
+
+    const rows = [
+      ['🆔 아이디', data.username || '-'],
+      ['🏷️ 이름', data.name || '-'],
+      ['📧 이메일', data.email || '-'],
+      ['🛡️ 등급', data.role === 'admin' ? '관리자' : '일반 사용자'],
+      ['📅 가입일', joined]
+    ];
+
+    body.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'my-info-box';
+    rows.forEach(([label, value]) => {
+      const row = document.createElement('div');
+      row.className = 'my-info-row';
+      const l = document.createElement('span');
+      l.className = 'my-info-label';
+      l.textContent = label;
+      const v = document.createElement('span');
+      v.className = 'my-info-value';
+      v.textContent = value;
+      row.appendChild(l);
+      row.appendChild(v);
+      box.appendChild(row);
+    });
+    body.appendChild(box);
+  })();
+}
+
 // 전역 노출 (account-recovery.js 등에서 사용)
 window.openUserBadgeMenu = openUserBadgeMenu;
 window.closeUserBadgeMenu = closeUserBadgeMenu;
 window.openMenuSettingsModal = openMenuSettingsModal;
 window.closeMenuSettingsModal = closeMenuSettingsModal;
+window.openMyInfoModal = openMyInfoModal;
