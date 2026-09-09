@@ -9,6 +9,7 @@ function initCoupangActions() {
   document.getElementById('import-input').addEventListener('change', handleCoupangImportFile);
   document.getElementById('btn-clear').addEventListener('click', clearAllCoupang);
   document.getElementById('btn-bulk-fee').addEventListener('click', applyBulkFeeCoupang);
+  document.getElementById('btn-bulk-cost').addEventListener('click', openBulkCostModalCoupang);
   document.getElementById('bulk-fee-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); applyBulkFeeCoupang(); }
   });
@@ -211,4 +212,98 @@ function removeBundleItem(cardId, itemId) {
   recalcCoupangCard(card);
   reportSaveResult(saveCoupang(), COUPANG_CONFIG.MESSAGES);
   renderCoupang();
+}
+
+
+/* =====================================================
+   비용 전체입력 (창고택배비/마켓택배비)
+   - 판매수수료 전체입력 바의 '비용 전체입력' 버튼 → 모달에서 2개 항목 입력
+   - 입력한 항목만 모든 카드에 일괄 적용 (비워둔 항목은 변경 안 함)
+   - N배송 페이지의 동일 기능(5개 항목)과 동일 패턴, 항목만 2개로 축소
+   ===================================================== */
+
+// 전체입력 대상 비용 필드 (key = 카드 데이터 필드, label = 모달 표시명)
+const BULK_COST_FIELDS_Coupang = [
+  { key: 'warehouseFee', label: '창고택배비' },
+  { key: 'marketFee',    label: '마켓택배비' }
+];
+
+let _bulkCostOverlayEl_Coupang = null;
+
+/** 비용 전체입력 모달 닫기 */
+function closeBulkCostModalCoupang() {
+  if (_bulkCostOverlayEl_Coupang) {
+    _bulkCostOverlayEl_Coupang.remove();
+    _bulkCostOverlayEl_Coupang = null;
+  }
+}
+
+/** 비용 2개 항목 전체입력 모달 열기 */
+function openBulkCostModalCoupang() {
+  if (coupangState.cards.length === 0) { showToast('등록된 상품이 없어요'); return; }
+  closeBulkCostModalCoupang();
+
+  // 2개 입력 행 생성 (placeholder는 config의 필드 정의에서 재사용)
+  let rowsHtml = '';
+  BULK_COST_FIELDS_Coupang.forEach(f => {
+    const ph = (COUPANG_CONFIG.FIELDS[f.key] && COUPANG_CONFIG.FIELDS[f.key].placeholder) || '';
+    rowsHtml +=
+      '<label class="bulk-cost-row">' +
+        '<span class="bulk-cost-row-label">' + f.label + '</span>' +
+        '<input type="number" step="any" class="bulk-cost-input" data-key="' + f.key + '" placeholder="' + ph + '" />' +
+      '</label>';
+  });
+
+  const overlay = document.createElement('div');
+  overlay.className = 'bulk-cost-overlay';
+  overlay.innerHTML =
+    '<div class="bulk-cost-modal">' +
+      '<h3 class="bulk-cost-title">비용 전체입력</h3>' +
+      '<p class="bulk-cost-desc">모든 상품(' + coupangState.cards.length + '개)에 일괄 적용할 비용을 입력하세요.<br>비워둔 항목은 변경하지 않아요.</p>' +
+      '<div class="bulk-cost-body">' + rowsHtml + '</div>' +
+      '<div class="bulk-cost-actions">' +
+        '<button type="button" class="bulk-cost-btn bulk-cost-btn-cancel" id="bulk-cost-cancel-Coupang">취소</button>' +
+        '<button type="button" class="bulk-cost-btn bulk-cost-btn-apply" id="bulk-cost-apply-Coupang">적용</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  _bulkCostOverlayEl_Coupang = overlay;
+
+  overlay.querySelector('#bulk-cost-cancel-Coupang').addEventListener('click', closeBulkCostModalCoupang);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeBulkCostModalCoupang();
+  });
+
+  overlay.querySelector('#bulk-cost-apply-Coupang').addEventListener('click', () => {
+    // 입력된(비어 있지 않은) 항목만 수집
+    const values = {};
+    let filled = 0;
+    overlay.querySelectorAll('.bulk-cost-input').forEach(inp => {
+      const v = inp.value.trim();
+      if (v !== '') { values[inp.dataset.key] = v; filled++; }
+    });
+    if (filled === 0) { showToast('입력한 비용이 없어요'); return; }
+
+    const summary = BULK_COST_FIELDS_Coupang
+      .filter(f => values[f.key] !== undefined)
+      .map(f => f.label + ' ' + values[f.key] + '원')
+      .join(', ');
+
+    closeBulkCostModalCoupang();
+    showModal({
+      title: '비용 전체 적용',
+      text: '모든 상품(' + coupangState.cards.length + '개)에\n' + summary + '을(를) 일괄 적용할까요?',
+      confirmText: '적용',
+      onConfirm: () => {
+        coupangState.cards.forEach(c => {
+          Object.keys(values).forEach(key => { c[key] = values[key]; });
+          recalcCoupangCard(c);
+        });
+        const result = saveCoupang();
+        renderCoupang();
+        reportSaveResult(result, COUPANG_CONFIG.MESSAGES,
+          '전체 ' + coupangState.cards.length + '개 상품의 비용 ' + filled + '개 항목이 변경되었어요');
+      }
+    });
+  });
 }
