@@ -11,7 +11,8 @@
  * 인증이 필요 없는/있는 API 요청 공통 처리.
  * - 기본 Content-Type: application/json
  * - 인증 필요 시 {auth: true} 옵션 → Auth.getAuthHeader() 자동 부착
- * - 401 → 세션 만료 처리 (storage 클리어) 후 { ok: false, msg: '세션이 만료되었습니다', unauthorized: true } 반환
+ * - 401 → 자격 실패(서버 error 메시지 존재)면 그 메시지 표시, 세션 만료(generic 401)면
+ *   storage 클리어 후 { ok: false, msg: '세션이 만료되었습니다', unauthorized: true } 반환
  * - 그 외 !res.ok → { ok: false, msg: data.error || defaultMsg } 반환
  * - 네트워크 오류 (fetch 자체 throw) → { ok: false, msg: '네트워크 오류: ...', networkError: true } 반환
  * - 성공 → { ok: true, data } 반환
@@ -33,6 +34,15 @@ async function apiFetch(url, options = {}) {
     const data = await res.json().catch(() => ({}));
 
     if (res.status === 401) {
+      // 401은 두 종류다:
+      //  1) 자격 실패 — 로그인 비밀번호 틀림, 현재 비밀번호 불일치, 인증번호 불일치 등.
+      //     서버가 구체적인 error 메시지를 내려준다 → 그 메시지를 그대로 표시 (세션 클리어 안 함)
+      //  2) 세션 만료 — requireAuth의 generic 메시지('인증되지 않음'/'Unauthorized') → 세션 클리어
+      const serverMsg = data && data.error ? String(data.error) : '';
+      const GENERIC_401 = ['인증되지 않음', 'Unauthorized'];
+      if (serverMsg && !GENERIC_401.includes(serverMsg)) {
+        return { ok: false, msg: serverMsg };
+      }
       Auth._clearSession();
       return { ok: false, msg: '세션이 만료되었습니다', unauthorized: true };
     }
