@@ -1,6 +1,6 @@
 /* =====================================================
    api/admin/data.js - 사용자 데이터 조회/삭제
-   GET    /api/admin/data?username=xxx  → { data, ts, pages, total }
+   GET    /api/admin/data?username=xxx  → { ts, pages, total }
    DELETE /api/admin/data?username=xxx  → { ok, deleted: [...], count }
 
    실제 데이터 키 규칙: data:<username>:<pageKey> (3단, pages 전부)
@@ -75,11 +75,12 @@ export async function onRequestGet(context) {
 
   const total = Object.keys(pages).length;
   if (total === 0) {
-    return jsonResponse({ data: null, ts: 0, pages: {}, total: 0 }, 200, request);
+    return jsonResponse({ ts: 0, pages: {}, total: 0 }, 200, request);
   }
 
-  // data 필드에 pages 맵을 담아 반환 (admin.html의 hasData 판정 호환)
-  return rawJsonResponse(JSON.stringify({ data: pages, ts: newestTs, pages, total }), request);
+  // pages 맵만 반환 (base64 이미지가 든 데이터를 data/pages 두 번 싣지 않는다 —
+  // 2배 직렬화 시 Worker 메모리(128MB) 초과로 관리자 조회가 죽을 수 있음)
+  return rawJsonResponse(JSON.stringify({ ts: newestTs, pages, total }), request);
 }
 
 // DELETE: 사용자 데이터 삭제 (계정은 유지) — 모든 서브페이지 + 레거시 키

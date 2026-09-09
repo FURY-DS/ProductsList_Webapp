@@ -97,8 +97,6 @@ const AccountRecovery = {
     setVal('find-id-code', '');
     this._setErr('find-id-error', '');
     this._setErr('find-id-error2', '');
-    const devHint = document.getElementById('find-id-dev-hint');
-    if (devHint) { devHint.classList.add('hidden'); devHint.textContent = ''; }
   },
 
   _showFindIdStep(n) {
@@ -237,8 +235,6 @@ const AccountRecovery = {
     setVal('find-pw-new-confirm', '');
     this._setErr('find-pw-error', '');
     this._setErr('find-pw-error2', '');
-    const devHint = document.getElementById('find-pw-dev-hint');
-    if (devHint) { devHint.classList.add('hidden'); devHint.textContent = ''; }
   },
 
   _showFindPwStep(n) {

@@ -32,8 +32,10 @@ const corsBaseHeaders = {
  * CORS Origin 화이트리스트 검사.
  * - 이 앱의 모든 정상 호출은 같은 오리진( Pages Functions가 같은 도메인에서 서비스됨)에서
  *   발생하므로 CORS 헤더가 없어도 동작한다.
- * - cross-origin 호출은 명시적으로 허용된 오리진(localhost, *.pages.dev preview)에만
+ * - cross-origin 호출은 명시적으로 허용된 오리진(localhost, 이 프로젝트의 pages.dev 도메인)에만
  *   Origin을 반영해 응답하고, 그 외에는 ACAO 헤더를 보내지 않는다(fail-closed).
+ * - pages.dev는 누구나 서브도메인을 만들 수 있는 공용 도메인이므로 전면 허용(*.pages.dev)하지 않고
+ *   이 프로젝트 전용(productslist.pages.dev 및 <hash>.productslist.pages.dev 미리보기)으로 제한한다.
  * - 전면 허용(' *')은 제거했다.
  */
 function isAllowedOrigin(origin) {
@@ -41,7 +43,8 @@ function isAllowedOrigin(origin) {
   try {
     const o = new URL(origin);
     if (o.hostname === 'localhost' || o.hostname === '127.0.0.1') return true;
-    if (o.hostname === 'pages.dev' || o.hostname.endsWith('.pages.dev')) return true;
+    // 프로덕션 + Cloudflare Pages 미리보기(<hash>.productslist.pages.dev)
+    if (o.hostname === 'productslist.pages.dev' || o.hostname.endsWith('.productslist.pages.dev')) return true;
   } catch (e) {
     return false;
   }

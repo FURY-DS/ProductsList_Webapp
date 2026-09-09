@@ -808,7 +808,7 @@ async function loadUsers() {
         headers: adminHeaders()
       });
       const dataInfo = await dataRes.json();
-      const hasData = dataInfo.data !== null;
+      const hasData = (dataInfo.total || 0) > 0;
       if (hasData) dataCount++;
 
       const date = user.createdAt ? new Date(user.createdAt).toLocaleString('ko-KR') : '—';
@@ -854,30 +854,30 @@ function viewData(username) {
     .then(r => r.json())
     .then(data => {
       const content = document.getElementById('data-content');
-      // 새 응답: { data: { pageKey: {data, ts} }, ts, pages, total } — 페이지별 데이터 묶음
-      if (!data || data.data === null || data.data === undefined) {
-        content.textContent = '(데이터 없음)';
+      // 새 응답: { pages: { pageKey: {data, ts} }, ts, total } — 페이지별 데이터 묶음
+      if (!data || !data.pages || typeof data.pages !== 'object' || Object.keys(data.pages).length === 0) {
+        // 레거시 응답 형식 fallback: { data, ts } (구버전 서버 대비)
+        if (data && data.data !== null && data.data !== undefined) {
+          try {
+            content.textContent = JSON.stringify(data.data, null, 2);
+          } catch (e) {
+            content.textContent = String(data.data);
+          }
+        } else {
+          content.textContent = '(데이터 없음)';
+        }
         return;
       }
-      if (data.pages && typeof data.pages === 'object') {
-        let out = '';
-        for (const [pageKey, pageInfo] of Object.entries(data.pages)) {
-          out += `===== ${pageKey} (ts: ${pageInfo.ts || 0}${pageInfo.corrupted ? ', 손상됨' : ''}) =====\n`;
-          try {
-            out += JSON.stringify(pageInfo.data, null, 2) + '\n\n';
-          } catch (e) {
-            out += String(pageInfo.data) + '\n\n';
-          }
-        }
-        content.textContent = out.trim() || '(데이터 없음)';
-      } else {
-        // 레거시 응답 형식 fallback
+      let out = '';
+      for (const [pageKey, pageInfo] of Object.entries(data.pages)) {
+        out += `===== ${pageKey} (ts: ${pageInfo.ts || 0}${pageInfo.corrupted ? ', 손상됨' : ''}) =====\n`;
         try {
-          content.textContent = JSON.stringify(data.data, null, 2);
+          out += JSON.stringify(pageInfo.data, null, 2) + '\n\n';
         } catch (e) {
-          content.textContent = String(data.data);
+          out += String(pageInfo.data) + '\n\n';
         }
       }
+      content.textContent = out.trim() || '(데이터 없음)';
     })
     .catch(e => {
       document.getElementById('data-content').textContent = '오류: ' + e.message;
