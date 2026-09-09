@@ -10,13 +10,14 @@
 
 import {
   verifySession, verifyAdmin,
-  jsonResponse, handleOptions,
+  jsonResponse, handleOptions, buildCorsHeaders,
   getClientIp, isRateLimited, recordAttempt
 } from './auth.js';
 
-/** OPTIONS preflight — 모든 라우트에서 동일 */
-export async function onRequestOptions() {
-  return handleOptions();
+/** OPTIONS preflight — cross-origin 호출 시 Origin 화이트리스트 검사 후 반영 */
+export async function onRequestOptions(context = {}) {
+  const request = context && context.request ? context.request : null;
+  return handleOptions(request);
 }
 
 /**
@@ -57,7 +58,11 @@ export async function requireAuth(kv, request, errorMsg = 'Unauthorized') {
 export async function requireAdmin(kv, request, env) {
   const admin = await verifyAdmin(kv, request, env);
   if (!admin.ok) {
-    return { admin: null, response: jsonResponse({ error: 'Unauthorized' }, 401) };
+    // 마스터 키 브루트포스로 rate limit에 걸린 경우 429로 구분 응답
+    if (admin.rateLimited) {
+      return { admin: null, response: jsonResponse({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요' }, 429, request) };
+    }
+    return { admin: null, response: jsonResponse({ error: 'Unauthorized' }, 401, request) };
   }
   return { admin };
 }
@@ -84,14 +89,14 @@ export function ipScope(request) {
 }
 
 /**
- * Raw KV 데이터를 JSON 응답으로 반환 (CORS 포함)
- * data.js, admin/data.js에서 사용
+ * Raw KV 데이터를 JSON 응답으로 반환.
+ * request를 넘기면 Origin 화이트리스트 검사 후 CORS 반영 (기본은 ACAO 미전송 — 동일 출처 호출에는 불필요)
  */
-export function rawJsonResponse(raw) {
+export function rawJsonResponse(raw, request = null) {
   return new Response(raw, {
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      ...buildCorsHeaders(request)
     }
   });
 }

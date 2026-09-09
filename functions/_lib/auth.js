@@ -22,26 +22,56 @@ const INITIAL_ADMINS = ['alcave'];
 const DUMMY_SALT = 'AAAAAAAAAAAAAAAAAAAAAA==';
 const DUMMY_HASH = '';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const corsBaseHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Key'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Key',
+  'Vary': 'Origin'
 };
 
-/** JSON 응답 (CORS 포함) */
-export function jsonResponse(data, status = 200) {
+/**
+ * CORS Origin 화이트리스트 검사.
+ * - 이 앱의 모든 정상 호출은 같은 오리진( Pages Functions가 같은 도메인에서 서비스됨)에서
+ *   발생하므로 CORS 헤더가 없어도 동작한다.
+ * - cross-origin 호출은 명시적으로 허용된 오리진(localhost, *.pages.dev preview)에만
+ *   Origin을 반영해 응답하고, 그 외에는 ACAO 헤더를 보내지 않는다(fail-closed).
+ * - 전면 허용(' *')은 제거했다.
+ */
+function isAllowedOrigin(origin) {
+  if (!origin || typeof origin !== 'string') return false;
+  try {
+    const o = new URL(origin);
+    if (o.hostname === 'localhost' || o.hostname === '127.0.0.1') return true;
+    if (o.hostname === 'pages.dev' || o.hostname.endsWith('.pages.dev')) return true;
+  } catch (e) {
+    return false;
+  }
+  return false;
+}
+
+function buildCorsHeaders(request) {
+  const origin = request && request.headers ? request.headers.get('Origin') : null;
+  if (origin && isAllowedOrigin(origin)) {
+    return { ...corsBaseHeaders, 'Access-Control-Allow-Origin': origin };
+  }
+  return { ...corsBaseHeaders };
+}
+
+export { buildCorsHeaders };
+
+/** JSON 응답 (CORS 포함). request를 넘기면 Origin 화이트리스트 검사 후 반영 */
+export function jsonResponse(data, status = 200, request = null) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       'Content-Type': 'application/json',
-      ...corsHeaders
+      ...buildCorsHeaders(request)
     }
   });
 }
 
-/** CORS preflight 응답 */
-export function handleOptions() {
-  return new Response(null, { headers: corsHeaders });
+/** CORS preflight 응답. cross-origin 호출 시 허용 오리진에만 반영 */
+export function handleOptions(request = null) {
+  return new Response(null, { headers: buildCorsHeaders(request) });
 }
 
 /** 랜덤 솔트 생성 (16바이트 base64) */
@@ -222,15 +252,28 @@ export async function deleteSession(kv, token) {
 
 /**
  * 관리자 접근 확인
- * 방법 1: X-Admin-Key 헤더 (마스터 키)
+ * 방법 1: X-Admin-Key 헤더 (마스터 키) — IP 기준 rate limit + 상수 시간 비교 적용
  * 방법 2: Bearer 토큰 (role이 "admin"인 사용자)
- * → { ok: true, method, username } 또는 { ok: false }
+ * → { ok: true, method, username } 또는 { ok: false, rateLimited? }
  */
 export async function verifyAdmin(kv, request, env) {
   // 방법 1: X-Admin-Key (마스터 키)
   const adminKey = request.headers.get('X-Admin-Key');
-  if (adminKey && env.ADMIN_KEY && adminKey === env.ADMIN_KEY) {
-    return { ok: true, method: 'key', username: null };
+  if (adminKey && env.ADMIN_KEY) {
+    const ip = getClientIp(request);
+
+    // 브루트포스 방지: 마스터 키 경로에도 로그인과 별개의 rate limit 적용
+    if (await isRateLimited(kv, 'admin_key', ip)) {
+      return { ok: false, rateLimited: true };
+    }
+
+    if (await constantTimeEqual(adminKey, env.ADMIN_KEY)) {
+      return { ok: true, method: 'key', username: null };
+    }
+
+    // 키 불일치 시 실패 카운트 기록
+    await recordAttempt(kv, 'admin_key', ip);
+    return { ok: false };
   }
 
   // 방법 2: Bearer 토큰 (admin 역할 사용자)
@@ -242,6 +285,18 @@ export async function verifyAdmin(kv, request, env) {
   return { ok: false };
 }
 
+/** 상수 시간 문자열 비교 (타이밍 공격 완화). SHA-256 해시 후 XOR 비교 */
+async function constantTimeEqual(a, b) {
+  const enc = new TextEncoder();
+  const aBuf = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(String(a || ''))));
+  const bBuf = new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(String(b || ''))));
+  let diff = 0;
+  for (let i = 0; i < aBuf.byteLength; i++) {
+    diff |= aBuf[i] ^ bBuf[i];
+  }
+  return diff === 0;
+}
+
 /* =====================================================
    요청 제한 (Rate Limiting) - IP 기준, 실패 횟수 카운트
    KV 키: ratelimit:<bucket>:<ip> → { count }  (TTL로 자동 만료)
@@ -249,23 +304,25 @@ export async function verifyAdmin(kv, request, env) {
    ===================================================== */
 
 const RATE_LIMITS = {
-  login:           { windowSec: 15 * 60,      max: 10 }, // 15분에 실패 10회
+  login:           { windowSec: 15 * 60,      max: 10 }, // 15분에 실패 10회 (IP+아이디 조합)
+  login_user:      { windowSec: 60 * 60,      max: 30 }, // 1시간에 실패 30회 (아이디 단위 — IP 교체 공격 방어)
+  admin_key:       { windowSec: 15 * 60,      max: 5  }, // 15분에 실패 5회 (마스터 키 브루트포스 방어)
   register:        { windowSec: 60 * 60,      max: 5  }, // 1시간에 시도 5회
-  findid_request:  { windowSec: 60 * 60,      max: 5  }, // 1시간에 5회 (이메일 발송)
+  findid_request:  { windowSec: 60 * 60,      max: 10 }, // 1시간에 10회 (미존재 요청도 카운트하므로 상향)
   findid_verify:   { windowSec: 60 * 60,      max: 10 }, // 1시간에 10회 (시도)
-  findpw_request:  { windowSec: 60 * 60,      max: 5  }, // 1시간에 5회 (이메일 발송)
+  findpw_request:  { windowSec: 60 * 60,      max: 10 }, // 1시간에 10회 (미존재 요청도 카운트하므로 상향)
   findpw_verify:   { windowSec: 60 * 60,      max: 10 }, // 1시간에 10회 (시도)
   change_password: { windowSec: 60 * 60,      max: 10 }  // 1시간에 10회
 };
 
-/** 요청에서 클라이언트 IP 추출 (Cloudflare가 엣지에서 신뢰성 있게 설정) */
+/**
+ * 요청에서 클라이언트 IP 추출.
+ * Cloudflare 엣지가 설정하는 CF-Connecting-IP만 신뢰한다.
+ * X-Forwarded-For는 클라이언트가 임의로 조작할 수 있어 rate limit 우회 수단이 되므로 사용하지 않는다.
+ */
 export function getClientIp(request) {
   const cfIp = request.headers.get('CF-Connecting-IP');
-  if (cfIp) return cfIp;
-
-  const forwardedFor = request.headers.get('X-Forwarded-For');
-  if (forwardedFor) return forwardedFor.split(',')[0].trim() || 'unknown';
-
+  if (cfIp) return cfIp.trim();
   return 'unknown';
 }
 
@@ -278,6 +335,15 @@ export function getRateLimitScope(request, username = '') {
     .replace(/[^a-z0-9_@.-]/g, '_')
     .slice(0, 64) || 'unknown';
   return `${ip}:${userPart}`;
+}
+
+/** 아이디 단위 rate limit scope (IP 무관 — 계정별 브루트포스 방어용) */
+export function getUserRateLimitScope(username = '') {
+  return String(username || 'unknown')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_@.-]/g, '_')
+    .slice(0, 64) || 'unknown';
 }
 
 /** 현재 제한 초과 상태인지 확인 (카운트를 늘리지 않음) */
@@ -328,10 +394,25 @@ export function validateUsername(username) {
   return /^[a-zA-Z0-9_]+$/.test(username);
 }
 
-/** 비밀번호 검증: 6자 이상 */
+// 흔한 비밀번호 blacklist (credential stuffing 대상 1순위)
+const COMMON_PASSWORDS = new Set([
+  '123456', '1234567', '12345678', '123456789', '1234567890',
+  '111111', '000000', '121212', '123123', '666666', '888888',
+  'password', 'password1', 'passw0rd',
+  'qwerty', 'qwerty123', 'asdfasdf', 'abc123', '1q2w3e', '1q2w3e4r'
+]);
+
+/**
+ * 비밀번호 검증: 8~128자 + 흔한 비밀번호 금지.
+ * - 상한(128자): PBKDF2에 초장문 입력 시 Worker CPU 고갈(DoS) 방지
+ * - 하한 상향(8자)은 회원가입/변경 시에만 적용되고 로그인 경로는 검사하지 않으므로
+ *   기존 사용자가 잠기지 않는다.
+ */
 export function validatePassword(password) {
   if (!password || typeof password !== 'string') return false;
-  return password.length >= 6;
+  if (password.length < 8 || password.length > 128) return false;
+  if (COMMON_PASSWORDS.has(password.toLowerCase())) return false;
+  return true;
 }
 
 /** 이름 검증: 1~20자, 공백/특수문자 일부 허용 */
@@ -343,12 +424,16 @@ export function validateName(name) {
   return /^[가-힣a-zA-Z0-9 .\-_]+$/.test(trimmed);
 }
 
-/** 이메일 검증: 기본 형식 + 최대 길이 */
+/**
+ * 이메일 검증: 실제 이메일 문자셋으로 제한 + 최대 길이.
+ * - 로컬파트: 영문/숫자/._%+- 만 허용 (공백, <, >, ", /, = 등 HTML 특수문자 차단
+ *   → 관리자 화면 등에서 이스케이프 누락 시에도 저장형 XSS 표면 제거)
+ * - 도메인: 영문/숫자/하이픈 + 점 구분 TLD(2자 이상)
+ */
 export function validateEmail(email) {
   if (!email || typeof email !== 'string') return false;
   if (email.length > 254) return false;
-  // 간단한 RFC 5322 패턴 (실무적으로 충분)
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email);
 }
 
 /* =====================================================

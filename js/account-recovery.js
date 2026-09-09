@@ -134,14 +134,7 @@ const AccountRecovery = {
       return;
     }
 
-    // dev mode면 화면에 힌트로 표시
-    if (result.devCode) {
-      const devHint = document.getElementById('find-id-dev-hint');
-      if (devHint) {
-        devHint.textContent = `⚙️ 개발 모드: 인증번호 ${result.devCode} (이메일 미설정 — RESEND_API_KEY 필요)`;
-        devHint.classList.remove('hidden');
-      }
-    }
+    // 보안: 서버는 어떤 모드에서도 인증번호를 응답에 포함하지 않는다 (이메일로만 전달)
 
     this._showFindIdStep(2);
     // 2단계 진입 시 인증번호 입력으로 포커스
@@ -277,13 +270,7 @@ const AccountRecovery = {
       return;
     }
 
-    if (result.devCode) {
-      const devHint = document.getElementById('find-pw-dev-hint');
-      if (devHint) {
-        devHint.textContent = `⚙️ 개발 모드: 인증번호 ${result.devCode} (이메일 미설정)`;
-        devHint.classList.remove('hidden');
-      }
-    }
+    // 보안: 서버는 어떤 모드에서도 인증번호를 응답에 포함하지 않는다 (이메일로만 전달)
 
     this._showFindPwStep(2);
     setTimeout(() => {
@@ -306,8 +293,8 @@ const AccountRecovery = {
       this._setErr('find-pw-error2', '인증번호 6자리를 입력해주세요');
       return;
     }
-    if (newPassword.length < 6) {
-      this._setErr('find-pw-error2', '새 비밀번호는 6자 이상이어야 합니다');
+    if (newPassword.length < 8) {
+      this._setErr('find-pw-error2', '새 비밀번호는 8자 이상 128자 이하로 입력해주세요');
       return;
     }
     if (newPassword !== newPasswordConfirm) {
@@ -378,8 +365,8 @@ const AccountRecovery = {
       this._setErr('change-pw-error', '현재 비밀번호를 입력해주세요');
       return;
     }
-    if (newPw.length < 6) {
-      this._setErr('change-pw-error', '새 비밀번호는 6자 이상이어야 합니다');
+    if (newPw.length < 8) {
+      this._setErr('change-pw-error', '새 비밀번호는 8자 이상 128자 이하로 입력해주세요');
       return;
     }
     if (newPw !== confirm) {

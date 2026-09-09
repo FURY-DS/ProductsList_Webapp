@@ -103,19 +103,18 @@ function showAuthOverlay() {
   if (savePwCb) savePwCb.checked = prefs.savePw;
   if (autoLoginCb) autoLoginCb.checked = prefs.autoLogin;
 
-  // 비밀번호 저장이 켜져 있으면 아이디/비밀번호 자동 채움
+  // 아이디 저장이 켜져 있으면 아이디만 자동 채움 (비밀번호는 저장하지 않음)
   const usernameInput = document.getElementById('auth-username');
   const passwordInput = document.getElementById('auth-password');
   if (prefs.savePw) {
     const saved = Auth.getSavedCredentials();
     if (saved) {
       if (usernameInput) usernameInput.value = saved.u || '';
-      if (passwordInput) passwordInput.value = saved.p || '';
     }
   } else {
     if (usernameInput) usernameInput.value = '';
-    if (passwordInput) passwordInput.value = '';
   }
+  if (passwordInput) passwordInput.value = '';
   const passwordConfirmInput = document.getElementById('auth-password-confirm');
   if (passwordConfirmInput) passwordConfirmInput.value = '';
   const nameInput = document.getElementById('auth-name');
@@ -472,8 +471,9 @@ async function handleAuthSubmit() {
       // 회원가입 시에는 비밀번호 저장 옵션을 step2에서 받지 않으므로 저장하지 않음
     } else {
       result = await Auth.login(username, password, { autoLogin });
+      // 보안: 아이디만 저장 (비밀번호는 localStorage에 저장하지 않음)
       if (result.ok && savePw) {
-        Auth.saveCredentials(username, password);
+        Auth.saveCredentials(username);
       } else if (result.ok && !savePw) {
         Auth.clearSavedCredentials();
       }

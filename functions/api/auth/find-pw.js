@@ -41,15 +41,18 @@ export async function onRequestPost(context) {
   );
   if (limitRes) return limitRes;
 
-  const user = await findUserByNameUsernameAndEmail(env.DATA_KV, name, username, email);
   const genericResponse = { sent: true };
+
+  // 사용자 존재 여부와 무관하게 카운터를 증가한다.
+  // (존재할 때만 증가하면 429 응답 코드 자체가 계정 열거 오라클이 된다)
+  await recordAttempt(env.DATA_KV, 'findpw_request', ip);
+
+  const user = await findUserByNameUsernameAndEmail(env.DATA_KV, name, username, email);
 
   if (!user) {
     // 사용자가 없어도 동일한 응답
-    return jsonResponse(genericResponse);
+    return jsonResponse(genericResponse, 200, request);
   }
-
-  await recordAttempt(env.DATA_KV, 'findpw_request', ip);
 
   // scope: username + email 조합 (같은 username에 다른 이메일이 매칭되지 않게)
   const scope = `${username.toLowerCase()}:${email.toLowerCase()}`;
@@ -61,14 +64,11 @@ export async function onRequestPost(context) {
   const result = await sendEmail(env, user.email, subject, text, html);
 
   if (!result.ok) {
-    return jsonResponse({ error: result.error || '이메일 발송에 실패했습니다' }, 500);
+    return jsonResponse({ error: result.error || '이메일 발송에 실패했습니다' }, 500, request);
   }
 
-  if (result.devMode && result.devCode) {
-    return jsonResponse({ sent: true, devCode: result.devCode });
-  }
-
-  return jsonResponse(genericResponse);
+  // 보안: dev mode에서도 인증번호를 API 응답에 포함하지 않는다 — 인증번호는 오직 이메일로만 전달
+  return jsonResponse(genericResponse, 200, request);
 }
 
 export { onRequestOptions };

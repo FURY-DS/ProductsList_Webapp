@@ -7,7 +7,7 @@
    ===================================================== */
 
 import { requireAdmin, parseJsonBody, onRequestOptions } from '../../_lib/helpers.js';
-import { jsonResponse } from '../../_lib/auth.js';
+import { jsonResponse, validateUsername } from '../../_lib/auth.js';
 
 const VALID_ROLES = ['admin', 'user'];
 
@@ -23,8 +23,8 @@ export async function onRequestPost(context) {
   const username = (body.username || '').toLowerCase();
   const role = body.role || '';
 
-  if (!username) {
-    return jsonResponse({ error: 'username이 필요합니다' }, 400);
+  if (!validateUsername(username)) {
+    return jsonResponse({ error: '잘못된 아이디입니다' }, 400, request);
   }
 
   if (!VALID_ROLES.includes(role)) {
@@ -46,7 +46,7 @@ export async function onRequestPost(context) {
   user.role = role;
   await env.DATA_KV.put(userKey, JSON.stringify(user));
 
-  return jsonResponse({ ok: true, username, role });
+  return jsonResponse({ ok: true, username, role }, 200, request);
 }
 
 export { onRequestOptions };

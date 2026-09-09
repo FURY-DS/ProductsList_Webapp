@@ -40,17 +40,19 @@ export async function onRequestPost(context) {
   );
   if (limitRes) return limitRes;
 
+  // 사용자 존재 여부와 무관하게 카운터를 증가한다.
+  // (존재할 때만 증가하면 429 응답 코드 자체가 계정 열거 오라클이 된다)
+  await recordAttempt(env.DATA_KV, 'findid_request', ip);
+
+  const genericResponse = { sent: true };
+
   // 사용자 조회 (없어도 동일한 응답)
   const user = await findUserByNameAndEmail(env.DATA_KV, name, email);
-  const genericResponse = { sent: true };
 
   if (!user) {
     // 사용자가 없어도 동일한 응답 (열거 방지)
-    // 단, 카운터는 늘리지 않음 (남용 방지 + 정상 사용자가 잠기지 않게)
-    return jsonResponse(genericResponse);
+    return jsonResponse(genericResponse, 200, request);
   }
-
-  await recordAttempt(env.DATA_KV, 'findid_request', ip);
 
   // 인증번호 생성 + 저장 (이메일을 키의 일부로 — 같은 이메일로 중복 발송 시 덮어쓰기)
   const code = generateVerificationCode();
@@ -63,15 +65,12 @@ export async function onRequestPost(context) {
   const result = await sendEmail(env, user.email, subject, text, html);
 
   if (!result.ok) {
-    return jsonResponse({ error: result.error || '이메일 발송에 실패했습니다' }, 500);
+    return jsonResponse({ error: result.error || '이메일 발송에 실패했습니다' }, 500, request);
   }
 
-  // dev mode에서는 인증번호를 응답에 포함 (테스트용)
-  if (result.devMode && result.devCode) {
-    return jsonResponse({ sent: true, devCode: result.devCode });
-  }
-
-  return jsonResponse(genericResponse);
+  // 보안: dev mode에서도 인증번호를 API 응답에 포함하지 않는다.
+  // (환경변수 설정 실수로 운영에서 dev mode가 되면 계정 탈취로 이어짐) — 인증번호는 오직 이메일로만 전달
+  return jsonResponse(genericResponse, 200, request);
 }
 
 export { onRequestOptions };

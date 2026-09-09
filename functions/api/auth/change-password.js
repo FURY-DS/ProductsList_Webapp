@@ -32,7 +32,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ error: '현재 비밀번호를 입력해주세요' }, 400);
   }
   if (!validatePassword(newPassword)) {
-    return jsonResponse({ error: '새 비밀번호는 6자 이상이어야 합니다' }, 400);
+    return jsonResponse({ error: '새 비밀번호는 8자 이상 128자 이하로 입력해주세요' }, 400);
   }
   if (oldPassword === newPassword) {
     return jsonResponse({ error: '새 비밀번호는 현재 비밀번호와 달라야 합니다' }, 400);

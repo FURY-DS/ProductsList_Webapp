@@ -22,3 +22,8 @@ data/
 
 # Local xlsx test sandbox
 _test_xlsx/
+
+# Local secrets / env (never commit)
+.dev.vars
+.dev.vars.*
+!.dev.vars.example

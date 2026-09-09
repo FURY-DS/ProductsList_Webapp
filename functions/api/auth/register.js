@@ -25,7 +25,7 @@ export async function onRequestPost(context) {
   }
 
   if (!validatePassword(password)) {
-    return jsonResponse({ error: '비밀번호는 6자 이상이어야 합니다' }, 400);
+    return jsonResponse({ error: '비밀번호는 8자 이상 128자 이하로 입력해주세요' }, 400);
   }
 
   if (!validateName(name)) {

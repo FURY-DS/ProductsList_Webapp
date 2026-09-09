@@ -94,7 +94,9 @@ export async function sendEmail(env, to, subject, text, html) {
     console.log('[email:dev mode] to:', to);
     console.log('[email:dev mode] subject:', subject);
     if (devCode) console.log('[email:dev mode] dev code:', devCode);
-    return { ok: true, devMode: true, devCode };
+    // 보안: devCode를 반환값에 포함하지 않는다 (API 응답 노출 방지 — Fail-Safe).
+    // 로컬 테스트 시 인증번호는 서버 콘솔 로그에서만 확인할 것.
+    return { ok: true, devMode: true };
   }
 
   // 운영 환경에서는 fallback 없이 발송 실패 에러를 반환하여 보안 유출 원천 차단

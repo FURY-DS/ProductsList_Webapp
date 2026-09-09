@@ -4,7 +4,7 @@
 
    자동로그인 ON  → 토큰을 localStorage에 저장 (브라우저 재시작 후에도 유지, 30일)
    자동로그인 OFF → 토큰을 sessionStorage에 저장 (탭 닫으면 삭제)
-   비밀번호 저장  → 아이디/비밀번호를 localStorage에 저장 (폼 자동 채움)
+   비밀번호 저장  → 제거됨: 아이디만 저장 (보안 감사 2026-09 — base64 평문 저장 취약점)
    ===================================================== */
 
 /**
@@ -312,34 +312,38 @@ const Auth = {
   },
 
   // =====================================================
-  //  비밀번호 저장 (폼 자동 채움용)
+  //  아이디 저장 (폼 자동 채움용)
   // =====================================================
 
   /**
-   * 아이디/비밀번호를 localStorage에 저장 (base64 인코딩).
-   * 보안용이 아닌 단순 폼 자동 채움용. base64는 인코딩일 뿐 암호화 아님.
+   * 아이디만 localStorage에 저장. 비밀번호는 저장하지 않는다.
+   * - 과거에는 비밀번호를 base64로 저장했으나 인코딩일 뿐 암호화가 아니어서
+   *   XSS/공용 PC 환경에서 원문 노출 위험이 컸다 → 제거 (보안 감사 2026-09).
+   * - 비밀번호 자동 채움은 브라우저 내장 Password Manager에 위임
+   *   (폼의 autocomplete="current-password").
    */
-  saveCredentials(username, password) {
+  saveCredentials(username) {
     try {
-      const json = JSON.stringify({ u: username, p: password });
-      const encoded = btoa(unescape(encodeURIComponent(json)));
-      localStorage.setItem('saved_credentials', encoded);
+      localStorage.setItem('saved_credentials', JSON.stringify({ u: username }));
     } catch (e) { /* ignore */ }
   },
 
-  /** 저장된 아이디/비밀번호 불러오기 (없거나 파싱 실패 시 null) */
+  /** 저장된 아이디 불러오기 (없거나 파싱 실패 시 null) */
   getSavedCredentials() {
     try {
       const raw = localStorage.getItem('saved_credentials');
       if (!raw) return null;
-      const decoded = decodeURIComponent(escape(atob(raw)));
-      return JSON.parse(decoded);
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.u) return { u: parsed.u };
+      return null;
     } catch (e) {
+      // 구버전 base64 형식(비밀번호 포함) 데이터 → 유출 원천 제거를 위해 즉시 삭제
+      try { localStorage.removeItem('saved_credentials'); } catch (e2) { /* ignore */ }
       return null;
     }
   },
 
-  /** 저장된 아이디/비밀번호 삭제 */
+  /** 저장된 아이디 삭제 */
   clearSavedCredentials() {
     localStorage.removeItem('saved_credentials');
   },
